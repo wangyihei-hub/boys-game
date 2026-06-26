@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useQuestionStore } from '../stores/questionStore';
 import { QuestionCard } from '../components/parent/QuestionCard';
 import type { Question, Subject } from '../types';
@@ -27,6 +28,7 @@ export function QuestionBank() {
   const clearError = useQuestionStore(state => state.clearError);
 
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     loadQuestions();
@@ -63,15 +65,25 @@ export function QuestionBank() {
   };
 
   const handleDelete = async (ids: string[]) => {
-    if (ids.length === 0) return;
-    await deleteQuestions(ids);
-    setSelectedIds(prev => {
-      const next = new Set(prev);
-      for (const id of ids) {
-        next.delete(id);
-      }
-      return next;
-    });
+    if (ids.length === 0 || deleting) return;
+    const message = ids.length === 1
+      ? '确定要删除这 1 道题目吗？'
+      : `确定要删除这 ${ids.length} 道题目吗？`;
+    if (!window.confirm(message)) return;
+
+    setDeleting(true);
+    try {
+      await deleteQuestions(ids);
+      setSelectedIds(prev => {
+        const next = new Set(prev);
+        for (const id of ids) {
+          next.delete(id);
+        }
+        return next;
+      });
+    } finally {
+      setDeleting(false);
+    }
   };
 
   if (!loaded) {
@@ -92,11 +104,12 @@ export function QuestionBank() {
         {selectedCount > 0 && (
           <button
             type="button"
+            disabled={deleting}
             onClick={() => handleDelete(Array.from(selectedIds))}
-            className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 active:scale-95"
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-red-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-red-600 active:scale-95 disabled:cursor-not-allowed disabled:opacity-60"
           >
             <Trash2 className="h-4 w-4" />
-            删除选中 ({selectedCount})
+            {deleting ? '删除中…' : `删除选中 (${selectedCount})`}
           </button>
         )}
       </div>
@@ -121,7 +134,12 @@ export function QuestionBank() {
             <BookOpen className="h-8 w-8 text-slate-400" />
           </div>
           <p className="text-slate-500">题库还是空的</p>
-          <p className="text-sm text-slate-400">去 AI 出题页面生成一些题目吧</p>
+          <Link
+            to="/parent/questions/generate"
+            className="rounded-lg bg-indigo-500 px-4 py-2 text-sm font-semibold text-white shadow hover:bg-indigo-600 active:scale-95"
+          >
+            去 AI 出题页面生成一些题目吧
+          </Link>
         </div>
       )}
 
@@ -150,6 +168,7 @@ export function QuestionBank() {
                     <QuestionCard
                       question={question}
                       onDelete={(id) => handleDelete([id])}
+                      disabled={deleting}
                     />
                   </div>
                 </div>

@@ -37,11 +37,18 @@ const SUBJECT_META: Record<Subject, SubjectMeta> = {
 interface QuestionCardProps {
   question: Question;
   onDelete: (id: string) => void;
+  disabled?: boolean;
 }
 
-export function QuestionCard({ question, onDelete }: QuestionCardProps) {
+export function QuestionCard({ question, onDelete, disabled = false }: QuestionCardProps) {
   const [expanded, setExpanded] = useState(false);
   const meta = SUBJECT_META[question.subject];
+  const answerIndex = Number(question.answer);
+  const hasValidChoiceAnswer =
+    question.options !== undefined &&
+    !Number.isNaN(answerIndex) &&
+    answerIndex >= 0 &&
+    answerIndex < question.options.length;
 
   return (
     <div className={['card overflow-hidden border-l-4', meta.border, meta.bg].join(' ')}>
@@ -70,8 +77,9 @@ export function QuestionCard({ question, onDelete }: QuestionCardProps) {
           </button>
           <button
             type="button"
+            disabled={disabled}
             onClick={() => onDelete(question.id)}
-            className="rounded-lg p-1.5 text-red-500 hover:bg-red-50"
+            className="rounded-lg p-1.5 text-red-500 hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-40"
             aria-label="删除题目"
           >
             <Trash2 className="h-5 w-5" />
@@ -83,8 +91,13 @@ export function QuestionCard({ question, onDelete }: QuestionCardProps) {
         <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-sm">
           {question.options && question.options.length > 0 && (
             <div className="space-y-1">
+              {!hasValidChoiceAnswer && (
+                <div className="rounded-lg bg-red-50 px-3 py-2 text-red-700">
+                  <span className="font-bold">答案数据异常</span>
+                </div>
+              )}
               {question.options.map((option, index) => {
-                const isCorrect = index === Number(question.answer);
+                const isCorrect = hasValidChoiceAnswer && index === answerIndex;
                 return (
                   <div
                     key={index}

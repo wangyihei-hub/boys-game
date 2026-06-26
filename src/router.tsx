@@ -23,8 +23,8 @@ export const router = createHashRouter([
     element: <ParentLayout />,
     children: [
       { index: true, element: <ParentDashboard /> },
-      { path: 'generate', element: <GenerateQuestions /> },
-      { path: 'bank', element: <QuestionBank /> }
+      { path: 'questions', element: <QuestionBank /> },
+      { path: 'questions/generate', element: <GenerateQuestions /> }
     ]
   }
 ]);
