@@ -10,6 +10,7 @@ import {
   saveRedemption,
   getDailyTasks,
   saveDailyTask,
+  saveDailyTasks,
   deleteDailyTasks as deleteDailyTasksFromDB,
   getLotteryPool,
   saveLotteryPrize,
@@ -73,13 +74,18 @@ export const useParentStore = create<ParentState>((set, get) => ({
   lastResult: null,
   async loadParentData() {
     try {
-      const [settings, rewards, redemptions, dailyTasks, lotteryPool] = await Promise.all([
+      const today = getTodayKey();
+      const [settings, rewards, redemptions, loadedTasks, lotteryPool] = await Promise.all([
         getParentSettings('default'),
         getRewards(),
         getRedemptions(),
-        getDailyTasks(getTodayKey()),
+        getDailyTasks(today),
         getLotteryPool()
       ]);
+      const dailyTasks = loadedTasks.length > 0 ? loadedTasks : generateDailyTasks(today);
+      if (loadedTasks.length === 0) {
+        await saveDailyTasks(dailyTasks);
+      }
       set({
         settings: settings ?? DEFAULT_SETTINGS,
         rewards,
@@ -177,7 +183,11 @@ export const useParentStore = create<ParentState>((set, get) => ({
   },
   async loadDailyTasks(dateKey = getTodayKey()) {
     try {
-      const tasks = await getDailyTasks(dateKey);
+      const loadedTasks = await getDailyTasks(dateKey);
+      const tasks = loadedTasks.length > 0 ? loadedTasks : generateDailyTasks(dateKey);
+      if (loadedTasks.length === 0) {
+        await saveDailyTasks(tasks);
+      }
       set({ dailyTasks: tasks, error: null });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : '加载每日任务失败' });
