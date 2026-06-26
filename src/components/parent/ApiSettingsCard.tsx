@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { AIProvider, ParentSettings } from '../../types';
+import { useParentStore } from '../../stores/parentStore';
 
 interface ApiSettingsCardProps {
   settings: ParentSettings;
@@ -34,34 +35,48 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
   const [model, setModel] = useState(settings.apiModel ?? '');
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [saveError, setSaveError] = useState<string | null>(null);
+
+  const clearSaveError = () => {
+    if (saveError) setSaveError(null);
+    useParentStore.getState().clearError();
+  };
 
   useEffect(() => {
     setProvider(settings.apiProvider ?? 'openai');
     setApiKey(settings.apiKey ?? '');
     setEndpoint(settings.apiEndpoint ?? '');
     setModel(settings.apiModel ?? '');
+    setSaveError(null);
   }, [settings.apiProvider, settings.apiKey, settings.apiEndpoint, settings.apiModel]);
 
   const handleProviderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const next = e.target.value as AIProvider;
     setProvider(next);
-    setEndpoint(PROVIDER_DEFAULTS[next].endpoint);
-    setModel(PROVIDER_DEFAULTS[next].model);
+    setEndpoint('');
+    setModel('');
+    clearSaveError();
   };
 
   const handleSave = async () => {
     setSaving(true);
     setSaved(false);
+    clearSaveError();
     try {
       await onSave({
         ...settings,
         apiProvider: provider,
         apiKey: apiKey.trim(),
-        apiEndpoint: provider === 'custom' ? endpoint.trim() : endpoint.trim() || PROVIDER_DEFAULTS[provider].endpoint,
-        apiModel: provider === 'custom' ? model.trim() : model.trim() || PROVIDER_DEFAULTS[provider].model
+        apiEndpoint: endpoint.trim() || undefined,
+        apiModel: model.trim() || undefined
       });
-      setSaved(true);
-      setTimeout(() => setSaved(false), 2000);
+      const persistedError = useParentStore.getState().error;
+      if (persistedError) {
+        setSaveError(persistedError);
+      } else {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 2000);
+      }
     } finally {
       setSaving(false);
     }
@@ -95,7 +110,10 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
           id="api-key"
           type="password"
           value={apiKey}
-          onChange={e => setApiKey(e.target.value)}
+          onChange={e => {
+            setApiKey(e.target.value);
+            clearSaveError();
+          }}
           placeholder={provider === 'custom' ? '可选' : '请输入 API Key'}
           className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
         />
@@ -111,7 +129,10 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
             id="api-endpoint"
             type="url"
             value={endpoint}
-            onChange={e => setEndpoint(e.target.value)}
+            onChange={e => {
+              setEndpoint(e.target.value);
+              clearSaveError();
+            }}
             placeholder="https://api.example.com/v1/chat/completions"
             className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
           />
@@ -126,7 +147,10 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
           id="api-model"
           type="text"
           value={model}
-          onChange={e => setModel(e.target.value)}
+          onChange={e => {
+            setModel(e.target.value);
+            clearSaveError();
+          }}
           placeholder={provider === 'custom' ? '请输入模型名称' : PROVIDER_DEFAULTS[provider].model}
           className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
         />
@@ -141,7 +165,8 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
         >
           {saving ? '保存中...' : '保存'}
         </button>
-        {saved && <span className="text-sm font-semibold text-green-600">已保存</span>}
+        {saved && !saveError && <span className="text-sm font-semibold text-green-600">已保存</span>}
+        {saveError && <span className="text-sm font-semibold text-red-600">{saveError}</span>}
       </div>
     </div>
   );
