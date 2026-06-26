@@ -65,10 +65,12 @@ function createAnthropicResponse(content: string): object {
   };
 }
 
-function mockFetch(response: object, status = 200): ReturnType<typeof vi.fn> {
+function mockFetch(response: object | string, status = 200): ReturnType<typeof vi.fn> {
+  const body = typeof response === 'string' ? response : JSON.stringify(response);
   return vi.fn().mockResolvedValue({
     ok: status >= 200 && status < 300,
     status,
+    text: () => Promise.resolve(body),
     json: () => Promise.resolve(response),
   });
 }
@@ -81,6 +83,14 @@ describe('provider request builders', () => {
     const body = payload.body as Record<string, unknown>;
     expect(body.model).toBe('gpt-4o-mini');
     expect(body.messages).toHaveLength(2);
+  });
+
+  it('builds an OpenAI request using a custom apiEndpoint', () => {
+    const payload = buildOpenAIRequest(baseConfig, {
+      ...baseSettings,
+      apiEndpoint: 'https://proxy.example.com/v1/chat/completions',
+    });
+    expect(payload.url).toBe('https://proxy.example.com/v1/chat/completions');
   });
 
   it('builds an Anthropic request with default model and version header', () => {
@@ -96,6 +106,15 @@ describe('provider request builders', () => {
     expect(body.system).toContain('数学');
   });
 
+  it('builds an Anthropic request using a custom apiEndpoint', () => {
+    const payload = buildAnthropicRequest(baseConfig, {
+      ...baseSettings,
+      apiProvider: 'anthropic',
+      apiEndpoint: 'https://proxy.example.com/v1/messages',
+    });
+    expect(payload.url).toBe('https://proxy.example.com/v1/messages');
+  });
+
   it('builds a custom request using the provided endpoint', () => {
     const payload = buildCustomRequest(baseConfig, {
       ...baseSettings,
@@ -106,6 +125,16 @@ describe('provider request builders', () => {
     expect(payload.url).toBe('https://custom.example.com/v1/chat');
     const body = payload.body as Record<string, unknown>;
     expect(body.model).toBe('custom-model');
+  });
+
+  it('omits Authorization header for custom provider when no API key is provided', () => {
+    const payload = buildCustomRequest(baseConfig, {
+      ...baseSettings,
+      apiProvider: 'custom',
+      apiKey: undefined,
+      apiEndpoint: 'https://custom.example.com/v1/chat',
+    });
+    expect(payload.headers.Authorization).toBeUndefined();
   });
 
   it('throws when custom provider is missing an endpoint', () => {
@@ -180,11 +209,25 @@ describe('generateQuestions', () => {
     expect(result.questions).toHaveLength(2);
   });
 
-  it('throws when API key is missing', async () => {
+  it('throws when API key is missing for non-custom providers', async () => {
     await expect(
       generateQuestions(baseConfig, { ...baseSettings, apiKey: undefined })
     ).rejects.toThrow('API key is required');
     expect(globalThis.fetch).not.toHaveBeenCalled();
+  });
+
+  it('allows custom provider without an API key', async () => {
+    globalThis.fetch = mockFetch(createOpenAIResponse(JSON.stringify(validQuestions)));
+
+    const result = await generateQuestions(baseConfig, {
+      ...baseSettings,
+      apiProvider: 'custom',
+      apiKey: undefined,
+      apiEndpoint: 'https://custom.example.com/v1/chat',
+    });
+
+    expect(globalThis.fetch).toHaveBeenCalledTimes(1);
+    expect(result.success).toBe(2);
   });
 
   it('throws on network errors from fetch', async () => {
@@ -209,6 +252,14 @@ describe('generateQuestions', () => {
 
     await expect(generateQuestions(baseConfig, baseSettings)).rejects.toThrow(
       'Invalid API key'
+    );
+  });
+
+  it('throws with status and raw body when error response is not JSON', async () => {
+    globalThis.fetch = mockFetch('<html>502 Bad Gateway</html>', 502);
+
+    await expect(generateQuestions(baseConfig, baseSettings)).rejects.toThrow(
+      'API request failed with status 502'
     );
   });
 });

@@ -11,7 +11,9 @@ export interface RequestPayload {
 }
 
 const OPENAI_DEFAULT_MODEL = 'gpt-4o-mini';
+const OPENAI_DEFAULT_URL = 'https://api.openai.com/v1/chat/completions';
 const ANTHROPIC_DEFAULT_MODEL = 'claude-3-haiku-20240307';
+const ANTHROPIC_DEFAULT_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
 
 export function buildOpenAIRequest(
@@ -22,7 +24,7 @@ export function buildOpenAIRequest(
   const model = settings.apiModel || OPENAI_DEFAULT_MODEL;
 
   return {
-    url: 'https://api.openai.com/v1/chat/completions',
+    url: settings.apiEndpoint || OPENAI_DEFAULT_URL,
     headers: {
       'Content-Type': 'application/json',
       Authorization: `Bearer ${settings.apiKey}`,
@@ -46,7 +48,7 @@ export function buildAnthropicRequest(
   const model = settings.apiModel || ANTHROPIC_DEFAULT_MODEL;
 
   return {
-    url: 'https://api.anthropic.com/v1/messages',
+    url: settings.apiEndpoint || ANTHROPIC_DEFAULT_URL,
     headers: {
       'Content-Type': 'application/json',
       'x-api-key': settings.apiKey ?? '',
@@ -72,12 +74,16 @@ export function buildCustomRequest(
   const { system, user } = getPromptBuilder(config.subject);
   const model = settings.apiModel || OPENAI_DEFAULT_MODEL;
 
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  };
+  if (settings.apiKey) {
+    headers.Authorization = `Bearer ${settings.apiKey}`;
+  }
+
   return {
     url: settings.apiEndpoint,
-    headers: {
-      'Content-Type': 'application/json',
-      Authorization: `Bearer ${settings.apiKey ?? ''}`,
-    },
+    headers,
     body: {
       model,
       messages: [
@@ -140,7 +146,7 @@ export async function generateQuestions(
 ): Promise<GenerationResult> {
   const startTime = performance.now();
 
-  if (!settings.apiKey) {
+  if (!settings.apiKey && settings.apiProvider !== 'custom') {
     throw new Error('API key is required');
   }
 
@@ -169,15 +175,24 @@ export async function generateQuestions(
     body: JSON.stringify(payload.body),
   });
 
-  const responseData = (await response.json()) as unknown;
-
   if (!response.ok) {
+    const rawText = await response.text();
+    let parsed: unknown;
+    try {
+      parsed = JSON.parse(rawText);
+    } catch {
+      parsed = null;
+    }
     let errorMessage = `API request failed with status ${response.status}`;
-    if (isRecord(responseData) && isRecord(responseData.error)) {
-      errorMessage = String(responseData.error.message ?? errorMessage);
+    if (isRecord(parsed) && isRecord(parsed.error)) {
+      errorMessage = String(parsed.error.message ?? errorMessage);
+    } else if (rawText) {
+      errorMessage = `${errorMessage}: ${rawText.slice(0, 200)}`;
     }
     throw new Error(errorMessage);
   }
+
+  const responseData = (await response.json()) as unknown;
 
   const rawResponseText = extractText(responseData);
   const parsedJson = extractJson(rawResponseText);
