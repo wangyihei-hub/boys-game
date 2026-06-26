@@ -19,6 +19,7 @@ import {
 import { generateQuestions as generateQuestionsFromAI } from '../services/aiQuestion';
 import { generateDailyTasks, getTodayKey, markTaskRewardClaimed } from '../services/dailyTaskLogic';
 import { createLotteryPrizeId } from '../services/lotteryLogic';
+import { isValidPinFormat } from '../services/pinLogic';
 import { useProfileStore } from './profileStore';
 import { useQuestionStore } from './questionStore';
 
@@ -51,6 +52,8 @@ interface ParentState {
   updateLotteryPrize: (prize: LotteryPrize) => Promise<void>;
   deleteLotteryPrize: (id: string) => Promise<void>;
   generateQuestions: (config: QuestionGenerationConfig) => Promise<void>;
+  verifyPin: (input: string) => boolean;
+  updatePin: (pin: string | undefined) => Promise<void>;
   clearError: () => void;
   clearGenerationResult: () => void;
 }
@@ -311,6 +314,26 @@ export const useParentStore = create<ParentState>((set, get) => ({
       set({ lastResult: result, generating: false, error: null });
     } catch (err) {
       set({ generating: false, error: err instanceof Error ? err.message : '生成题目失败', lastResult: null });
+    }
+  },
+  verifyPin(input) {
+    const settings = get().settings;
+    if (!settings?.pin) return true;
+    return input === settings.pin;
+  },
+  async updatePin(pin) {
+    try {
+      if (pin !== undefined && !isValidPinFormat(pin)) {
+        set({ error: 'PIN 必须是 4-6 位数字' });
+        return;
+      }
+      const current = get().settings;
+      if (!current) return;
+      const next = { ...current, pin };
+      await saveParentSettings(next);
+      set({ settings: next, error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '更新 PIN 失败' });
     }
   },
   clearError() {

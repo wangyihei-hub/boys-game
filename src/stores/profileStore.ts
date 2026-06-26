@@ -1,22 +1,31 @@
 import { create } from 'zustand';
-import type { Achievement, AchievementId, Profile, TransactionType } from '../types';
+import type { Achievement, AchievementId, DailyStats, Profile, TransactionType } from '../types';
 import {
   getAchievements as getAchievementsFromDB,
   getBattleRecords,
+  getDailyStats,
   getProfile,
   getProgressBySubject,
   getTransactions,
   saveAchievement,
+  saveDailyStats,
   saveProfile,
   saveTransaction
 } from '../db';
 import { calculateLevelUp } from '../services/battleLogic';
 import { computeNextBalance, createTransaction } from '../services/economyLogic';
 import { checkAchievements, checkLevelAchievements, checkStarAchievement, createInitialAchievements } from '../services/achievementLogic';
+import {
+  createEmptyDailyStats,
+  getTodayKey,
+  recordMinutes as addMinutesToStats,
+  recordStarsEarned as addStarsToStats
+} from '../services/usageLogic';
 
 interface ProfileState {
   profile: Profile | null;
   achievements: Achievement[];
+  dailyStats: DailyStats | null;
   loaded: boolean;
   error: string | null;
   loadProfile: () => Promise<void>;
@@ -26,6 +35,9 @@ interface ProfileState {
   addExp: (amount: number) => Promise<{ newLevel: number; newExp: number; levelUps: number }>;
   applyBattleRewards: (stars: number, exp: number) => Promise<{ newLevel: number; newExp: number; levelUps: number; newlyUnlocked: AchievementId[] }>;
   checkBattleAchievements: (subject: string, stageId: string) => Promise<AchievementId[]>;
+  recordStarsEarned: (amount: number) => Promise<void>;
+  recordMinutesPlayed: (minutes: number) => Promise<void>;
+  loadDailyStats: (dateKey?: string) => Promise<void>;
   clearError: () => void;
 }
 
@@ -44,6 +56,7 @@ function createDefaultProfile(): Profile {
 export const useProfileStore = create<ProfileState>((set, get) => ({
   profile: null,
   achievements: [],
+  dailyStats: null,
   loaded: false,
   error: null,
   async loadProfile() {
@@ -60,7 +73,13 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
           await saveAchievement(achievement);
         }
       }
-      set({ profile, achievements, loaded: true, error: null });
+      const today = getTodayKey();
+      let dailyStats = await getDailyStats(today);
+      if (!dailyStats) {
+        dailyStats = createEmptyDailyStats(today);
+        await saveDailyStats(dailyStats);
+      }
+      set({ profile, achievements, dailyStats, loaded: true, error: null });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : '加载档案失败', loaded: true });
     }
@@ -86,6 +105,9 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       await saveProfile(next);
       await saveTransaction(transaction);
       set({ profile: next, error: null });
+      if (type === 'earn') {
+        await get().recordStarsEarned(amount);
+      }
     } catch (err) {
       set({ error: err instanceof Error ? err.message : '保存星星变动失败' });
     }
@@ -117,6 +139,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const transaction = createTransaction('earn', stars, '战斗奖励', current.stars);
       await saveProfile(next);
       await saveTransaction(transaction);
+      await get().recordStarsEarned(stars);
 
       const newlyUnlocked: AchievementId[] = [];
       const achievements = get().achievements;
@@ -174,6 +197,40 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     } catch (err) {
       set({ error: err instanceof Error ? err.message : '检查成就失败' });
       return [];
+    }
+  },
+  async recordStarsEarned(amount) {
+    try {
+      const current = get().dailyStats;
+      if (!current) return;
+      const next = addStarsToStats(current, amount, Date.now());
+      await saveDailyStats(next);
+      set({ dailyStats: next, error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '记录星星统计失败' });
+    }
+  },
+  async recordMinutesPlayed(minutes) {
+    try {
+      const current = get().dailyStats;
+      if (!current) return;
+      const next = addMinutesToStats(current, minutes, Date.now());
+      await saveDailyStats(next);
+      set({ dailyStats: next, error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '记录时长统计失败' });
+    }
+  },
+  async loadDailyStats(dateKey = getTodayKey()) {
+    try {
+      let stats = await getDailyStats(dateKey);
+      if (!stats) {
+        stats = createEmptyDailyStats(dateKey);
+        await saveDailyStats(stats);
+      }
+      set({ dailyStats: stats, error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '加载每日统计失败' });
     }
   },
   clearError() {
