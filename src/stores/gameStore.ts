@@ -17,7 +17,16 @@ import {
   submitAnswer,
   submitTimeout
 } from '../services/battleLogic';
-import { getProgress, saveBattleRecord, saveProgressBatch } from '../db';
+import {
+  getDailyTasks,
+  getProgress,
+  getWrongQuestion,
+  saveBattleRecord,
+  saveDailyTasks,
+  saveProgressBatch,
+  saveWrongQuestion
+} from '../db';
+import { generateDailyTasks, getTodayKey, updateTaskProgress } from '../services/dailyTaskLogic';
 
 export const STAGES: Stage[] = [
   // 语文之森
@@ -170,6 +179,37 @@ export const useGameStore = create<GameState>((set, get) => ({
     };
 
     await saveBattleRecord(record);
+
+    // Persist wrong answers
+    for (const answer of battle.answers) {
+      if (answer.correct) continue;
+      const questionId = battle.questions[battle.answers.indexOf(answer)]?.id ?? '';
+      if (!questionId) continue;
+      const existing = await getWrongQuestion(questionId);
+      await saveWrongQuestion({
+        questionId,
+        wrongCount: (existing?.wrongCount ?? 0) + 1,
+        lastReviewAt: Date.now()
+      });
+    }
+
+    // Update daily tasks
+    const today = getTodayKey();
+    let tasks = await getDailyTasks(today);
+    if (tasks.length === 0) {
+      tasks = generateDailyTasks(today);
+    }
+    const correctCount = battle.answers.filter((a: BattleAnswer) => a.correct).length;
+    const taskUpdates: { type: 'win_battle' | 'correct_answers'; increment: number }[] = [
+      { type: 'win_battle', increment: battle.result === 'win' ? 1 : 0 },
+      { type: 'correct_answers', increment: correctCount }
+    ];
+    let updatedTasks = tasks;
+    for (const update of taskUpdates) {
+      const { next } = updateTaskProgress(updatedTasks, update.type, update.increment);
+      updatedTasks = next;
+    }
+    await saveDailyTasks(updatedTasks);
 
     const progressList = get().progress;
     const progressIndex = progressList.findIndex(

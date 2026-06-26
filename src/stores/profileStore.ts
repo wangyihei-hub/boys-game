@@ -1,11 +1,22 @@
 import { create } from 'zustand';
-import type { Profile, TransactionType } from '../types';
-import { getProfile, saveProfile, saveTransaction } from '../db';
+import type { Achievement, AchievementId, Profile, TransactionType } from '../types';
+import {
+  getAchievements as getAchievementsFromDB,
+  getBattleRecords,
+  getProfile,
+  getProgressBySubject,
+  getTransactions,
+  saveAchievement,
+  saveProfile,
+  saveTransaction
+} from '../db';
 import { calculateLevelUp } from '../services/battleLogic';
 import { computeNextBalance, createTransaction } from '../services/economyLogic';
+import { checkAchievements, checkLevelAchievements, checkStarAchievement, createInitialAchievements } from '../services/achievementLogic';
 
 interface ProfileState {
   profile: Profile | null;
+  achievements: Achievement[];
   loaded: boolean;
   error: string | null;
   loadProfile: () => Promise<void>;
@@ -13,7 +24,8 @@ interface ProfileState {
   addStars: (amount: number, reason?: string) => Promise<void>;
   applyTransaction: (type: TransactionType, amount: number, reason: string) => Promise<void>;
   addExp: (amount: number) => Promise<{ newLevel: number; newExp: number; levelUps: number }>;
-  applyBattleRewards: (stars: number, exp: number) => Promise<{ newLevel: number; newExp: number; levelUps: number }>;
+  applyBattleRewards: (stars: number, exp: number) => Promise<{ newLevel: number; newExp: number; levelUps: number; newlyUnlocked: AchievementId[] }>;
+  checkBattleAchievements: (subject: string, stageId: string) => Promise<AchievementId[]>;
   clearError: () => void;
 }
 
@@ -31,6 +43,7 @@ function createDefaultProfile(): Profile {
 
 export const useProfileStore = create<ProfileState>((set, get) => ({
   profile: null,
+  achievements: [],
   loaded: false,
   error: null,
   async loadProfile() {
@@ -40,7 +53,14 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         profile = createDefaultProfile();
         await saveProfile(profile);
       }
-      set({ profile, loaded: true, error: null });
+      let achievements = await getAchievementsFromDB();
+      if (achievements.length === 0) {
+        achievements = createInitialAchievements();
+        for (const achievement of achievements) {
+          await saveAchievement(achievement);
+        }
+      }
+      set({ profile, achievements, loaded: true, error: null });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : '加载档案失败', loaded: true });
     }
@@ -90,18 +110,70 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   async applyBattleRewards(stars, exp) {
     try {
       const current = get().profile;
-      if (!current) return { newLevel: 1, newExp: 0, levelUps: 0 };
+      if (!current) return { newLevel: 1, newExp: 0, levelUps: 0, newlyUnlocked: [] };
       const { newLevel, newExp, levelUps } = calculateLevelUp(current.level, current.exp, exp);
       const nextStars = Math.max(0, current.stars + stars);
       const next = { ...current, stars: nextStars, level: newLevel, exp: newExp };
       const transaction = createTransaction('earn', stars, '战斗奖励', current.stars);
       await saveProfile(next);
       await saveTransaction(transaction);
-      set({ profile: next, error: null });
-      return { newLevel, newExp, levelUps };
+
+      const newlyUnlocked: AchievementId[] = [];
+      const achievements = get().achievements;
+      for (const id of checkLevelAchievements(achievements, newLevel)) {
+        newlyUnlocked.push(id);
+      }
+      const transactions = await getTransactions();
+      const totalStarsEarned = transactions
+        .filter(t => t.type === 'earn')
+        .reduce((sum, t) => sum + t.amount, 0);
+      for (const id of checkStarAchievement(achievements, totalStarsEarned)) {
+        newlyUnlocked.push(id);
+      }
+      if (newlyUnlocked.length > 0) {
+        const nextAchievements = achievements.map(a =>
+          newlyUnlocked.includes(a.id) ? { ...a, unlockedAt: Date.now() } : a
+        );
+        for (const achievement of nextAchievements) {
+          await saveAchievement(achievement);
+        }
+        set({ profile: next, achievements: nextAchievements, error: null });
+      } else {
+        set({ profile: next, error: null });
+      }
+      return { newLevel, newExp, levelUps, newlyUnlocked };
     } catch (err) {
       set({ error: err instanceof Error ? err.message : '保存战斗奖励失败' });
-      return { newLevel: get().profile?.level ?? 1, newExp: get().profile?.exp ?? 0, levelUps: 0 };
+      return { newLevel: get().profile?.level ?? 1, newExp: get().profile?.exp ?? 0, levelUps: 0, newlyUnlocked: [] };
+    }
+  },
+  async checkBattleAchievements(subject, stageId) {
+    try {
+      const current = get().achievements;
+      const transactions = await getTransactions();
+      const totalStarsEarned = transactions
+        .filter(t => t.type === 'earn')
+        .reduce((sum, t) => sum + t.amount, 0);
+      const records = await getBattleRecords(subject as import('../types').Subject, stageId);
+      const progress = await Promise.all(
+        (['chinese', 'math', 'english'] as const).map(s => getProgressBySubject(s))
+      ).then(groups => groups.flat());
+      const { next, newlyUnlocked } = checkAchievements(current, {
+        level: get().profile?.level ?? 1,
+        totalStarsEarned,
+        records,
+        progress
+      });
+      if (newlyUnlocked.length > 0) {
+        for (const achievement of next) {
+          await saveAchievement(achievement);
+        }
+        set({ achievements: next, error: null });
+      }
+      return newlyUnlocked;
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '检查成就失败' });
+      return [];
     }
   },
   clearError() {

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Sparkles, Gift, ClipboardList } from 'lucide-react';
+import { BookOpen, Sparkles, Gift, ClipboardList, Settings } from 'lucide-react';
 import { ApiSettingsCard } from '../components/parent/ApiSettingsCard';
 import { useParentStore } from '../stores/parentStore';
 
@@ -75,6 +75,19 @@ export function ParentDashboard() {
           <div>
             <h3 className="text-lg font-bold">兑换审批</h3>
             <p className="text-sm text-slate-500">确认或拒绝孩子的星星兑换申请</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/parent/settings"
+          className="card flex items-center gap-4 transition hover:bg-purple-50 active:scale-95"
+        >
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-purple-100 text-purple-600">
+            <Settings className="h-7 w-7" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold">游戏配置</h3>
+            <p className="text-sm text-slate-500">每日任务与抽奖奖池管理</p>
           </div>
         </Link>
       </div>

@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { GenerationResult, ParentSettings, QuestionGenerationConfig, Reward, Redemption } from '../types';
+import type { DailyTask, GenerationResult, LotteryPrize, ParentSettings, QuestionGenerationConfig, Reward, Redemption } from '../types';
 import {
   getParentSettings,
   saveParentSettings,
@@ -7,15 +7,26 @@ import {
   saveReward,
   deleteReward as deleteRewardFromDB,
   getRedemptions,
-  saveRedemption
+  saveRedemption,
+  getDailyTasks,
+  saveDailyTask,
+  deleteDailyTasks as deleteDailyTasksFromDB,
+  getLotteryPool,
+  saveLotteryPrize,
+  deleteLotteryPrize as deleteLotteryPrizeFromDB
 } from '../db';
 import { generateQuestions as generateQuestionsFromAI } from '../services/aiQuestion';
+import { generateDailyTasks, getTodayKey, markTaskRewardClaimed } from '../services/dailyTaskLogic';
+import { createLotteryPrizeId } from '../services/lotteryLogic';
+import { useProfileStore } from './profileStore';
 import { useQuestionStore } from './questionStore';
 
 interface ParentState {
   settings: ParentSettings | null;
   rewards: Reward[];
   redemptions: Redemption[];
+  dailyTasks: DailyTask[];
+  lotteryPool: LotteryPrize[];
   loaded: boolean;
   error: string | null;
   generating: boolean;
@@ -28,6 +39,16 @@ interface ParentState {
   addRedemption: (redemption: Redemption) => Promise<void>;
   confirmRedemption: (id: string) => Promise<void>;
   markRedemptionRejected: (id: string) => Promise<void>;
+  loadDailyTasks: (dateKey?: string) => Promise<void>;
+  addDailyTask: (task: DailyTask) => Promise<void>;
+  updateDailyTask: (task: DailyTask) => Promise<void>;
+  deleteDailyTask: (id: string, dateKey?: string) => Promise<void>;
+  resetDailyTasks: (dateKey?: string) => Promise<void>;
+  claimDailyTaskReward: (taskId: string) => Promise<{ success: boolean; error?: string }>;
+  loadLotteryPool: () => Promise<void>;
+  addLotteryPrize: (prize: Omit<LotteryPrize, 'id'>) => Promise<void>;
+  updateLotteryPrize: (prize: LotteryPrize) => Promise<void>;
+  deleteLotteryPrize: (id: string) => Promise<void>;
   generateQuestions: (config: QuestionGenerationConfig) => Promise<void>;
   clearError: () => void;
   clearGenerationResult: () => void;
@@ -44,21 +65,27 @@ export const useParentStore = create<ParentState>((set, get) => ({
   settings: null,
   rewards: [],
   redemptions: [],
+  dailyTasks: [],
+  lotteryPool: [],
   loaded: false,
   error: null,
   generating: false,
   lastResult: null,
   async loadParentData() {
     try {
-      const [settings, rewards, redemptions] = await Promise.all([
+      const [settings, rewards, redemptions, dailyTasks, lotteryPool] = await Promise.all([
         getParentSettings('default'),
         getRewards(),
-        getRedemptions()
+        getRedemptions(),
+        getDailyTasks(getTodayKey()),
+        getLotteryPool()
       ]);
       set({
         settings: settings ?? DEFAULT_SETTINGS,
         rewards,
         redemptions,
+        dailyTasks,
+        lotteryPool,
         loaded: true,
         error: null
       });
@@ -146,6 +173,112 @@ export const useParentStore = create<ParentState>((set, get) => ({
       set({ redemptions: get().redemptions.map(r => (r.id === id ? updated : r)), error: null });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : '拒绝兑换失败' });
+    }
+  },
+  async loadDailyTasks(dateKey = getTodayKey()) {
+    try {
+      const tasks = await getDailyTasks(dateKey);
+      set({ dailyTasks: tasks, error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '加载每日任务失败' });
+    }
+  },
+  async addDailyTask(task) {
+    try {
+      await saveDailyTask(task);
+      set({ dailyTasks: [...get().dailyTasks, task], error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '添加任务失败' });
+    }
+  },
+  async updateDailyTask(task) {
+    try {
+      await saveDailyTask(task);
+      set({
+        dailyTasks: get().dailyTasks.map(t => (t.id === task.id ? task : t)),
+        error: null
+      });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '更新任务失败' });
+    }
+  },
+  async deleteDailyTask(id, dateKey = getTodayKey()) {
+    try {
+      await deleteDailyTasksFromDB(dateKey);
+      const nextTasks = get().dailyTasks.filter(t => t.id !== id);
+      for (const task of nextTasks) {
+        await saveDailyTask(task);
+      }
+      set({ dailyTasks: nextTasks, error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '删除任务失败' });
+    }
+  },
+  async resetDailyTasks(dateKey = getTodayKey()) {
+    try {
+      await deleteDailyTasksFromDB(dateKey);
+      const tasks = generateDailyTasks(dateKey);
+      for (const task of tasks) {
+        await saveDailyTask(task);
+      }
+      set({ dailyTasks: tasks, error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '重置任务失败' });
+    }
+  },
+  async claimDailyTaskReward(taskId) {
+    const task = get().dailyTasks.find(t => t.id === taskId);
+    if (!task) return { success: false, error: '任务不存在' };
+    if (!task.completed) return { success: false, error: '任务尚未完成' };
+    if (task.rewardStars <= 0) return { success: false, error: '奖励已领取' };
+
+    try {
+      await useProfileStore.getState().applyTransaction('earn', task.rewardStars, `完成任务：${task.title}`);
+      const nextTasks = markTaskRewardClaimed(get().dailyTasks, taskId);
+      const updated = nextTasks.find(t => t.id === taskId)!;
+      await saveDailyTask(updated);
+      set({ dailyTasks: nextTasks, error: null });
+      return { success: true };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '领取失败';
+      set({ error: message });
+      return { success: false, error: message };
+    }
+  },
+  async loadLotteryPool() {
+    try {
+      const lotteryPool = await getLotteryPool();
+      set({ lotteryPool, error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '加载奖池失败' });
+    }
+  },
+  async addLotteryPrize(prize) {
+    try {
+      const item: LotteryPrize = { ...prize, id: createLotteryPrizeId() };
+      await saveLotteryPrize(item);
+      set({ lotteryPool: [...get().lotteryPool, item], error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '添加奖品失败' });
+    }
+  },
+  async updateLotteryPrize(prize) {
+    try {
+      await saveLotteryPrize(prize);
+      set({
+        lotteryPool: get().lotteryPool.map(p => (p.id === prize.id ? prize : p)),
+        error: null
+      });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '更新奖品失败' });
+    }
+  },
+  async deleteLotteryPrize(id) {
+    try {
+      await deleteLotteryPrizeFromDB(id);
+      set({ lotteryPool: get().lotteryPool.filter(p => p.id !== id), error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '删除奖品失败' });
     }
   },
   async generateQuestions(config) {

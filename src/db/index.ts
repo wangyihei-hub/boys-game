@@ -2,6 +2,9 @@ import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import type {
   Achievement,
   BattleRecord,
+  DailyTask,
+  InventoryItem,
+  LotteryPrize,
   ParentSettings,
   Profile,
   Progress,
@@ -9,16 +12,17 @@ import type {
   Redemption,
   Reward,
   Subject,
-  Transaction
+  Transaction,
+  WrongQuestion
 } from '../types';
 
 const DB_NAME = 'boys-game-db';
-const DB_VERSION = 3;
+const DB_VERSION = 4;
 
 interface GameDB extends DBSchema {
   profiles: { key: string; value: Profile };
   questions: { key: string; value: Question; indexes: { 'by-subject-topic': [string, string] } };
-  wrongQuestions: { key: string; value: { questionId: string; wrongCount: number; lastReviewAt: number } };
+  wrongQuestions: { key: string; value: WrongQuestion };
   rewards: { key: string; value: Reward };
   redemptions: { key: string; value: Redemption; indexes: { 'by-status': string } };
   transactions: { key: string; value: Transaction };
@@ -26,6 +30,9 @@ interface GameDB extends DBSchema {
   parentSettings: { key: string; value: ParentSettings & { id: string } };
   progress: { key: string; value: Progress; indexes: { 'by-subject': Subject } };
   battleRecords: { key: string; value: BattleRecord; indexes: { 'by-subject-stage': [Subject, string] } };
+  dailyTasks: { key: string; value: DailyTask };
+  lotteryPool: { key: string; value: LotteryPrize };
+  inventory: { key: string; value: InventoryItem };
 }
 
 let dbPromise: Promise<IDBPDatabase<GameDB>> | null = null;
@@ -54,6 +61,11 @@ export function getDB() {
         }
         if (oldVersion < 3) {
           db.createObjectStore('transactions', { keyPath: 'id' });
+        }
+        if (oldVersion < 4) {
+          db.createObjectStore('dailyTasks', { keyPath: 'id' });
+          db.createObjectStore('lotteryPool', { keyPath: 'id' });
+          db.createObjectStore('inventory', { keyPath: 'id' });
         }
       }
     }).catch(err => {
@@ -201,6 +213,16 @@ export async function saveBattleRecord(record: BattleRecord): Promise<void> {
   await db.put('battleRecords', record);
 }
 
+export async function getAchievements(): Promise<Achievement[]> {
+  const db = await getDB();
+  return db.getAll('achievements');
+}
+
+export async function saveAchievement(achievement: Achievement): Promise<void> {
+  const db = await getDB();
+  await db.put('achievements', achievement);
+}
+
 export async function getTransactions(): Promise<Transaction[]> {
   const db = await getDB();
   return db.getAll('transactions');
@@ -209,4 +231,91 @@ export async function getTransactions(): Promise<Transaction[]> {
 export async function saveTransaction(transaction: Transaction): Promise<void> {
   const db = await getDB();
   await db.put('transactions', transaction);
+}
+
+export async function getWrongQuestions(): Promise<WrongQuestion[]> {
+  const db = await getDB();
+  return db.getAll('wrongQuestions');
+}
+
+export async function getWrongQuestion(questionId: string): Promise<WrongQuestion | undefined> {
+  const db = await getDB();
+  return db.get('wrongQuestions', questionId);
+}
+
+export async function saveWrongQuestion(record: WrongQuestion): Promise<void> {
+  const db = await getDB();
+  await db.put('wrongQuestions', record);
+}
+
+export async function deleteWrongQuestion(questionId: string): Promise<void> {
+  const db = await getDB();
+  await db.delete('wrongQuestions', questionId);
+}
+
+export async function getDailyTasks(dateKey: string): Promise<DailyTask[]> {
+  const db = await getDB();
+  const all = await db.getAll('dailyTasks');
+  return all.filter(t => t.dateKey === dateKey);
+}
+
+export async function saveDailyTask(task: DailyTask): Promise<void> {
+  const db = await getDB();
+  await db.put('dailyTasks', task);
+}
+
+export async function saveDailyTasks(tasks: DailyTask[]): Promise<void> {
+  const db = await getDB();
+  const tx = db.transaction('dailyTasks', 'readwrite');
+  for (const task of tasks) {
+    await tx.store.put(task);
+  }
+  await tx.done;
+}
+
+export async function deleteDailyTasks(dateKey: string): Promise<void> {
+  const db = await getDB();
+  const tx = db.transaction('dailyTasks', 'readwrite');
+  const all = await tx.store.getAll();
+  for (const task of all) {
+    if (task.dateKey === dateKey) {
+      await tx.store.delete(task.id);
+    }
+  }
+  await tx.done;
+}
+
+export async function getLotteryPool(): Promise<LotteryPrize[]> {
+  const db = await getDB();
+  return db.getAll('lotteryPool');
+}
+
+export async function saveLotteryPrize(prize: LotteryPrize): Promise<void> {
+  const db = await getDB();
+  await db.put('lotteryPool', prize);
+}
+
+export async function deleteLotteryPrize(id: string): Promise<void> {
+  const db = await getDB();
+  await db.delete('lotteryPool', id);
+}
+
+export async function getInventory(): Promise<InventoryItem[]> {
+  const db = await getDB();
+  return db.getAll('inventory');
+}
+
+export async function getInventoryItem(id: string): Promise<InventoryItem | undefined> {
+  const db = await getDB();
+  return db.get('inventory', id);
+}
+
+export async function saveInventoryItem(item: InventoryItem): Promise<void> {
+  const db = await getDB();
+  await db.put('inventory', item);
+}
+
+export async function deleteInventoryItem(id: string): Promise<void> {
+  const db = await getDB();
+  await db.delete('inventory', id);
 }

@@ -15,6 +15,7 @@ export function Battle() {
 
   const profile = useProfileStore(state => state.profile);
   const applyBattleRewards = useProfileStore(state => state.applyBattleRewards);
+  const checkBattleAchievements = useProfileStore(state => state.checkBattleAchievements);
   const currentBattle = useGameStore(state => state.currentBattle);
   const submitAnswer = useGameStore(state => state.submitAnswer);
   const finishBattle = useGameStore(state => state.finishBattle);
@@ -68,8 +69,11 @@ export function Battle() {
     setIsFinishing(true);
     try {
       const result = await finishBattle(profile.level, profile.exp);
-      await applyBattleRewards(result.stars, result.exp);
-      navigate('/play/battle-result', { state: result });
+      const rewardResult = await applyBattleRewards(result.stars, result.exp);
+      if (subject && stageId) {
+        await checkBattleAchievements(subject, stageId);
+      }
+      navigate('/play/battle-result', { state: { ...result, ...rewardResult } });
     } catch {
       setIsFinishing(false);
     }

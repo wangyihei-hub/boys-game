@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Map, Star, Trophy, Zap } from 'lucide-react';
+import { Map, Star, Trophy, Zap, BookOpen, Ticket, ShoppingBag } from 'lucide-react';
 import { useProfileStore } from '../stores/profileStore';
 import { useGameStore, computeRegionProgress } from '../stores/gameStore';
 import { nextLevelExp } from '../services/battleLogic';
@@ -63,21 +63,27 @@ export function PlayHome() {
           <span className="text-xs text-slate-500">已通关 {totalPassed}/{totalStages}</span>
         </Link>
 
-        <div className="card flex flex-col items-center gap-2 text-center opacity-60">
+        <Link
+          to="/play/achievements"
+          className="card flex flex-col items-center gap-2 text-center transition hover:bg-amber-50 active:scale-95"
+        >
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-amber-100 text-amber-600">
             <Trophy className="h-6 w-6" />
           </div>
           <span className="font-bold text-slate-700">成就图鉴</span>
-          <span className="text-xs text-slate-500">即将开放</span>
-        </div>
+          <span className="text-xs text-slate-500">查看里程碑</span>
+        </Link>
 
-        <div className="card flex flex-col items-center gap-2 text-center opacity-60">
+        <Link
+          to="/play/tasks"
+          className="card flex flex-col items-center gap-2 text-center transition hover:bg-purple-50 active:scale-95"
+        >
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-purple-100 text-purple-600">
             <Zap className="h-6 w-6" />
           </div>
           <span className="font-bold text-slate-700">每日任务</span>
-          <span className="text-xs text-slate-500">即将开放</span>
-        </div>
+          <span className="text-xs text-slate-500">今日挑战</span>
+        </Link>
 
         <Link
           to="/play/rewards"
@@ -88,6 +94,39 @@ export function PlayHome() {
           </div>
           <span className="font-bold text-slate-700">奖励兑换</span>
           <span className="text-xs text-slate-500">{profile.stars} 颗星星</span>
+        </Link>
+
+        <Link
+          to="/play/wrong"
+          className="card flex flex-col items-center gap-2 text-center transition hover:bg-red-50 active:scale-95"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-red-100 text-red-600">
+            <BookOpen className="h-6 w-6" />
+          </div>
+          <span className="font-bold text-slate-700">错题本</span>
+          <span className="text-xs text-slate-500">复习巩固</span>
+        </Link>
+
+        <Link
+          to="/play/lottery"
+          className="card flex flex-col items-center gap-2 text-center transition hover:bg-indigo-50 active:scale-95"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-indigo-100 text-indigo-600">
+            <Ticket className="h-6 w-6" />
+          </div>
+          <span className="font-bold text-slate-700">周末抽奖</span>
+          <span className="text-xs text-slate-500">试试手气</span>
+        </Link>
+
+        <Link
+          to="/play/shop"
+          className="card flex flex-col items-center gap-2 text-center transition hover:bg-cyan-50 active:scale-95"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-cyan-100 text-cyan-600">
+            <ShoppingBag className="h-6 w-6" />
+          </div>
+          <span className="font-bold text-slate-700">虚拟商城</span>
+          <span className="text-xs text-slate-500">装扮基地</span>
         </Link>
       </div>
 

@@ -98,12 +98,60 @@ export interface ParentSettings {
   apiModel?: string;
 }
 
-export interface Achievement {
+export interface WrongQuestion {
+  questionId: string;
+  wrongCount: number;
+  lastReviewAt: number;
+}
+
+export type TaskType = 'login' | 'win_battle' | 'correct_answers' | 'earn_stars';
+
+export interface DailyTask {
   id: string;
+  title: string;
+  type: TaskType;
+  target: number;
+  rewardStars: number;
+  completed: boolean;
+  progress: number;
+  dateKey: string;
+}
+
+export type AchievementId =
+  | 'first_win'
+  | 'first_boss'
+  | 'reach_level_5'
+  | 'reach_level_10'
+  | 'win_streak_5'
+  | 'collect_100_stars'
+  | 'all_subject_passed';
+
+export interface Achievement {
+  id: AchievementId;
   title: string;
   description: string;
   icon: string;
   unlockedAt?: number;
+}
+
+export type PrizeType = 'stars' | 'fragment' | 'privilege' | 'virtual';
+
+export interface LotteryPrize {
+  id: string;
+  name: string;
+  type: PrizeType;
+  amount?: number;
+  icon: string;
+  probability: number;
+  stock: number;
+}
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  type: 'skin' | 'effect' | 'furniture' | 'pet_food' | 'lottery_ticket' | 'fragment';
+  icon: string;
+  count: number;
 }
 
 export type StageStatus = 'locked' | 'unlocked' | 'passed';
