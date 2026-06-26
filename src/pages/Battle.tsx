@@ -7,7 +7,9 @@ import { ComboIndicator } from '../components/play/ComboIndicator';
 import type { BattleAnswer } from '../types';
 import { useGameStore, getStageById } from '../stores/gameStore';
 import { useProfileStore } from '../stores/profileStore';
-import { CORRECT_ANSWER_TIME_LIMIT_MS, getMaxPlayerHp } from '../services/battleLogic';
+import { useEconomyStore } from '../stores/economyStore';
+import { getAnswerTimeLimitMs, getMaxPlayerHp } from '../services/battleLogic';
+import { computeEquipmentBonuses } from '../services/equipmentLogic';
 
 export function Battle() {
   const { subject, stageId } = useParams<{ subject: string; stageId: string }>();
@@ -20,10 +22,16 @@ export function Battle() {
   const submitAnswer = useGameStore(state => state.submitAnswer);
   const finishBattle = useGameStore(state => state.finishBattle);
   const clearCurrentBattle = useGameStore(state => state.clearCurrentBattle);
+  const inventory = useEconomyStore(state => state.inventory);
+  const loadInventory = useEconomyStore(state => state.loadInventory);
 
   const [monsterShake, setMonsterShake] = useState(false);
   const [heroBounce, setHeroBounce] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
+
+  useEffect(() => {
+    loadInventory();
+  }, [loadInventory]);
 
   useEffect(() => {
     if (!currentBattle && stageId && subject) {
@@ -41,7 +49,10 @@ export function Battle() {
   }
 
   const stage = currentBattle.stage;
-  const maxPlayerHp = getMaxPlayerHp(profile.level);
+  const bonuses = computeEquipmentBonuses(inventory, profile.equippedItems);
+  const maxPlayerHp = getMaxPlayerHp(profile.level, bonuses);
+
+  const submitTimeout = useGameStore(state => state.submitTimeout);
 
   const handleAnswer = (answer: string | number) => {
     if (currentBattle.finished) return;
@@ -49,7 +60,11 @@ export function Battle() {
     const previousMonsterHp = currentBattle.monsterHp;
     const previousPlayerHp = currentBattle.playerHp;
 
-    submitAnswer(answer, profile.level);
+    if (answer === '') {
+      submitTimeout(bonuses);
+    } else {
+      submitAnswer(answer, profile.level, bonuses);
+    }
 
     const nextBattle = { ...currentBattle };
     // 手动应用一帧变化以触发动画，因为 Zustand 的 set 是异步的
@@ -148,7 +163,7 @@ export function Battle() {
         question={currentQuestion}
         questionNumber={currentBattle.currentIndex + 1}
         totalQuestions={currentBattle.questions.length}
-        timeLimitMs={CORRECT_ANSWER_TIME_LIMIT_MS}
+        timeLimitMs={getAnswerTimeLimitMs(bonuses)}
         onAnswer={handleAnswer}
       />
     </div>

@@ -1,4 +1,5 @@
 import type { BattleAnswer, BattleResult, Difficulty, Question, Stage } from '../types';
+import type { EquipmentBonuses } from './equipmentLogic';
 
 export interface BattleState {
   stage: Stage;
@@ -31,16 +32,20 @@ export const COMBO_MULTIPLIER_2 = 2;
 export const CRIT_MULTIPLIER = 2;
 export const CORRECT_ANSWER_TIME_LIMIT_MS = 15_000;
 
-export function getMaxPlayerHp(level: number): number {
-  return BASE_PLAYER_HP + level * PLAYER_HP_PER_LEVEL;
+export function getMaxPlayerHp(level: number, bonuses: Partial<EquipmentBonuses> = {}): number {
+  return BASE_PLAYER_HP + level * PLAYER_HP_PER_LEVEL + (bonuses.hpBonus ?? 0);
 }
 
-export function getBaseDamage(level: number): number {
-  return BASE_DAMAGE + level * DAMAGE_PER_LEVEL;
+export function getBaseDamage(level: number, bonuses: Partial<EquipmentBonuses> = {}): number {
+  return BASE_DAMAGE + level * DAMAGE_PER_LEVEL + (bonuses.attackBonus ?? 0);
 }
 
 export function getMonsterCounterDamage(difficulty: Difficulty): number {
   return 8 + difficulty * 3;
+}
+
+export function getAnswerTimeLimitMs(bonuses: Partial<EquipmentBonuses> = {}): number {
+  return CORRECT_ANSWER_TIME_LIMIT_MS + (bonuses.timeBonus ?? 0);
 }
 
 export function getComboMultiplier(combo: number): number {
@@ -52,14 +57,15 @@ export function getComboMultiplier(combo: number): number {
 export function calculateAttack(
   level: number,
   combo: number,
-  critReady: boolean
+  critReady: boolean,
+  bonuses: Partial<EquipmentBonuses> = {}
 ): AttackResult {
-  const base = getBaseDamage(level);
+  const base = getBaseDamage(level, bonuses);
   const comboBonus = getComboMultiplier(combo);
   let damage = Math.round(base * comboBonus);
   let isCrit = false;
   if (critReady) {
-    damage = Math.round(damage * CRIT_MULTIPLIER);
+    damage = Math.round(damage * (CRIT_MULTIPLIER + (bonuses.critBonus ?? 0)));
     isCrit = true;
   }
   return { damage, isCrit, comboBonus };
@@ -68,13 +74,14 @@ export function calculateAttack(
 export function createBattleState(
   stage: Stage,
   questions: Question[],
-  playerLevel: number
+  playerLevel: number,
+  bonuses: Partial<EquipmentBonuses> = {}
 ): BattleState {
   return {
     stage,
     questions,
     currentIndex: 0,
-    playerHp: getMaxPlayerHp(playerLevel),
+    playerHp: getMaxPlayerHp(playerLevel, bonuses),
     monsterHp: stage.monsterHp,
     combo: 0,
     critReady: false,
@@ -88,7 +95,8 @@ export function createBattleState(
 export function submitAnswer(
   state: BattleState,
   selectedAnswer: string | number,
-  level: number
+  level: number,
+  bonuses: Partial<EquipmentBonuses> = {}
 ): BattleState {
   if (state.finished) return state;
 
@@ -104,7 +112,7 @@ export function submitAnswer(
   let next = { ...state, answers: nextAnswers };
 
   if (isCorrect) {
-    const attack = calculateAttack(level, next.combo, next.critReady);
+    const attack = calculateAttack(level, next.combo, next.critReady, bonuses);
     next = {
       ...next,
       monsterHp: Math.max(0, next.monsterHp - attack.damage),
@@ -124,13 +132,16 @@ export function submitAnswer(
   return advanceBattle(next);
 }
 
-export function submitTimeout(state: BattleState): BattleState {
+export function submitTimeout(
+  state: BattleState,
+  bonuses: Partial<EquipmentBonuses> = {}
+): BattleState {
   if (state.finished) return state;
 
   const question = state.questions[state.currentIndex];
   const nextAnswers = [
     ...state.answers,
-    { questionId: question.id, correct: false, timeMs: CORRECT_ANSWER_TIME_LIMIT_MS }
+    { questionId: question.id, correct: false, timeMs: getAnswerTimeLimitMs(bonuses) }
   ];
 
   const counterDamage = getMonsterCounterDamage(state.stage.difficulty);

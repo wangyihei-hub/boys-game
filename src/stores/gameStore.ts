@@ -17,6 +17,7 @@ import {
   submitAnswer,
   submitTimeout
 } from '../services/battleLogic';
+import type { EquipmentBonuses } from '../services/equipmentLogic';
 import {
   getDailyTasks,
   getProgress,
@@ -90,9 +91,9 @@ interface GameState {
   currentBattle: BattleState | null;
   lastBattleRecord: BattleRecord | null;
   loadProgress: () => Promise<void>;
-  startBattle: (stage: Stage, questions: Question[], playerLevel: number) => void;
-  submitAnswer: (selectedAnswer: string | number, playerLevel: number) => void;
-  submitTimeout: () => void;
+  startBattle: (stage: Stage, questions: Question[], playerLevel: number, bonuses?: Partial<EquipmentBonuses>) => void;
+  submitAnswer: (selectedAnswer: string | number, playerLevel: number, bonuses?: Partial<EquipmentBonuses>) => void;
+  submitTimeout: (bonuses?: Partial<EquipmentBonuses>) => void;
   escapeBattle: () => void;
   finishBattle: (playerLevel: number, currentExp: number) => Promise<{
     result: BattleResult;
@@ -133,20 +134,20 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  startBattle(stage, questions, playerLevel) {
-    set({ currentBattle: createBattleState(stage, questions, playerLevel), lastBattleRecord: null });
+  startBattle(stage, questions, playerLevel, bonuses = {}) {
+    set({ currentBattle: createBattleState(stage, questions, playerLevel, bonuses), lastBattleRecord: null });
   },
 
-  submitAnswer(selectedAnswer, playerLevel) {
+  submitAnswer(selectedAnswer, playerLevel, bonuses = {}) {
     const battle = get().currentBattle;
     if (!battle) return;
-    set({ currentBattle: submitAnswer(battle, selectedAnswer, playerLevel) });
+    set({ currentBattle: submitAnswer(battle, selectedAnswer, playerLevel, bonuses) });
   },
 
-  submitTimeout() {
+  submitTimeout(bonuses = {}) {
     const battle = get().currentBattle;
     if (!battle) return;
-    set({ currentBattle: submitTimeout(battle) });
+    set({ currentBattle: submitTimeout(battle, bonuses) });
   },
 
   escapeBattle() {

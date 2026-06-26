@@ -5,6 +5,8 @@ import { StageNode } from '../components/play/StageNode';
 import { useGameStore, computeRegionProgress, getStagesBySubject } from '../stores/gameStore';
 import { useQuestionStore } from '../stores/questionStore';
 import { useProfileStore } from '../stores/profileStore';
+import { useEconomyStore } from '../stores/economyStore';
+import { computeEquipmentBonuses } from '../services/equipmentLogic';
 import type { Stage, StageStatus, Subject } from '../types';
 import { ChevronLeft } from 'lucide-react';
 
@@ -27,11 +29,14 @@ export function WorldMap() {
   const startBattle = useGameStore(state => state.startBattle);
   const loadQuestions = useQuestionStore(state => state.loadQuestions);
   const getQuestionsForBattle = useQuestionStore(state => state.getQuestionsForBattle);
+  const inventory = useEconomyStore(state => state.inventory);
+  const loadInventory = useEconomyStore(state => state.loadInventory);
 
   useEffect(() => {
     loadProgress();
     loadQuestions();
-  }, [loadProgress, loadQuestions]);
+    loadInventory();
+  }, [loadProgress, loadQuestions, loadInventory]);
 
   const stages = useMemo(() => getStagesBySubject(selectedSubject), [selectedSubject]);
 
@@ -47,7 +52,8 @@ export function WorldMap() {
     if (!profile) return;
     const questions = getQuestionsForBattle(stage.subject, stage.difficulty, stage.questionCount);
     if (questions.length === 0) return;
-    startBattle(stage, questions, profile.level);
+    const bonuses = computeEquipmentBonuses(inventory, profile.equippedItems);
+    startBattle(stage, questions, profile.level, bonuses);
     navigate(`/play/battle/${stage.subject}/${stage.id}`);
   };
 

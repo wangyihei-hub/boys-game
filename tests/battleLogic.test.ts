@@ -5,6 +5,8 @@ import {
   calculateRewards,
   createBattleState,
   escapeBattle,
+  getAnswerTimeLimitMs,
+  getBaseDamage,
   getComboMultiplier,
   getMaxPlayerHp,
   getMonsterCounterDamage,
@@ -174,5 +176,42 @@ describe('battleLogic', () => {
     expect(result.newLevel).toBe(3);
     expect(result.newExp).toBe(50);
     expect(result.levelUps).toBe(2);
+  });
+
+  it('increases max player hp with hpBonus', () => {
+    expect(getMaxPlayerHp(1, { hpBonus: 10 })).toBe(getMaxPlayerHp(1) + 10);
+    expect(getMaxPlayerHp(5, { hpBonus: 25 })).toBe(getMaxPlayerHp(5) + 25);
+  });
+
+  it('increases base damage with attackBonus', () => {
+    expect(getBaseDamage(1, { attackBonus: 3 })).toBe(getBaseDamage(1) + 3);
+    expect(getBaseDamage(5, { attackBonus: 7 })).toBe(getBaseDamage(5) + 7);
+  });
+
+  it('increases crit multiplier with critBonus', () => {
+    const normal = calculateAttack(1, 3, false, { critBonus: 0.25 });
+    const crit = calculateAttack(1, 3, true, { critBonus: 0.25 });
+    expect(crit.damage).toBe(Math.round(normal.damage * (2 + 0.25)));
+    expect(crit.isCrit).toBe(true);
+  });
+
+  it('increases answer time limit with timeBonus', () => {
+    expect(getAnswerTimeLimitMs({ timeBonus: 3000 })).toBe(15_000 + 3000);
+    expect(getAnswerTimeLimitMs({ timeBonus: 5000 })).toBe(15_000 + 5000);
+  });
+
+  it('applies attack bonus when dealing damage', () => {
+    const stage = makeStage({ monsterHp: 999 });
+    const questions = [makeQuestion()];
+    const state = createBattleState(stage, questions, 1, { attackBonus: 5 });
+    const next = submitAnswer(state, 1, 1, { attackBonus: 5 });
+    expect(next.monsterHp).toBe(999 - calculateAttack(1, 0, false, { attackBonus: 5 }).damage);
+  });
+
+  it('applies hp bonus to initial battle state', () => {
+    const stage = makeStage();
+    const questions = [makeQuestion()];
+    const state = createBattleState(stage, questions, 1, { hpBonus: 15 });
+    expect(state.playerHp).toBe(getMaxPlayerHp(1) + 15);
   });
 });
