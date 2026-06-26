@@ -3,13 +3,34 @@ import { useParentStore } from '../stores/parentStore';
 import { useProfileStore } from '../stores/profileStore';
 import { isRestMode, shouldShowEyeCare } from '../services/usageLogic';
 
+const EYE_CARE_STORAGE_KEY = 'boys-game-eye-care-last-reminder';
+
+function readLastReminder(): number | undefined {
+  try {
+    const raw = localStorage.getItem(EYE_CARE_STORAGE_KEY);
+    if (!raw) return undefined;
+    const value = Number(raw);
+    return Number.isFinite(value) && value > 0 ? value : undefined;
+  } catch {
+    return undefined;
+  }
+}
+
+function writeLastReminder(timestamp: number) {
+  try {
+    localStorage.setItem(EYE_CARE_STORAGE_KEY, String(timestamp));
+  } catch {
+    // ignore storage errors
+  }
+}
+
 export function useHealthGuard() {
   const settings = useParentStore(state => state.settings);
   const loaded = useProfileStore(state => state.loaded);
 
   const [isRestModeActive, setIsRestModeActive] = useState(false);
   const [showEyeCare, setShowEyeCare] = useState(false);
-  const [lastReminderAt, setLastReminderAt] = useState<number | undefined>(undefined);
+  const [lastReminderAt, setLastReminderAt] = useState<number | undefined>(() => readLastReminder());
 
   useEffect(() => {
     if (!loaded || !settings) return;
@@ -23,6 +44,7 @@ export function useHealthGuard() {
       if (shouldShowEyeCare(lastReminderAt, settings.eyeCareIntervalMinutes, now)) {
         setShowEyeCare(true);
         setLastReminderAt(now);
+        writeLastReminder(now);
       }
     };
 
@@ -33,6 +55,9 @@ export function useHealthGuard() {
 
   const dismissEyeCare = () => {
     setShowEyeCare(false);
+    const now = Date.now();
+    setLastReminderAt(now);
+    writeLastReminder(now);
   };
 
   return {
