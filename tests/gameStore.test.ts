@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach } from 'vitest';
-import { useGameStore, getDefaultProgress, STAGES, computeRegionProgress } from '../src/stores/gameStore';
+import { useGameStore, STAGES, computeRegionProgress } from '../src/stores/gameStore';
 import { resetDB, saveProgressBatch } from '../src/db';
 import type { Question } from '../src/types';
 

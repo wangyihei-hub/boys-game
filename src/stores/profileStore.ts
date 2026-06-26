@@ -1,7 +1,8 @@
 import { create } from 'zustand';
-import type { Profile } from '../types';
-import { getProfile, saveProfile } from '../db';
+import type { Profile, TransactionType } from '../types';
+import { getProfile, saveProfile, saveTransaction } from '../db';
 import { calculateLevelUp } from '../services/battleLogic';
+import { computeNextBalance, createTransaction } from '../services/economyLogic';
 
 interface ProfileState {
   profile: Profile | null;
@@ -9,7 +10,8 @@ interface ProfileState {
   error: string | null;
   loadProfile: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
-  addStars: (amount: number) => Promise<void>;
+  addStars: (amount: number, reason?: string) => Promise<void>;
+  applyTransaction: (type: TransactionType, amount: number, reason: string) => Promise<void>;
   addExp: (amount: number) => Promise<{ newLevel: number; newExp: number; levelUps: number }>;
   applyBattleRewards: (stars: number, exp: number) => Promise<{ newLevel: number; newExp: number; levelUps: number }>;
   clearError: () => void;
@@ -54,16 +56,22 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       set({ error: err instanceof Error ? err.message : '保存档案失败' });
     }
   },
-  async addStars(amount) {
+  async applyTransaction(type, amount, reason) {
     try {
       const current = get().profile;
       if (!current) return;
-      const next = { ...current, stars: Math.max(0, current.stars + amount) };
+      const nextStars = computeNextBalance(type, amount, current.stars);
+      const next = { ...current, stars: nextStars };
+      const transaction = createTransaction(type, amount, reason, current.stars);
       await saveProfile(next);
+      await saveTransaction(transaction);
       set({ profile: next, error: null });
     } catch (err) {
-      set({ error: err instanceof Error ? err.message : '保存星星失败' });
+      set({ error: err instanceof Error ? err.message : '保存星星变动失败' });
     }
+  },
+  async addStars(amount, reason = '获得星星') {
+    await get().applyTransaction('earn', amount, reason);
   },
   async addExp(amount) {
     try {
@@ -84,13 +92,11 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       const current = get().profile;
       if (!current) return { newLevel: 1, newExp: 0, levelUps: 0 };
       const { newLevel, newExp, levelUps } = calculateLevelUp(current.level, current.exp, exp);
-      const next = {
-        ...current,
-        stars: Math.max(0, current.stars + stars),
-        level: newLevel,
-        exp: newExp
-      };
+      const nextStars = Math.max(0, current.stars + stars);
+      const next = { ...current, stars: nextStars, level: newLevel, exp: newExp };
+      const transaction = createTransaction('earn', stars, '战斗奖励', current.stars);
       await saveProfile(next);
+      await saveTransaction(transaction);
       set({ profile: next, error: null });
       return { newLevel, newExp, levelUps };
     } catch (err) {

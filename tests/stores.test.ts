@@ -64,6 +64,8 @@ describe('parentStore', () => {
     const redemption: Redemption = {
       id: 'red1',
       rewardId: 'r1',
+      rewardName: 'Ice Cream',
+      starCost: 10,
       status: 'pending',
       createdAt: Date.now()
     };

@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { BookOpen, Sparkles } from 'lucide-react';
+import { BookOpen, Sparkles, Gift, ClipboardList } from 'lucide-react';
 import { ApiSettingsCard } from '../components/parent/ApiSettingsCard';
 import { useParentStore } from '../stores/parentStore';
 
@@ -49,6 +49,32 @@ export function ParentDashboard() {
           <div>
             <h3 className="text-lg font-bold">AI 出题</h3>
             <p className="text-sm text-slate-500">使用 AI 自动生成各学科练习题</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/parent/rewards"
+          className="card flex items-center gap-4 transition hover:bg-pink-50 active:scale-95"
+        >
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-pink-100 text-pink-600">
+            <Gift className="h-7 w-7" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold">奖励池管理</h3>
+            <p className="text-sm text-slate-500">配置家庭奖励、星星价格和库存</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/parent/redemptions"
+          className="card flex items-center gap-4 transition hover:bg-green-50 active:scale-95"
+        >
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-green-100 text-green-600">
+            <ClipboardList className="h-7 w-7" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold">兑换审批</h3>
+            <p className="text-sm text-slate-500">确认或拒绝孩子的星星兑换申请</p>
           </div>
         </Link>
       </div>

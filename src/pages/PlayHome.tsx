@@ -79,13 +79,16 @@ export function PlayHome() {
           <span className="text-xs text-slate-500">即将开放</span>
         </div>
 
-        <div className="card flex flex-col items-center gap-2 text-center opacity-60">
+        <Link
+          to="/play/rewards"
+          className="card flex flex-col items-center gap-2 text-center transition hover:bg-pink-50 active:scale-95"
+        >
           <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-pink-100 text-pink-600">
             🎁
           </div>
           <span className="font-bold text-slate-700">奖励兑换</span>
-          <span className="text-xs text-slate-500">即将开放</span>
-        </div>
+          <span className="text-xs text-slate-500">{profile.stars} 颗星星</span>
+        </Link>
       </div>
 
       {loaded && (

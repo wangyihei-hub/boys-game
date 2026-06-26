@@ -5,9 +5,12 @@ import { PlayHome } from './pages/PlayHome';
 import { WorldMap } from './pages/WorldMap';
 import { Battle } from './pages/Battle';
 import { BattleResult } from './pages/BattleResult';
+import { RewardShop } from './pages/RewardShop';
 import { ParentDashboard } from './pages/ParentDashboard';
 import { GenerateQuestions } from './pages/GenerateQuestions';
 import { QuestionBank } from './pages/QuestionBank';
+import { ParentRewardPool } from './pages/ParentRewardPool';
+import { ParentRedemptions } from './pages/ParentRedemptions';
 
 export const router = createHashRouter([
   {
@@ -21,7 +24,8 @@ export const router = createHashRouter([
       { index: true, element: <PlayHome /> },
       { path: 'map', element: <WorldMap /> },
       { path: 'battle/:subject/:stageId', element: <Battle /> },
-      { path: 'battle-result', element: <BattleResult /> }
+      { path: 'battle-result', element: <BattleResult /> },
+      { path: 'rewards', element: <RewardShop /> }
     ]
   },
   {
@@ -30,7 +34,9 @@ export const router = createHashRouter([
     children: [
       { index: true, element: <ParentDashboard /> },
       { path: 'questions', element: <QuestionBank /> },
-      { path: 'questions/generate', element: <GenerateQuestions /> }
+      { path: 'questions/generate', element: <GenerateQuestions /> },
+      { path: 'rewards', element: <ParentRewardPool /> },
+      { path: 'redemptions', element: <ParentRedemptions /> }
     ]
   }
 ]);

@@ -50,9 +50,23 @@ export type RedemptionStatus = 'pending' | 'confirmed' | 'rejected';
 export interface Redemption {
   id: string;
   rewardId: string;
+  rewardName: string;
+  starCost: number;
   status: RedemptionStatus;
   createdAt: number;
   confirmedAt?: number;
+  rejectedAt?: number;
+}
+
+export type TransactionType = 'earn' | 'spend' | 'refund';
+
+export interface Transaction {
+  id: string;
+  type: TransactionType;
+  amount: number;
+  reason: string;
+  balanceAfter: number;
+  createdAt: number;
 }
 
 export type AIProvider = 'openai' | 'anthropic' | 'custom';

@@ -8,11 +8,12 @@ import type {
   Question,
   Redemption,
   Reward,
-  Subject
+  Subject,
+  Transaction
 } from '../types';
 
 const DB_NAME = 'boys-game-db';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 interface GameDB extends DBSchema {
   profiles: { key: string; value: Profile };
@@ -20,6 +21,7 @@ interface GameDB extends DBSchema {
   wrongQuestions: { key: string; value: { questionId: string; wrongCount: number; lastReviewAt: number } };
   rewards: { key: string; value: Reward };
   redemptions: { key: string; value: Redemption; indexes: { 'by-status': string } };
+  transactions: { key: string; value: Transaction };
   achievements: { key: string; value: Achievement };
   parentSettings: { key: string; value: ParentSettings & { id: string } };
   progress: { key: string; value: Progress; indexes: { 'by-subject': Subject } };
@@ -49,6 +51,9 @@ export function getDB() {
           progressStore.createIndex('by-subject', 'subject');
           const battleRecordStore = db.createObjectStore('battleRecords', { keyPath: 'id' });
           battleRecordStore.createIndex('by-subject-stage', ['subject', 'stageId']);
+        }
+        if (oldVersion < 3) {
+          db.createObjectStore('transactions', { keyPath: 'id' });
         }
       }
     }).catch(err => {
@@ -131,6 +136,11 @@ export async function saveReward(reward: Reward): Promise<void> {
   await db.put('rewards', reward);
 }
 
+export async function deleteReward(id: string): Promise<void> {
+  const db = await getDB();
+  await db.delete('rewards', id);
+}
+
 export async function getRedemptions(status?: Redemption['status']): Promise<Redemption[]> {
   const db = await getDB();
   if (status) {
@@ -189,4 +199,14 @@ export async function getBattleRecords(subject: Subject, stageId: string): Promi
 export async function saveBattleRecord(record: BattleRecord): Promise<void> {
   const db = await getDB();
   await db.put('battleRecords', record);
+}
+
+export async function getTransactions(): Promise<Transaction[]> {
+  const db = await getDB();
+  return db.getAll('transactions');
+}
+
+export async function saveTransaction(transaction: Transaction): Promise<void> {
+  const db = await getDB();
+  await db.put('transactions', transaction);
 }
