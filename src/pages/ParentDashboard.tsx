@@ -1,7 +1,9 @@
+import { ApiSettingsCard } from '../components/parent/ApiSettingsCard';
 import { useParentStore } from '../stores/parentStore';
 
 export function ParentDashboard() {
   const settings = useParentStore(state => state.settings);
+  const updateSettings = useParentStore(state => state.updateSettings);
 
   if (!settings) return null;
 
@@ -20,6 +22,8 @@ export function ParentDashboard() {
           </div>
         </div>
       </div>
+
+      <ApiSettingsCard settings={settings} onSave={updateSettings} />
     </div>
   );
 }
