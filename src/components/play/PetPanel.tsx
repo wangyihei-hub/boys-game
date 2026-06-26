@@ -10,8 +10,7 @@ import {
   getPetDef,
   getPetInstance
 } from '../../services/petLogic';
-import { getAllBattleRecords, getDailyTasks } from '../../db';
-import { getTodayKey } from '../../services/usageLogic';
+import { getAllBattleRecords, getAllDailyTasks } from '../../db';
 import { PetAvatar } from './PetAvatar';
 
 export function PetPanel() {
@@ -34,7 +33,7 @@ export function PetPanel() {
     async function loadData() {
       const [records, tasks] = await Promise.all([
         getAllBattleRecords(),
-        getDailyTasks(getTodayKey())
+        getAllDailyTasks()
       ]);
       setBattleRecords(records);
       setDailyTasks(tasks);
@@ -69,7 +68,7 @@ export function PetPanel() {
       await loadInventory();
       const [records, tasks] = await Promise.all([
         getAllBattleRecords(),
-        getDailyTasks(getTodayKey())
+        getAllDailyTasks()
       ]);
       setBattleRecords(records);
       setDailyTasks(tasks);

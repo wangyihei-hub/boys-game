@@ -93,13 +93,13 @@ describe('equipmentLogic', () => {
     const inventory: InventoryItem[] = [
       makeInventoryItem({ id: 'iron-sword', slot: 'weapon', name: '铁剑', icon: '⚔️' })
     ];
-    const result = equipItem({}, 'weapon', 'iron-sword', inventory);
+    const result = equipItem({}, 'weapon', 'iron-sword', inventory, 3);
     expect(result.error).toBeUndefined();
     expect(result.equippedItems.weapon).toBe('iron-sword');
   });
 
   it('rejects equipping an item that does not exist in inventory', () => {
-    const result = equipItem({}, 'weapon', 'iron-sword', []);
+    const result = equipItem({}, 'weapon', 'iron-sword', [], 3);
     expect(result.error).toBe('背包中不存在该装备');
     expect(result.equippedItems.weapon).toBeUndefined();
   });
@@ -108,8 +108,17 @@ describe('equipmentLogic', () => {
     const inventory: InventoryItem[] = [
       makeInventoryItem({ id: 'wooden-sword', slot: 'weapon' })
     ];
-    const result = equipItem({}, 'shoes', 'wooden-sword', inventory);
+    const result = equipItem({}, 'shoes', 'wooden-sword', inventory, 1);
     expect(result.error).toBe('该装备属于 weapon 槽位');
+  });
+
+  it('rejects equipping an item above the player level', () => {
+    const inventory: InventoryItem[] = [
+      makeInventoryItem({ id: 'iron-sword', slot: 'weapon', name: '铁剑', icon: '⚔️' })
+    ];
+    const result = equipItem({}, 'weapon', 'iron-sword', inventory, 1);
+    expect(result.error).toBe('需要等级 Lv.3');
+    expect(result.equippedItems.weapon).toBeUndefined();
   });
 
   it('replaces the previous item in the same slot', () => {
@@ -118,7 +127,7 @@ describe('equipmentLogic', () => {
       makeInventoryItem({ id: 'iron-sword', slot: 'weapon', name: '铁剑', icon: '⚔️' })
     ];
     let equipped: Profile['equippedItems'] = { weapon: 'wooden-sword' };
-    const result = equipItem(equipped, 'weapon', 'iron-sword', inventory);
+    const result = equipItem(equipped, 'weapon', 'iron-sword', inventory, 3);
     expect(result.error).toBeUndefined();
     expect(result.equippedItems.weapon).toBe('iron-sword');
   });

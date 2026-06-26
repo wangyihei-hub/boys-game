@@ -260,5 +260,6 @@ export interface BattleRecord {
   durationMs: number;
   starsEarned: number;
   expEarned: number;
+  correctAnswers: number;
   createdAt: number;
 }

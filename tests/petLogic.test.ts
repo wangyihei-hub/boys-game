@@ -44,6 +44,7 @@ function makeWinRecord(subject: 'chinese' | 'math' | 'english' = 'math'): Battle
     durationMs: 1000,
     starsEarned: 5,
     expEarned: 10,
+    correctAnswers: 1,
     createdAt: Date.now()
   };
 }

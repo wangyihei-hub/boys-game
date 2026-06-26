@@ -276,13 +276,16 @@ function evaluateRequirement(
 ): { progress: number; met: boolean } {
   switch (requirement.type) {
     case 'correct_count': {
-      const progress = battleRecords.filter(record => record.result === 'win').length;
+      const progress = battleRecords.reduce(
+        (sum, record) => sum + (record.correctAnswers ?? 0),
+        0
+      );
       return { progress, met: progress >= requirement.target };
     }
     case 'subject_correct_count': {
-      const progress = battleRecords.filter(
-        record => record.result === 'win' && record.subject === requirement.subject
-      ).length;
+      const progress = battleRecords
+        .filter(record => record.subject === requirement.subject)
+        .reduce((sum, record) => sum + (record.correctAnswers ?? 0), 0);
       return { progress, met: progress >= requirement.target };
     }
     case 'consecutive_days': {
@@ -347,7 +350,7 @@ export function evolvePet(
     return { inventory, error: '进化条件不足' };
   }
 
-  const nextPet: InventoryItem = { ...pet, evolutionStage: currentStage + 1 };
+  const nextPet: InventoryItem = { ...pet, evolutionStage: currentStage + 1, bond: 0 };
   const nextInventory = inventory.map((item, index) =>
     index === petIndex ? nextPet : item
   );

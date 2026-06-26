@@ -48,7 +48,7 @@ export function EquipmentPanel() {
   }
 
   async function handleEquip(slot: EquipmentSlot, itemId: string) {
-    const result = equipItem(currentProfile.equippedItems, slot, itemId, inventory);
+    const result = equipItem(currentProfile.equippedItems, slot, itemId, inventory, currentProfile.level);
     if (result.error) return;
     await updateProfile({ equippedItems: result.equippedItems });
   }

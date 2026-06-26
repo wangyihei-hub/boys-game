@@ -133,6 +133,7 @@ async function seedDatabase(): Promise<void> {
     durationMs: 60_000,
     starsEarned: 10,
     expEarned: 20,
+    correctAnswers: 5,
     createdAt: 1_700_000_000_000
   };
   await db.put('battleRecords', battleRecord);

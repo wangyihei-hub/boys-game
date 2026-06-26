@@ -3,9 +3,9 @@ import type { Achievement, AchievementId, DailyStats, Profile, TransactionType }
 import {
   getAchievements as getAchievementsFromDB,
   getAllBattleRecords,
+  getAllDailyTasks,
   getBattleRecords,
   getDailyStats,
-  getDailyTasks,
   getInventory,
   getProfile,
   getProgressBySubject,
@@ -17,6 +17,7 @@ import {
   saveProfile,
   saveTransaction
 } from '../db';
+
 import { calculateLevelUp } from '../services/battleLogic';
 import { computeNextBalance, createTransaction } from '../services/economyLogic';
 import { checkAchievements, checkLevelAchievements, checkStarAchievement, createInitialAchievements } from '../services/achievementLogic';
@@ -297,8 +298,8 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       }
 
       const battleRecords = await getAllBattleRecords();
-      const dailyTasks = await getDailyTasks(getTodayKey());
-      const { canEvolve } = checkEvolution(petInstance, battleRecords, dailyTasks);
+      const allDailyTasks = await getAllDailyTasks();
+      const { canEvolve } = checkEvolution(petInstance, battleRecords, allDailyTasks);
       if (!canEvolve) {
         return { success: false, error: '进化条件不足' };
       }
@@ -307,7 +308,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
         inventory,
         petItemId,
         battleRecords,
-        dailyTasks
+        allDailyTasks
       );
       if (error) {
         return { success: false, error };

@@ -174,6 +174,8 @@ export const useGameStore = create<GameState>((set, get) => ({
     const minutes = Math.max(1, Math.ceil(durationMs / 60000));
     await useProfileStore.getState().recordMinutesPlayed(minutes);
 
+    const correctAnswers = battle.answers.filter(a => a.correct).length;
+
     const record: BattleRecord = {
       id: `${battle.stage.subject}-${battle.stage.id}-${Date.now()}`,
       subject: battle.stage.subject,
@@ -182,6 +184,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       durationMs,
       starsEarned: stars,
       expEarned: exp,
+      correctAnswers,
       createdAt: Date.now()
     };
 

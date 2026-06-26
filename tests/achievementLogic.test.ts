@@ -23,6 +23,7 @@ function makeRecord(overrides: Partial<BattleRecord> = {}): BattleRecord {
     durationMs: 1000,
     starsEarned: 5,
     expEarned: 10,
+    correctAnswers: 1,
     createdAt: Date.now(),
     ...overrides
   };

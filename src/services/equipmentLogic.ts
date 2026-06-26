@@ -143,7 +143,8 @@ export function equipItem(
   equippedItems: Profile['equippedItems'],
   slot: EquipmentSlot,
   itemId: string,
-  inventory: InventoryItem[]
+  inventory: InventoryItem[],
+  playerLevel: number
 ): { equippedItems: Profile['equippedItems']; error?: string } {
   const owned = inventory.find(item => item.id === itemId && item.count > 0);
   if (!owned) {
@@ -153,6 +154,10 @@ export function equipItem(
   const def = getEquipmentDef(itemId);
   if (!def) {
     return { equippedItems, error: '装备不存在' };
+  }
+
+  if (def.level > playerLevel) {
+    return { equippedItems, error: `需要等级 Lv.${def.level}` };
   }
 
   if (def.slot !== slot) {

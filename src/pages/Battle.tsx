@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MonsterAvatar } from '../components/play/MonsterAvatar';
 import { HeroAvatar } from '../components/play/HeroAvatar';
@@ -34,6 +34,9 @@ export function Battle() {
   const [hintOption, setHintOption] = useState<number | undefined>(undefined);
   const [healAmount, setHealAmount] = useState(0);
 
+  const prevMonsterHpRef = useRef<number | undefined>(undefined);
+  const prevPlayerHpRef = useRef<number | undefined>(undefined);
+
   useEffect(() => {
     loadInventory();
   }, [loadInventory]);
@@ -49,8 +52,41 @@ export function Battle() {
 
   useEffect(() => {
     setHintOption(undefined);
-    setHealAmount(0);
+    if (healAmount > 0) {
+      const timer = window.setTimeout(() => setHealAmount(0), 800);
+      return () => window.clearTimeout(timer);
+    }
   }, [currentBattle?.currentIndex]);
+
+  useEffect(() => {
+    if (!currentBattle) {
+      prevMonsterHpRef.current = undefined;
+      prevPlayerHpRef.current = undefined;
+      return;
+    }
+
+    const monsterHp = currentBattle.monsterHp;
+    const playerHp = currentBattle.playerHp;
+    let monsterTimer: number | undefined;
+    let heroTimer: number | undefined;
+
+    if (prevMonsterHpRef.current !== undefined && monsterHp < prevMonsterHpRef.current) {
+      setMonsterShake(true);
+      monsterTimer = window.setTimeout(() => setMonsterShake(false), 400);
+    }
+    if (prevPlayerHpRef.current !== undefined && playerHp < prevPlayerHpRef.current) {
+      setHeroBounce(true);
+      heroTimer = window.setTimeout(() => setHeroBounce(false), 400);
+    }
+
+    prevMonsterHpRef.current = monsterHp;
+    prevPlayerHpRef.current = playerHp;
+
+    return () => {
+      if (monsterTimer !== undefined) window.clearTimeout(monsterTimer);
+      if (heroTimer !== undefined) window.clearTimeout(heroTimer);
+    };
+  }, [currentBattle?.monsterHp, currentBattle?.playerHp]);
 
   if (!currentBattle || !profile) {
     return (
@@ -78,9 +114,6 @@ export function Battle() {
   const handleAnswer = (answer: string | number) => {
     if (currentBattle.finished) return;
 
-    const previousMonsterHp = currentBattle.monsterHp;
-    const previousPlayerHp = currentBattle.playerHp;
-
     if (answer === '') {
       submitTimeout(bonuses);
     } else {
@@ -99,18 +132,6 @@ export function Battle() {
       }
 
       submitAnswer(answer, profile.level, bonuses, petEffect);
-    }
-
-    const nextBattle = { ...currentBattle };
-    // 手动应用一帧变化以触发动画，因为 Zustand 的 set 是异步的
-    // 这里我们依赖 currentBattle 在下一次渲染时更新
-    if (nextBattle.monsterHp < previousMonsterHp) {
-      setMonsterShake(true);
-      setTimeout(() => setMonsterShake(false), 400);
-    }
-    if (nextBattle.playerHp < previousPlayerHp) {
-      setHeroBounce(true);
-      setTimeout(() => setHeroBounce(false), 400);
     }
   };
 

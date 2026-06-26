@@ -10,6 +10,7 @@ import {
   saveLotteryPrize
 } from '../db';
 import { canAfford, createRedemption, createRewardId } from '../services/economyLogic';
+import { createPetInstance } from '../services/petLogic';
 import {
   canSynthesizeFragment,
   createDefaultLotteryPool,
@@ -265,7 +266,10 @@ export const useEconomyStore = create<EconomyState>((set, get) => ({
       if (cost > 0) {
         await useProfileStore.getState().applyTransaction('spend', cost, `购买 ${item.name}`);
       }
-      const newItem: InventoryItem = { ...item, count: 1 };
+      const newItem: InventoryItem =
+        item.type === 'pet' && item.petDefId
+          ? createPetInstance(item.petDefId)
+          : { ...item, count: 1 };
       const nextInventory = updateInventory(get().inventory, newItem);
       await saveInventoryItem(nextInventory.find(i => i.id === newItem.id)!);
       set({ inventory: nextInventory, error: null });

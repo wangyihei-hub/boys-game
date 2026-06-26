@@ -269,6 +269,11 @@ export async function getDailyTasks(dateKey: string): Promise<DailyTask[]> {
   return all.filter(t => t.dateKey === dateKey);
 }
 
+export async function getAllDailyTasks(): Promise<DailyTask[]> {
+  const db = await getDB();
+  return db.getAll('dailyTasks');
+}
+
 export async function saveDailyTask(task: DailyTask): Promise<void> {
   const db = await getDB();
   await db.put('dailyTasks', task);
