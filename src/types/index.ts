@@ -189,6 +189,7 @@ export interface PetDef {
   description: string;
   skill: 'hint' | 'exclude' | 'heal' | 'double_stars';
   skillDescription: string;
+  starCost?: number;
   evolutions: {
     stage: number;
     name: string;

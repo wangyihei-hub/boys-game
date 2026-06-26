@@ -4,16 +4,77 @@ import { ArrowLeft, Star } from 'lucide-react';
 import { useEconomyStore } from '../stores/economyStore';
 import { useProfileStore } from '../stores/profileStore';
 import { ShopItem } from '../components/play/ShopItem';
+import { EQUIPMENT_CATALOG } from '../services/equipmentLogic';
+import { PET_CATALOG } from '../services/petLogic';
 import type { InventoryItem } from '../types';
 
-const SHOP_ITEMS: { item: Omit<InventoryItem, 'count'>; cost: number }[] = [
+interface ShopEntry {
+  item: Omit<InventoryItem, 'count'>;
+  cost: number;
+  description?: string;
+  levelReq?: number;
+}
+
+interface ShopSection {
+  title: string;
+  items: ShopEntry[];
+}
+
+const COSMETIC_ITEMS: ShopEntry[] = [
   { item: { id: 'skin-hero', name: '小勇士皮肤', type: 'skin', icon: '🦸' }, cost: 50 },
   { item: { id: 'skin-pet', name: '宠物皮肤', type: 'skin', icon: '🐶' }, cost: 60 },
-  { item: { id: 'effect-star', name: '星星特效', type: 'effect', icon: '✨' }, cost: 40 },
+  { item: { id: 'effect-star', name: '星星特效', type: 'effect', icon: '✨' }, cost: 40 }
+];
+
+const FURNITURE_ITEMS: ShopEntry[] = [
   { item: { id: 'furniture-desk', name: '学习书桌', type: 'furniture', icon: '📚' }, cost: 80 },
-  { item: { id: 'furniture-lamp', name: '小台灯', type: 'furniture', icon: '🛋️' }, cost: 45 },
+  { item: { id: 'furniture-lamp', name: '小台灯', type: 'furniture', icon: '🛋️' }, cost: 45 }
+];
+
+const FOOD_ITEMS: ShopEntry[] = [
   { item: { id: 'pet-food', name: '宠物饼干', type: 'pet_food', icon: '🍪' }, cost: 15 }
 ];
+
+function buildEquipmentSection(): ShopSection {
+  return {
+    title: '装备',
+    items: EQUIPMENT_CATALOG.map(def => ({
+      item: {
+        id: def.id,
+        name: def.name,
+        type: 'equipment',
+        icon: def.icon,
+        slot: def.slot,
+        attackBonus: def.attackBonus,
+        hpBonus: def.hpBonus,
+        critBonus: def.critBonus,
+        timeBonus: def.timeBonus
+      },
+      cost: def.starCost ?? 0,
+      description: `需要等级 Lv.${def.level} · ${def.description}`,
+      levelReq: def.level
+    }))
+  };
+}
+
+function buildPetSection(): ShopSection {
+  return {
+    title: '宠物',
+    items: PET_CATALOG.map(def => ({
+      item: {
+        id: def.id,
+        name: def.name,
+        type: 'pet',
+        icon: def.icon,
+        petDefId: def.id,
+        evolutionStage: 0,
+        bond: 0
+      },
+      cost: def.starCost ?? 0,
+      description: def.skillDescription
+    }))
+  };
+}
 
 export function Shop() {
   const profile = useProfileStore(state => state.profile);
@@ -31,6 +92,14 @@ export function Shop() {
   }, [loadEconomyData]);
 
   const fragmentCount = inventory.find(i => i.id === 'fragment')?.count ?? 0;
+
+  const sections: ShopSection[] = [
+    buildEquipmentSection(),
+    buildPetSection(),
+    { title: '饲料', items: FOOD_ITEMS },
+    { title: '装扮', items: COSMETIC_ITEMS },
+    { title: '家具', items: FURNITURE_ITEMS }
+  ];
 
   const handleBuy = async (item: Omit<InventoryItem, 'count'>, cost: number) => {
     if (processingId) return;
@@ -98,15 +167,41 @@ export function Shop() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-            {SHOP_ITEMS.map(({ item, cost }) => (
-              <ShopItem
-                key={item.id}
-                item={item}
-                cost={cost}
-                canAfford={profile.stars >= cost}
-                onBuy={handleBuy}
-              />
+          <div className="space-y-6">
+            {sections.map(section => (
+              <section key={section.title} className="space-y-3">
+                <h3 className="flex items-center gap-2 text-lg font-bold text-slate-700">
+                  <span className="h-2 w-2 rounded-full bg-indigo-500" />
+                  {section.title}
+                </h3>
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {section.items.map(entry => {
+                    const ownable = entry.item.type === 'equipment' || entry.item.type === 'pet';
+                    const owned = ownable && inventory.some(i => i.id === entry.item.id);
+                    const levelLocked = entry.levelReq ? profile.level < entry.levelReq : false;
+                    const disabled = owned || levelLocked;
+                    const buttonText = owned
+                      ? '已拥有'
+                      : levelLocked
+                        ? `需要等级 Lv.${entry.levelReq}`
+                        : undefined;
+
+                    return (
+                      <ShopItem
+                        key={entry.item.id}
+                        item={entry.item}
+                        cost={entry.cost}
+                        canAfford={profile.stars >= entry.cost}
+                        disabled={disabled}
+                        buttonText={buttonText}
+                        badge={owned ? '已拥有' : undefined}
+                        description={entry.description}
+                        onBuy={handleBuy}
+                      />
+                    );
+                  })}
+                </div>
+              </section>
             ))}
           </div>
         </>

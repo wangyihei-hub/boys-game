@@ -8,6 +8,7 @@ export const PET_CATALOG: PetDef[] = [
     description: '机灵的小猫，能在战斗中帮你排除一个错误选项。',
     skill: 'hint',
     skillDescription: '提示一个错误选项',
+    starCost: 30,
     evolutions: [
       {
         stage: 0,
@@ -32,6 +33,7 @@ export const PET_CATALOG: PetDef[] = [
     description: '忠诚的小狗，能在战斗中直接排除一个错误选项。',
     skill: 'exclude',
     skillDescription: '排除一个错误选项',
+    starCost: 30,
     evolutions: [
       {
         stage: 0,
@@ -56,6 +58,7 @@ export const PET_CATALOG: PetDef[] = [
     description: '治愈系小精灵，每答对 3 题会为你恢复生命。',
     skill: 'heal',
     skillDescription: '每答对 3 题恢复生命',
+    starCost: 60,
     evolutions: [
       {
         stage: 0,
@@ -80,6 +83,7 @@ export const PET_CATALOG: PetDef[] = [
     description: '带来好运的星星，有机会让战斗奖励翻倍。',
     skill: 'double_stars',
     skillDescription: '概率战斗星星翻倍',
+    starCost: 60,
     evolutions: [
       {
         stage: 0,
