@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import type { AIProvider, ParentSettings } from '../../types';
-import { useParentStore } from '../../stores/parentStore';
 
 interface ApiSettingsCardProps {
   settings: ParentSettings;
@@ -37,9 +36,9 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState<string | null>(null);
 
-  const clearSaveError = () => {
+  const clearFeedback = () => {
+    setSaved(false);
     if (saveError) setSaveError(null);
-    useParentStore.getState().clearError();
   };
 
   useEffect(() => {
@@ -47,39 +46,47 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
     setApiKey(settings.apiKey ?? '');
     setEndpoint(settings.apiEndpoint ?? '');
     setModel(settings.apiModel ?? '');
+    setSaved(false);
     setSaveError(null);
   }, [settings.apiProvider, settings.apiKey, settings.apiEndpoint, settings.apiModel]);
 
-  const handleProviderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const persist = async (patch: Partial<ParentSettings>) => {
+    setSaving(true);
+    setSaved(false);
+    setSaveError(null);
+    try {
+      await onSave({ ...settings, ...patch });
+      setSaved(true);
+      setTimeout(() => setSaved(false), 2000);
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : '保存失败');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleProviderChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
     const next = e.target.value as AIProvider;
     setProvider(next);
     setEndpoint('');
     setModel('');
-    clearSaveError();
+    clearFeedback();
+    // Persist immediately with cleared endpoint/model so stale custom values
+    // are not sent to OpenAI/Anthropic on the next generation.
+    await persist({
+      apiProvider: next,
+      apiEndpoint: undefined,
+      apiModel: undefined
+    });
   };
 
   const handleSave = async () => {
-    setSaving(true);
-    setSaved(false);
-    clearSaveError();
-    try {
-      await onSave({
-        ...settings,
-        apiProvider: provider,
-        apiKey: apiKey.trim(),
-        apiEndpoint: endpoint.trim() || undefined,
-        apiModel: model.trim() || undefined
-      });
-      const persistedError = useParentStore.getState().error;
-      if (persistedError) {
-        setSaveError(persistedError);
-      } else {
-        setSaved(true);
-        setTimeout(() => setSaved(false), 2000);
-      }
-    } finally {
-      setSaving(false);
-    }
+    await persist({
+      apiProvider: provider,
+      apiKey: apiKey.trim(),
+      apiEndpoint: endpoint.trim() || undefined,
+      apiModel: model.trim() || undefined
+    });
   };
 
   return (
@@ -112,7 +119,7 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
           value={apiKey}
           onChange={e => {
             setApiKey(e.target.value);
-            clearSaveError();
+            clearFeedback();
           }}
           placeholder={provider === 'custom' ? '可选' : '请输入 API Key'}
           className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
@@ -131,7 +138,7 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
             value={endpoint}
             onChange={e => {
               setEndpoint(e.target.value);
-              clearSaveError();
+              clearFeedback();
             }}
             placeholder="https://api.example.com/v1/chat/completions"
             className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
@@ -149,7 +156,7 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
           value={model}
           onChange={e => {
             setModel(e.target.value);
-            clearSaveError();
+            clearFeedback();
           }}
           placeholder={provider === 'custom' ? '请输入模型名称' : PROVIDER_DEFAULTS[provider].model}
           className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
