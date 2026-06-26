@@ -28,6 +28,7 @@ export default defineConfig({
     setupFiles: ['./tests/setup.ts'],
     sequence: {
       concurrent: false
-    }
+    },
+    exclude: ['**/node_modules/**', '**/dist/**', '**/.worktrees/**']
   }
 });
