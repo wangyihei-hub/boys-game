@@ -1,25 +1,50 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Map, Star, Trophy, Zap, BookOpen, Ticket, ShoppingBag } from 'lucide-react';
+import { Map, Star, Trophy, Zap, BookOpen, Ticket, ShoppingBag, Clock } from 'lucide-react';
 import { useProfileStore } from '../stores/profileStore';
+import { useParentStore } from '../stores/parentStore';
 import { useGameStore, computeRegionProgress } from '../stores/gameStore';
+import { useHealthGuard } from '../hooks/useHealthGuard';
 import { nextLevelExp } from '../services/battleLogic';
+
+function limitBarColor(percent: number) {
+  if (percent >= 100) return 'bg-red-500';
+  if (percent >= 80) return 'bg-amber-500';
+  return 'bg-green-500';
+}
 
 export function PlayHome() {
   const profile = useProfileStore(state => state.profile);
+  const dailyStats = useProfileStore(state => state.dailyStats);
   const progress = useGameStore(state => state.progress);
   const loaded = useGameStore(state => state.loaded);
   const loadProgress = useGameStore(state => state.loadProgress);
 
+  const settings = useParentStore(state => state.settings);
+  const parentLoaded = useParentStore(state => state.loaded);
+  const loadParentData = useParentStore(state => state.loadParentData);
+
+  const { isRestModeActive } = useHealthGuard();
+
   useEffect(() => {
     loadProgress();
-  }, [loadProgress]);
+    if (!parentLoaded) {
+      loadParentData();
+    }
+  }, [loadProgress, loadParentData, parentLoaded]);
 
   if (!profile) return null;
 
   const totalPassed = progress.filter(p => p.status === 'passed').length;
   const totalStages = progress.length;
   const expPercent = Math.round((profile.exp / nextLevelExp(profile.level)) * 100);
+
+  const starLimit = settings?.dailyStarLimit ?? 100;
+  const minuteLimit = settings?.dailyMinuteLimit ?? 45;
+  const starsEarned = dailyStats?.starsEarned ?? 0;
+  const minutesPlayed = dailyStats?.minutesPlayed ?? 0;
+  const starPercent = Math.min(100, Math.round((starsEarned / starLimit) * 100));
+  const minutePercent = Math.min(100, Math.round((minutesPlayed / minuteLimit) * 100));
 
   return (
     <div className="space-y-4">
@@ -48,6 +73,47 @@ export function PlayHome() {
             <span className="text-xl font-bold">{profile.stars}</span>
           </div>
           <p className="text-xs text-slate-500">星星</p>
+        </div>
+      </div>
+
+      {isRestModeActive && (
+        <div className="card flex items-center gap-3 bg-indigo-50 text-indigo-700">
+          <span className="text-2xl">🌙</span>
+          <p className="font-bold">现在是休息时间，明天见 👋</p>
+        </div>
+      )}
+
+      <div className="card space-y-3">
+        <h3 className="text-sm font-bold text-slate-700">今日使用概览</h3>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Star className="h-4 w-4 fill-current text-yellow-500" />
+            <span className="text-xs font-semibold text-slate-600">今日星星</span>
+            <span className="ml-auto text-xs font-bold text-slate-700">
+              {starsEarned}/{starLimit}
+            </span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+            <div
+              className={['h-full rounded-full', limitBarColor(starPercent)].join(' ')}
+              style={{ width: `${starPercent}%` }}
+            />
+          </div>
+        </div>
+        <div className="space-y-2">
+          <div className="flex items-center gap-2">
+            <Clock className="h-4 w-4 text-blue-500" />
+            <span className="text-xs font-semibold text-slate-600">今日时长</span>
+            <span className="ml-auto text-xs font-bold text-slate-700">
+              {minutesPlayed}/{minuteLimit} 分钟
+            </span>
+          </div>
+          <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
+            <div
+              className={['h-full rounded-full', limitBarColor(minutePercent)].join(' ')}
+              style={{ width: `${minutePercent}%` }}
+            />
+          </div>
         </div>
       </div>
 
