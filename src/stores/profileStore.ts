@@ -2,19 +2,30 @@ import { create } from 'zustand';
 import type { Achievement, AchievementId, DailyStats, Profile, TransactionType } from '../types';
 import {
   getAchievements as getAchievementsFromDB,
+  getAllBattleRecords,
   getBattleRecords,
   getDailyStats,
+  getDailyTasks,
+  getInventory,
   getProfile,
   getProgressBySubject,
   getTransactions,
+  deleteInventoryItem,
   saveAchievement,
   saveDailyStats,
+  saveInventoryItem,
   saveProfile,
   saveTransaction
 } from '../db';
 import { calculateLevelUp } from '../services/battleLogic';
 import { computeNextBalance, createTransaction } from '../services/economyLogic';
 import { checkAchievements, checkLevelAchievements, checkStarAchievement, createInitialAchievements } from '../services/achievementLogic';
+import {
+  checkEvolution,
+  evolvePet as evolvePetLogic,
+  feedPet as feedPetLogic,
+  getPetInstance
+} from '../services/petLogic';
 import {
   createEmptyDailyStats,
   getTodayKey,
@@ -38,6 +49,9 @@ interface ProfileState {
   recordStarsEarned: (amount: number) => Promise<void>;
   recordMinutesPlayed: (minutes: number) => Promise<void>;
   loadDailyStats: (dateKey?: string) => Promise<void>;
+  setActivePet: (petItemId: string | undefined) => Promise<void>;
+  feedPet: (petItemId: string, foodItemId?: string) => Promise<{ success: boolean; error?: string }>;
+  evolvePet: (petItemId: string) => Promise<{ success: boolean; error?: string }>;
   clearError: () => void;
 }
 
@@ -233,6 +247,82 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       set({ dailyStats: stats, error: null });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : '加载每日统计失败' });
+    }
+  },
+  async setActivePet(petItemId) {
+    await get().updateProfile({ activePet: petItemId });
+  },
+  async feedPet(petItemId, foodItemId) {
+    try {
+      const inventory = await getInventory();
+      const targetFoodId = foodItemId ?? inventory.find(i => i.type === 'pet_food')?.id;
+      if (!targetFoodId) {
+        return { success: false, error: '没有宠物食物' };
+      }
+
+      const { inventory: nextInventory, error } = feedPetLogic(inventory, petItemId, targetFoodId);
+      if (error) {
+        return { success: false, error };
+      }
+
+      const nextPet = nextInventory.find(i => i.id === petItemId);
+      const nextFood = nextInventory.find(i => i.id === targetFoodId);
+      if (nextPet) await saveInventoryItem(nextPet);
+      if (nextFood) {
+        await saveInventoryItem(nextFood);
+      } else {
+        await deleteInventoryItem(targetFoodId);
+      }
+
+      const { useEconomyStore } = await import('./economyStore');
+      await useEconomyStore.getState().loadInventory();
+      return { success: true };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '喂养失败';
+      set({ error: message });
+      return { success: false, error: message };
+    }
+  },
+  async evolvePet(petItemId) {
+    try {
+      const inventory = await getInventory();
+      const petItem = inventory.find(i => i.id === petItemId && i.type === 'pet');
+      if (!petItem) {
+        return { success: false, error: '宠物不存在' };
+      }
+
+      const petInstance = getPetInstance(inventory, petItemId);
+      if (!petInstance) {
+        return { success: false, error: '宠物信息不完整' };
+      }
+
+      const battleRecords = await getAllBattleRecords();
+      const dailyTasks = await getDailyTasks(getTodayKey());
+      const { canEvolve } = checkEvolution(petInstance, battleRecords, dailyTasks);
+      if (!canEvolve) {
+        return { success: false, error: '进化条件不足' };
+      }
+
+      const { inventory: nextInventory, error } = evolvePetLogic(
+        inventory,
+        petItemId,
+        battleRecords,
+        dailyTasks
+      );
+      if (error) {
+        return { success: false, error };
+      }
+
+      const nextPet = nextInventory.find(i => i.id === petItemId);
+      if (nextPet) await saveInventoryItem(nextPet);
+
+      const { useEconomyStore } = await import('./economyStore');
+      await useEconomyStore.getState().loadInventory();
+      return { success: true };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '进化失败';
+      set({ error: message });
+      return { success: false, error: message };
     }
   },
   clearError() {

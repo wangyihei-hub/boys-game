@@ -10,6 +10,7 @@ interface BattleResultState {
   levelUps: number;
   newLevel: number;
   newExp: number;
+  doubled?: boolean;
 }
 
 export function BattleResult() {
@@ -52,6 +53,13 @@ export function BattleResult() {
             <p className="text-3xl font-bold text-indigo-600">+{state.exp}</p>
             <p className="text-sm font-semibold text-indigo-700">经验</p>
           </div>
+        </div>
+      )}
+
+      {state.doubled && (
+        <div className="card animate-bounceShort border-pink-300 bg-pink-50 text-center">
+          <p className="text-2xl font-bold text-pink-600">幸运双倍！</p>
+          <p className="text-sm font-semibold text-pink-700">宠物让你的星星奖励翻倍了</p>
         </div>
       )}
 

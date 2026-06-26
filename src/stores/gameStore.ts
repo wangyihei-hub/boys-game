@@ -18,6 +18,7 @@ import {
   submitTimeout
 } from '../services/battleLogic';
 import type { EquipmentBonuses } from '../services/equipmentLogic';
+import type { PetSkillEffect } from '../services/petLogic';
 import {
   getDailyTasks,
   getProgress,
@@ -92,16 +93,17 @@ interface GameState {
   lastBattleRecord: BattleRecord | null;
   loadProgress: () => Promise<void>;
   startBattle: (stage: Stage, questions: Question[], playerLevel: number, bonuses?: Partial<EquipmentBonuses>) => void;
-  submitAnswer: (selectedAnswer: string | number, playerLevel: number, bonuses?: Partial<EquipmentBonuses>) => void;
+  submitAnswer: (selectedAnswer: string | number, playerLevel: number, bonuses?: Partial<EquipmentBonuses>, petEffect?: PetSkillEffect) => void;
   submitTimeout: (bonuses?: Partial<EquipmentBonuses>) => void;
   escapeBattle: () => void;
-  finishBattle: (playerLevel: number, currentExp: number) => Promise<{
+  finishBattle: (playerLevel: number, currentExp: number, petEffect?: PetSkillEffect) => Promise<{
     result: BattleResult;
     stars: number;
     exp: number;
     levelUps: number;
     newLevel: number;
     newExp: number;
+    doubled: boolean;
   }>;
   clearCurrentBattle: () => void;
   clearError: () => void;
@@ -138,10 +140,10 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ currentBattle: createBattleState(stage, questions, playerLevel, bonuses), lastBattleRecord: null });
   },
 
-  submitAnswer(selectedAnswer, playerLevel, bonuses = {}) {
+  submitAnswer(selectedAnswer, playerLevel, bonuses = {}, petEffect) {
     const battle = get().currentBattle;
     if (!battle) return;
-    set({ currentBattle: submitAnswer(battle, selectedAnswer, playerLevel, bonuses) });
+    set({ currentBattle: submitAnswer(battle, selectedAnswer, playerLevel, bonuses, petEffect) });
   },
 
   submitTimeout(bonuses = {}) {
@@ -156,7 +158,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ currentBattle: escapeBattle(battle) });
   },
 
-  async finishBattle(playerLevel, currentExp) {
+  async finishBattle(playerLevel, currentExp, petEffect) {
     const battle = get().currentBattle;
     if (!battle) {
       throw new Error('当前没有战斗');
@@ -165,7 +167,7 @@ export const useGameStore = create<GameState>((set, get) => ({
       throw new Error('战斗尚未结束');
     }
 
-    const { stars, exp } = calculateRewards(battle);
+    const { stars, exp, doubled } = calculateRewards(battle, petEffect);
     const { newLevel, newExp, levelUps } = calculateLevelUp(playerLevel, currentExp, exp);
 
     const durationMs = Math.round(performance.now() - battle.startTime);
@@ -268,7 +270,8 @@ export const useGameStore = create<GameState>((set, get) => ({
       exp,
       levelUps,
       newLevel,
-      newExp
+      newExp,
+      doubled
     };
   },
 

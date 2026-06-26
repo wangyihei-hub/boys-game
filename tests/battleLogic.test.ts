@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { describe, expect, it, vi } from 'vitest';
 import {
   calculateAttack,
   calculateLevelUp,
@@ -8,6 +8,8 @@ import {
   getAnswerTimeLimitMs,
   getBaseDamage,
   getComboMultiplier,
+  getExcludedOption,
+  getHintOption,
   getMaxPlayerHp,
   getMonsterCounterDamage,
   nextLevelExp,
@@ -213,5 +215,59 @@ describe('battleLogic', () => {
     const questions = [makeQuestion()];
     const state = createBattleState(stage, questions, 1, { hpBonus: 15 });
     expect(state.playerHp).toBe(getMaxPlayerHp(1) + 15);
+  });
+
+  it('returns a wrong option index for hint', () => {
+    const question = makeQuestion({ options: ['1', '2', '3', '4'], answer: 1 });
+    const hint = getHintOption(question, { skill: 'hint' });
+    expect(hint).not.toBe(1);
+    expect(hint).toBeGreaterThanOrEqual(0);
+    expect(hint).toBeLessThan(4);
+  });
+
+  it('returns undefined for hint when skill is not hint', () => {
+    const question = makeQuestion({ options: ['1', '2', '3', '4'], answer: 1 });
+    expect(getHintOption(question, { skill: 'exclude' })).toBeUndefined();
+  });
+
+  it('returns a wrong option index for exclude', () => {
+    const question = makeQuestion({ options: ['1', '2', '3', '4'], answer: 1 });
+    const excluded = getExcludedOption(question, { skill: 'exclude' });
+    expect(excluded).not.toBe(1);
+    expect(excluded).toBeGreaterThanOrEqual(0);
+    expect(excluded).toBeLessThan(4);
+  });
+
+  it('returns undefined for exclude when skill is not exclude', () => {
+    const question = makeQuestion({ options: ['1', '2', '3', '4'], answer: 1 });
+    expect(getExcludedOption(question, { skill: 'heal' })).toBeUndefined();
+  });
+
+  it('doubles stars when double_stars pet effect triggers', () => {
+    const stage = makeStage({ difficulty: 2, monsterHp: 1 });
+    const questions = [makeQuestion()];
+    const state = createBattleState(stage, questions, 1);
+    const next = submitAnswer(state, 1, 1);
+    const original = calculateRewards(next);
+
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0);
+    const doubled = calculateRewards(next, { skill: 'double_stars', doubleStarsChance: 1 });
+    randomSpy.mockRestore();
+
+    expect(doubled.stars).toBe(original.stars * 2);
+    expect(doubled.doubled).toBe(true);
+  });
+
+  it('does not double stars when double_stars chance fails', () => {
+    const stage = makeStage({ difficulty: 2, monsterHp: 1 });
+    const questions = [makeQuestion()];
+    const state = createBattleState(stage, questions, 1);
+    const next = submitAnswer(state, 1, 1);
+
+    const randomSpy = vi.spyOn(Math, 'random').mockReturnValue(0.99);
+    const result = calculateRewards(next, { skill: 'double_stars', doubleStarsChance: 0 });
+    randomSpy.mockRestore();
+
+    expect(result.doubled).toBe(false);
   });
 });

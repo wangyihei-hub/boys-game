@@ -1,5 +1,6 @@
 import type { BattleAnswer, BattleResult, Difficulty, Question, Stage } from '../types';
 import type { EquipmentBonuses } from './equipmentLogic';
+import type { PetSkillEffect } from './petLogic';
 
 export interface BattleState {
   stage: Stage;
@@ -54,6 +55,46 @@ export function getComboMultiplier(combo: number): number {
   return 1;
 }
 
+function getWrongOptionIndices(question: Question): number[] {
+  if (!question.options || question.options.length === 0) return [];
+  return question.options
+    .map((_, index) => index)
+    .filter(index => String(index) !== String(question.answer));
+}
+
+export function getHintOption(
+  question: Question,
+  petEffect: PetSkillEffect
+): number | undefined {
+  if (petEffect.skill !== 'hint') return undefined;
+  const wrong = getWrongOptionIndices(question);
+  if (wrong.length === 0) return undefined;
+  return wrong[Math.floor(Math.random() * wrong.length)];
+}
+
+export function getExcludedOption(
+  question: Question,
+  petEffect: PetSkillEffect
+): number | undefined {
+  if (petEffect.skill !== 'exclude') return undefined;
+  const wrong = getWrongOptionIndices(question);
+  if (wrong.length === 0) return undefined;
+  return wrong[Math.floor(Math.random() * wrong.length)];
+}
+
+export function calculateHeal(
+  state: BattleState,
+  petEffect: PetSkillEffect | undefined,
+  level: number,
+  bonuses: Partial<EquipmentBonuses> = {}
+): number {
+  if (petEffect?.skill !== 'heal' || !petEffect.healAmount) return 0;
+  const correctCount = state.answers.filter(a => a.correct).length;
+  if (correctCount === 0 || correctCount % 3 !== 0) return 0;
+  const maxHp = getMaxPlayerHp(level, bonuses);
+  return Math.min(petEffect.healAmount, Math.max(0, maxHp - state.playerHp));
+}
+
 export function calculateAttack(
   level: number,
   combo: number,
@@ -96,7 +137,8 @@ export function submitAnswer(
   state: BattleState,
   selectedAnswer: string | number,
   level: number,
-  bonuses: Partial<EquipmentBonuses> = {}
+  bonuses: Partial<EquipmentBonuses> = {},
+  petEffect?: PetSkillEffect
 ): BattleState {
   if (state.finished) return state;
 
@@ -119,6 +161,11 @@ export function submitAnswer(
       combo: next.combo + 1,
       critReady: next.combo >= 2 // 连续3题答对后下一题暴击：答对第3题后 critReady=true
     };
+
+    const heal = calculateHeal(next, petEffect, level, bonuses);
+    if (heal > 0) {
+      next = { ...next, playerHp: next.playerHp + heal };
+    }
   } else {
     const counterDamage = getMonsterCounterDamage(state.stage.difficulty);
     next = {
@@ -199,22 +246,31 @@ export function escapeBattle(state: BattleState): BattleState {
 }
 
 export function calculateRewards(
-  state: BattleState
-): { stars: number; exp: number } {
-  if (state.result !== 'win') return { stars: 0, exp: 0 };
+  state: BattleState,
+  petEffect?: PetSkillEffect
+): { stars: number; exp: number; doubled: boolean } {
+  if (state.result !== 'win') return { stars: 0, exp: 0, doubled: false };
 
   const correctCount = state.answers.filter(a => a.correct).length;
   const totalQuestions = state.questions.length;
   const baseStars = 2 + state.stage.difficulty;
   const comboBonus = Math.max(0, state.answers.filter(a => a.correct).length - COMBO_THRESHOLD_1);
-  const stars = baseStars + Math.min(comboBonus, 5);
+  let stars = baseStars + Math.min(comboBonus, 5);
+  let doubled = false;
+
+  if (petEffect?.skill === 'double_stars' && petEffect.doubleStarsChance !== undefined) {
+    if (Math.random() < petEffect.doubleStarsChance) {
+      stars *= 2;
+      doubled = true;
+    }
+  }
 
   const baseExp = 10 * state.stage.difficulty;
   const accuracyBonus = Math.round((correctCount / totalQuestions) * 10);
   const bossBonus = state.stage.isBoss ? 20 : 0;
   const exp = baseExp + accuracyBonus + bossBonus;
 
-  return { stars, exp };
+  return { stars, exp, doubled };
 }
 
 export function nextLevelExp(level: number): number {

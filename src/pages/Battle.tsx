@@ -1,15 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MonsterAvatar } from '../components/play/MonsterAvatar';
 import { HeroAvatar } from '../components/play/HeroAvatar';
 import { BattleQuestion } from '../components/play/BattleQuestion';
 import { ComboIndicator } from '../components/play/ComboIndicator';
-import type { BattleAnswer } from '../types';
+import type { BattleAnswer, Question } from '../types';
 import { useGameStore, getStageById } from '../stores/gameStore';
 import { useProfileStore } from '../stores/profileStore';
 import { useEconomyStore } from '../stores/economyStore';
-import { getAnswerTimeLimitMs, getMaxPlayerHp } from '../services/battleLogic';
+import { getAnswerTimeLimitMs, getMaxPlayerHp, getHintOption, getExcludedOption } from '../services/battleLogic';
 import { computeEquipmentBonuses } from '../services/equipmentLogic';
+import { getPetInstance, computePetSkillEffect } from '../services/petLogic';
+import type { PetSkillEffect } from '../services/petLogic';
 
 export function Battle() {
   const { subject, stageId } = useParams<{ subject: string; stageId: string }>();
@@ -24,10 +26,13 @@ export function Battle() {
   const clearCurrentBattle = useGameStore(state => state.clearCurrentBattle);
   const inventory = useEconomyStore(state => state.inventory);
   const loadInventory = useEconomyStore(state => state.loadInventory);
+  const submitTimeout = useGameStore(state => state.submitTimeout);
 
   const [monsterShake, setMonsterShake] = useState(false);
   const [heroBounce, setHeroBounce] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
+  const [hintOption, setHintOption] = useState<number | undefined>(undefined);
+  const [healAmount, setHealAmount] = useState(0);
 
   useEffect(() => {
     loadInventory();
@@ -42,6 +47,11 @@ export function Battle() {
     }
   }, [currentBattle, stageId, subject, navigate]);
 
+  useEffect(() => {
+    setHintOption(undefined);
+    setHealAmount(0);
+  }, [currentBattle?.currentIndex]);
+
   if (!currentBattle || !profile) {
     return (
       <div className="flex h-64 items-center justify-center text-slate-500">加载战斗中…</div>
@@ -52,7 +62,18 @@ export function Battle() {
   const bonuses = computeEquipmentBonuses(inventory, profile.equippedItems);
   const maxPlayerHp = getMaxPlayerHp(profile.level, bonuses);
 
-  const submitTimeout = useGameStore(state => state.submitTimeout);
+  const petInstance = getPetInstance(inventory, profile.activePet);
+  const petEffect: PetSkillEffect | undefined = useMemo(
+    () => (petInstance ? computePetSkillEffect(petInstance) : undefined),
+    [petInstance?.item.id, petInstance?.item.evolutionStage, petInstance?.def.id]
+  );
+
+  const currentQuestion = currentBattle.questions[currentBattle.currentIndex];
+
+  const excludedOption = useMemo(() => {
+    if (petEffect?.skill !== 'exclude' || !currentQuestion.options) return undefined;
+    return getExcludedOption(currentQuestion, petEffect);
+  }, [currentQuestion.id, petEffect?.skill]);
 
   const handleAnswer = (answer: string | number) => {
     if (currentBattle.finished) return;
@@ -63,7 +84,21 @@ export function Battle() {
     if (answer === '') {
       submitTimeout(bonuses);
     } else {
-      submitAnswer(answer, profile.level, bonuses);
+      const question: Question = currentBattle.questions[currentBattle.currentIndex];
+      const isCorrect = question.answer === answer;
+
+      if (!isCorrect && petEffect?.skill === 'hint') {
+        setHintOption(getHintOption(question, petEffect));
+      }
+
+      if (isCorrect && petEffect?.skill === 'heal') {
+        const correctCount = currentBattle.answers.filter(a => a.correct).length + 1;
+        if (correctCount % 3 === 0) {
+          setHealAmount(petEffect.healAmount ?? 0);
+        }
+      }
+
+      submitAnswer(answer, profile.level, bonuses, petEffect);
     }
 
     const nextBattle = { ...currentBattle };
@@ -83,7 +118,7 @@ export function Battle() {
     if (isFinishing) return;
     setIsFinishing(true);
     try {
-      const result = await finishBattle(profile.level, profile.exp);
+      const result = await finishBattle(profile.level, profile.exp, petEffect);
       const rewardResult = await applyBattleRewards(result.stars, result.exp);
       if (subject && stageId) {
         await checkBattleAchievements(subject, stageId);
@@ -126,8 +161,6 @@ export function Battle() {
     );
   }
 
-  const currentQuestion = currentBattle.questions[currentBattle.currentIndex];
-
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
@@ -157,6 +190,12 @@ export function Battle() {
         />
       </div>
 
+      {healAmount > 0 && (
+        <div className="text-center text-lg font-bold text-green-600 animate-bounceShort">
+          +{healAmount} 生命恢复
+        </div>
+      )}
+
       <ComboIndicator combo={currentBattle.combo} />
 
       <BattleQuestion
@@ -165,6 +204,8 @@ export function Battle() {
         totalQuestions={currentBattle.questions.length}
         timeLimitMs={getAnswerTimeLimitMs(bonuses)}
         onAnswer={handleAnswer}
+        disabledOption={excludedOption}
+        hintOption={hintOption}
       />
     </div>
   );

@@ -213,6 +213,11 @@ export async function getBattleRecords(subject: Subject, stageId: string): Promi
   return db.getAllFromIndex('battleRecords', 'by-subject-stage', [subject, stageId]);
 }
 
+export async function getAllBattleRecords(): Promise<BattleRecord[]> {
+  const db = await getDB();
+  return db.getAll('battleRecords');
+}
+
 export async function saveBattleRecord(record: BattleRecord): Promise<void> {
   const db = await getDB();
   await db.put('battleRecords', record);

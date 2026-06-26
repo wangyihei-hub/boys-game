@@ -193,6 +193,7 @@ export interface PetDef {
     stage: number;
     name: string;
     icon: string;
+    bondRequired: number;
     requirement: {
       type: 'correct_count' | 'subject_correct_count' | 'consecutive_days';
       target: number;

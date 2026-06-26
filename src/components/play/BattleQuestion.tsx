@@ -8,6 +8,8 @@ interface BattleQuestionProps {
   timeLimitMs: number;
   onAnswer: (answer: string | number) => void;
   disabled?: boolean;
+  disabledOption?: number;
+  hintOption?: number;
 }
 
 export function BattleQuestion({
@@ -16,7 +18,9 @@ export function BattleQuestion({
   totalQuestions,
   timeLimitMs,
   onAnswer,
-  disabled
+  disabled,
+  disabledOption,
+  hintOption
 }: BattleQuestionProps) {
   const [timeLeft, setTimeLeft] = useState(timeLimitMs);
   const [selected, setSelected] = useState<string | number | null>(null);
@@ -71,23 +75,28 @@ export function BattleQuestion({
         <p className="text-lg font-bold text-slate-800">{question.question}</p>
         {question.type === 'choice' && question.options && (
           <div className="mt-4 grid grid-cols-1 gap-3 sm:grid-cols-2">
-            {question.options.map((option, index) => (
-              <button
-                key={index}
-                type="button"
-                disabled={disabled || selected !== null}
-                onClick={() => handleSelect(index)}
-                className={[
-                  'rounded-xl border-2 px-4 py-3 text-left font-semibold transition',
-                  selected === index
-                    ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
-                    : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-300',
-                  'disabled:cursor-not-allowed disabled:opacity-60'
-                ].join(' ')}
-              >
-                {String.fromCharCode(65 + index)}. {option}
-              </button>
-            ))}
+            {question.options.map((option, index) => {
+              const isDisabled = disabled || selected !== null || index === disabledOption;
+              return (
+                <button
+                  key={index}
+                  type="button"
+                  disabled={isDisabled}
+                  onClick={() => handleSelect(index)}
+                  className={[
+                    'rounded-xl border-2 px-4 py-3 text-left font-semibold transition',
+                    selected === index
+                      ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
+                      : index === hintOption
+                        ? 'border-red-400 bg-red-50 text-red-700'
+                        : 'border-slate-200 bg-white text-slate-700 hover:border-indigo-300',
+                    'disabled:cursor-not-allowed disabled:opacity-60'
+                  ].join(' ')}
+                >
+                  {String.fromCharCode(65 + index)}. {option}
+                </button>
+              );
+            })}
           </div>
         )}
         {question.type !== 'choice' && (
