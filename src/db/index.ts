@@ -26,20 +26,44 @@ let dbPromise: Promise<IDBPDatabase<GameDB>> | null = null;
 export function getDB() {
   if (!dbPromise) {
     dbPromise = openDB<GameDB>(DB_NAME, DB_VERSION, {
-      upgrade(db) {
-        db.createObjectStore('profiles', { keyPath: 'id' });
-        const questionStore = db.createObjectStore('questions', { keyPath: 'id' });
-        questionStore.createIndex('by-subject-topic', ['subject', 'topic']);
-        db.createObjectStore('wrongQuestions', { keyPath: 'questionId' });
-        db.createObjectStore('rewards', { keyPath: 'id' });
-        const redemptionStore = db.createObjectStore('redemptions', { keyPath: 'id' });
-        redemptionStore.createIndex('by-status', 'status');
-        db.createObjectStore('achievements', { keyPath: 'id' });
-        db.createObjectStore('parentSettings', { keyPath: 'id' });
+      upgrade(db, oldVersion) {
+        // Schema migrations: add versioned branches as the DB evolves.
+        if (oldVersion < 1) {
+          db.createObjectStore('profiles', { keyPath: 'id' });
+          const questionStore = db.createObjectStore('questions', { keyPath: 'id' });
+          questionStore.createIndex('by-subject-topic', ['subject', 'topic']);
+          db.createObjectStore('wrongQuestions', { keyPath: 'questionId' });
+          db.createObjectStore('rewards', { keyPath: 'id' });
+          const redemptionStore = db.createObjectStore('redemptions', { keyPath: 'id' });
+          redemptionStore.createIndex('by-status', 'status');
+          db.createObjectStore('achievements', { keyPath: 'id' });
+          db.createObjectStore('parentSettings', { keyPath: 'id' });
+        }
       }
+    }).catch(err => {
+      dbPromise = null;
+      throw err;
     });
   }
   return dbPromise;
+}
+
+export async function resetDB(): Promise<void> {
+  if (dbPromise) {
+    try {
+      const db = await dbPromise;
+      db.close();
+    } catch {
+      // Connection failed; safe to proceed with deletion.
+    }
+    dbPromise = null;
+  }
+  return new Promise((resolve, reject) => {
+    const req = indexedDB.deleteDatabase(DB_NAME);
+    req.onsuccess = () => resolve();
+    req.onerror = () => reject(req.error);
+    req.onblocked = () => reject(new Error('Database reset blocked'));
+  });
 }
 
 export async function getProfile(id = 'default'): Promise<Profile | undefined> {
