@@ -91,7 +91,10 @@ export async function saveRedemption(redemption: Redemption): Promise<void> {
 
 export async function getParentSettings(id = 'default'): Promise<ParentSettings | undefined> {
   const db = await getDB();
-  return db.get('parentSettings', id);
+  const record = await db.get('parentSettings', id);
+  if (!record) return undefined;
+  const { id: _id, ...settings } = record;
+  return settings;
 }
 
 export async function saveParentSettings(settings: ParentSettings, id = 'default'): Promise<void> {

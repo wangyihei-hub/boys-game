@@ -10,15 +10,17 @@ interface ProfileState {
   addStars: (amount: number) => Promise<void>;
 }
 
-const DEFAULT_PROFILE: Profile = {
-  id: 'default',
-  nickname: '小勇士',
-  level: 1,
-  exp: 0,
-  stars: 0,
-  equippedItems: {},
-  createdAt: Date.now()
-};
+function createDefaultProfile(): Profile {
+  return {
+    id: 'default',
+    nickname: '小勇士',
+    level: 1,
+    exp: 0,
+    stars: 0,
+    equippedItems: {},
+    createdAt: Date.now()
+  };
+}
 
 export const useProfileStore = create<ProfileState>((set, get) => ({
   profile: null,
@@ -26,7 +28,7 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
   async loadProfile() {
     let profile = await getProfile('default');
     if (!profile) {
-      profile = DEFAULT_PROFILE;
+      profile = createDefaultProfile();
       await saveProfile(profile);
     }
     set({ profile, loaded: true });

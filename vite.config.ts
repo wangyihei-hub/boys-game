@@ -7,7 +7,6 @@ export default defineConfig({
     react(),
     VitePWA({
       registerType: 'autoUpdate',
-      manifestFilename: 'manifest.json',
       manifest: {
         name: '学科小勇士',
         short_name: '学科小勇士',
