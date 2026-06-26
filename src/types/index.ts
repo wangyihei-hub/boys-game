@@ -96,6 +96,7 @@ export interface ParentSettings {
   apiProvider?: AIProvider;
   apiEndpoint?: string;
   apiModel?: string;
+  pin?: string;
 }
 
 export interface WrongQuestion {
@@ -117,6 +118,14 @@ export interface DailyTask {
   dateKey: string;
 }
 
+export interface DailyStats {
+  id: string;
+  dateKey: string;
+  starsEarned: number;
+  minutesPlayed: number;
+  lastActivityAt: number;
+}
+
 export type AchievementId =
   | 'first_win'
   | 'first_boss'
@@ -124,7 +133,8 @@ export type AchievementId =
   | 'reach_level_10'
   | 'win_streak_5'
   | 'collect_100_stars'
-  | 'all_subject_passed';
+  | 'all_subject_passed'
+  | 'eye_care_guard';
 
 export interface Achievement {
   id: AchievementId;
@@ -146,12 +156,74 @@ export interface LotteryPrize {
   stock: number;
 }
 
+export type InventoryItemType =
+  | 'skin'
+  | 'effect'
+  | 'furniture'
+  | 'pet_food'
+  | 'lottery_ticket'
+  | 'fragment'
+  | 'equipment'
+  | 'pet';
+
+export type EquipmentSlot = 'weapon' | 'shield' | 'staff' | 'shoes';
+
+export interface EquipmentDef {
+  id: string;
+  name: string;
+  slot: EquipmentSlot;
+  icon: string;
+  attackBonus?: number;
+  hpBonus?: number;
+  critBonus?: number;
+  timeBonus?: number;
+  description: string;
+  requiredLevel?: number;
+}
+
+export type PetSkill =
+  | 'heal'
+  | 'shield'
+  | 'attack_boost'
+  | 'time_boost'
+  | 'hint'
+  | 'lucky';
+
+export interface PetEvolution {
+  stage: number;
+  name: string;
+  icon: string;
+  skill: PetSkill;
+  bondRequired: number;
+  attackBonus?: number;
+  hpBonus?: number;
+}
+
+export interface PetDef {
+  id: string;
+  name: string;
+  icon: string;
+  skill: PetSkill;
+  evolutions: PetEvolution[];
+  description: string;
+}
+
 export interface InventoryItem {
   id: string;
   name: string;
-  type: 'skin' | 'effect' | 'furniture' | 'pet_food' | 'lottery_ticket' | 'fragment';
+  type: InventoryItemType;
   icon: string;
   count: number;
+  // Equipment fields
+  slot?: EquipmentSlot;
+  attackBonus?: number;
+  hpBonus?: number;
+  critBonus?: number;
+  timeBonus?: number;
+  // Pet fields
+  petDefId?: string;
+  evolutionStage?: number;
+  bond?: number;
 }
 
 export type StageStatus = 'locked' | 'unlocked' | 'passed';

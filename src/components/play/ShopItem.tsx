@@ -14,7 +14,9 @@ const TYPE_LABELS: Record<InventoryItem['type'], string> = {
   furniture: '家具',
   pet_food: '宠物食物',
   lottery_ticket: '抽奖券',
-  fragment: '碎片'
+  fragment: '碎片',
+  equipment: '装备',
+  pet: '宠物'
 };
 
 export function ShopItem({ item, cost, canAfford, onBuy }: ShopItemProps) {

@@ -2,6 +2,7 @@ import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import type {
   Achievement,
   BattleRecord,
+  DailyStats,
   DailyTask,
   InventoryItem,
   LotteryPrize,
@@ -17,7 +18,7 @@ import type {
 } from '../types';
 
 const DB_NAME = 'boys-game-db';
-const DB_VERSION = 4;
+const DB_VERSION = 5;
 
 interface GameDB extends DBSchema {
   profiles: { key: string; value: Profile };
@@ -31,6 +32,7 @@ interface GameDB extends DBSchema {
   progress: { key: string; value: Progress; indexes: { 'by-subject': Subject } };
   battleRecords: { key: string; value: BattleRecord; indexes: { 'by-subject-stage': [Subject, string] } };
   dailyTasks: { key: string; value: DailyTask };
+  dailyStats: { key: string; value: DailyStats };
   lotteryPool: { key: string; value: LotteryPrize };
   inventory: { key: string; value: InventoryItem };
 }
@@ -66,6 +68,9 @@ export function getDB() {
           db.createObjectStore('dailyTasks', { keyPath: 'id' });
           db.createObjectStore('lotteryPool', { keyPath: 'id' });
           db.createObjectStore('inventory', { keyPath: 'id' });
+        }
+        if (oldVersion < 5) {
+          db.createObjectStore('dailyStats', { keyPath: 'id' });
         }
       }
     }).catch(err => {
@@ -318,4 +323,14 @@ export async function saveInventoryItem(item: InventoryItem): Promise<void> {
 export async function deleteInventoryItem(id: string): Promise<void> {
   const db = await getDB();
   await db.delete('inventory', id);
+}
+
+export async function getDailyStats(dateKey: string): Promise<DailyStats | undefined> {
+  const db = await getDB();
+  return db.get('dailyStats', dateKey);
+}
+
+export async function saveDailyStats(stats: DailyStats): Promise<void> {
+  const db = await getDB();
+  await db.put('dailyStats', stats);
 }
