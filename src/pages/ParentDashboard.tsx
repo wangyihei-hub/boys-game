@@ -1,11 +1,19 @@
+import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { BookOpen, Sparkles, Gift, ClipboardList, Settings } from 'lucide-react';
+import { Activity, BookOpen, Sparkles, Gift, ClipboardList, Settings } from 'lucide-react';
 import { ApiSettingsCard } from '../components/parent/ApiSettingsCard';
 import { useParentStore } from '../stores/parentStore';
+import { useProfileStore } from '../stores/profileStore';
 
 export function ParentDashboard() {
   const settings = useParentStore(state => state.settings);
   const updateSettings = useParentStore(state => state.updateSettings);
+  const dailyStats = useProfileStore(state => state.dailyStats);
+  const loadDailyStats = useProfileStore(state => state.loadDailyStats);
+
+  useEffect(() => {
+    loadDailyStats();
+  }, [loadDailyStats]);
 
   if (!settings) return null;
 
@@ -21,6 +29,38 @@ export function ParentDashboard() {
           <div>
             <p className="text-sm text-slate-500">每日时长上限（分钟）</p>
             <p className="text-xl font-bold">{settings.dailyMinuteLimit}</p>
+          </div>
+        </div>
+      </div>
+
+      <div className="card">
+        <div className="mb-3 flex items-center gap-3">
+          <Activity className="h-5 w-5 text-indigo-600" />
+          <h2 className="text-lg font-bold">今日使用概览</h2>
+        </div>
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
+          <div>
+            <p className="text-sm text-slate-500">今日星星收入</p>
+            <p className="text-xl font-bold">
+              {dailyStats?.starsEarned ?? 0} / {settings.dailyStarLimit}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-slate-500">今日游戏时长</p>
+            <p className="text-xl font-bold">
+              {dailyStats?.minutesPlayed ?? 0} / {settings.dailyMinuteLimit} 分钟
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-slate-500">最近一次活动</p>
+            <p className="text-xl font-bold">
+              {dailyStats && dailyStats.lastActivityAt > 0
+                ? new Date(dailyStats.lastActivityAt).toLocaleTimeString('zh-CN', {
+                    hour: '2-digit',
+                    minute: '2-digit'
+                  })
+                : '暂无'}
+            </p>
           </div>
         </div>
       </div>

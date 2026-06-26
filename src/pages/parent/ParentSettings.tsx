@@ -1,21 +1,24 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, Gift, Plus, RotateCcw, Shield } from 'lucide-react';
+import { ArrowLeft, Calendar, Gift, Heart, Plus, RotateCcw, Shield } from 'lucide-react';
 import { useParentStore } from '../../stores/parentStore';
 import { DailyTaskForm } from '../../components/parent/DailyTaskForm';
 import { LotteryPrizeForm } from '../../components/parent/LotteryPrizeForm';
 import { PinSettingsCard } from '../../components/parent/PinSettingsCard';
 import { DataExportImportCard } from '../../components/parent/DataExportImportCard';
+import { HealthSettingsCard } from '../../components/parent/HealthSettingsCard';
 import { getTodayKey } from '../../services/dailyTaskLogic';
 import { createDefaultLotteryPool } from '../../services/lotteryLogic';
 import type { DailyTask, LotteryPrize } from '../../types';
 
-type Tab = 'tasks' | 'lottery' | 'security';
+type Tab = 'tasks' | 'lottery' | 'health' | 'security';
 
 export function ParentSettings() {
   const dailyTasks = useParentStore(state => state.dailyTasks);
   const lotteryPool = useParentStore(state => state.lotteryPool);
+  const settings = useParentStore(state => state.settings);
   const loadParentData = useParentStore(state => state.loadParentData);
+  const updateSettings = useParentStore(state => state.updateSettings);
   const addDailyTask = useParentStore(state => state.addDailyTask);
   const updateDailyTask = useParentStore(state => state.updateDailyTask);
   const deleteDailyTask = useParentStore(state => state.deleteDailyTask);
@@ -150,6 +153,20 @@ export function ParentSettings() {
         >
           <span className="flex items-center justify-center gap-2">
             <Gift className="h-4 w-4" /> 抽奖奖池
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('health')}
+          className={[
+            'flex-1 rounded-xl px-4 py-2 text-sm font-bold transition',
+            activeTab === 'health'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-white text-slate-600 hover:bg-slate-50'
+          ].join(' ')}
+        >
+          <span className="flex items-center justify-center gap-2">
+            <Heart className="h-4 w-4" /> 健康使用
           </span>
         </button>
         <button
@@ -327,6 +344,12 @@ export function ParentSettings() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'health' && settings && (
+        <div className="space-y-4">
+          <HealthSettingsCard settings={settings} onSave={updateSettings} />
         </div>
       )}
 
