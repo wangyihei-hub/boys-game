@@ -19,6 +19,7 @@ export function GenerateQuestions() {
   const lastResult = useParentStore(state => state.lastResult);
   const generateQuestions = useParentStore(state => state.generateQuestions);
   const clearError = useParentStore(state => state.clearError);
+  const clearGenerationResult = useParentStore(state => state.clearGenerationResult);
 
   const canGenerate = subject && topic.trim();
 
@@ -33,12 +34,37 @@ export function GenerateQuestions() {
     });
   };
 
+  const handleSubjectChange = (value: Subject | null) => {
+    setSubject(value);
+    clearGenerationResult();
+  };
+
+  const handleGradeChange = (value: 4 | 5) => {
+    setGrade(value);
+    clearGenerationResult();
+  };
+
+  const handleTopicChange = (value: string) => {
+    setTopic(value);
+    clearGenerationResult();
+  };
+
+  const handleDifficultyChange = (value: Difficulty) => {
+    setDifficulty(value);
+    clearGenerationResult();
+  };
+
+  const handleCountChange = (value: number) => {
+    setCount(value);
+    clearGenerationResult();
+  };
+
   return (
     <div className="mx-auto max-w-2xl space-y-4">
       <div className="card">
         <h2 className="mb-1 text-lg font-bold">选择学科</h2>
         <p className="mb-4 text-sm text-slate-500">点击卡片选择要出题的学科</p>
-        <SubjectSelector value={subject} onChange={setSubject} />
+        <SubjectSelector value={subject} onChange={handleSubjectChange} />
       </div>
 
       <div className="card space-y-3">
@@ -48,7 +74,7 @@ export function GenerateQuestions() {
             <button
               key={g}
               type="button"
-              onClick={() => setGrade(g)}
+              onClick={() => handleGradeChange(g)}
               className={[
                 'rounded-xl border-2 px-3 py-2 text-sm font-semibold transition-colors',
                 grade === g
@@ -65,11 +91,11 @@ export function GenerateQuestions() {
 
       <GenerateForm
         topic={topic}
-        onTopicChange={setTopic}
+        onTopicChange={handleTopicChange}
         difficulty={difficulty}
-        onDifficultyChange={setDifficulty}
+        onDifficultyChange={handleDifficultyChange}
         count={count}
-        onCountChange={setCount}
+        onCountChange={handleCountChange}
       />
 
       <button

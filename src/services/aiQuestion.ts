@@ -15,6 +15,9 @@ const OPENAI_DEFAULT_URL = 'https://api.openai.com/v1/chat/completions';
 const ANTHROPIC_DEFAULT_MODEL = 'claude-3-haiku-20240307';
 const ANTHROPIC_DEFAULT_URL = 'https://api.anthropic.com/v1/messages';
 const ANTHROPIC_VERSION = '2023-06-01';
+const REQUEST_TIMEOUT_MS = 60_000;
+const MAX_QUESTION_COUNT = 20;
+const MIN_QUESTION_COUNT = 1;
 
 export function buildOpenAIRequest(
   config: QuestionGenerationConfig,
@@ -140,11 +143,22 @@ function extractAnthropicResponseText(data: unknown): string {
   return String(firstBlock.text);
 }
 
+function clampCount(count: number): number {
+  return Math.max(MIN_QUESTION_COUNT, Math.min(MAX_QUESTION_COUNT, count));
+}
+
+function fetchWithTimeout(url: string, init: RequestInit): Promise<Response> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  return fetch(url, { ...init, signal: controller.signal }).finally(() => clearTimeout(timeoutId));
+}
+
 export async function generateQuestions(
   config: QuestionGenerationConfig,
   settings: AISettings
 ): Promise<GenerationResult> {
   const startTime = performance.now();
+  const safeConfig = { ...config, count: clampCount(config.count) };
 
   if (!settings.apiKey && settings.apiProvider !== 'custom') {
     throw new Error('API key is required');
@@ -155,25 +169,33 @@ export async function generateQuestions(
 
   switch (settings.apiProvider) {
     case 'anthropic':
-      payload = buildAnthropicRequest(config, settings);
+      payload = buildAnthropicRequest(safeConfig, settings);
       extractText = extractAnthropicResponseText;
       break;
     case 'custom':
-      payload = buildCustomRequest(config, settings);
+      payload = buildCustomRequest(safeConfig, settings);
       extractText = extractOpenAIResponseText;
       break;
     case 'openai':
     default:
-      payload = buildOpenAIRequest(config, settings);
+      payload = buildOpenAIRequest(safeConfig, settings);
       extractText = extractOpenAIResponseText;
       break;
   }
 
-  const response = await fetch(payload.url, {
-    method: 'POST',
-    headers: payload.headers,
-    body: JSON.stringify(payload.body),
-  });
+  let response: Response;
+  try {
+    response = await fetchWithTimeout(payload.url, {
+      method: 'POST',
+      headers: payload.headers,
+      body: JSON.stringify(payload.body),
+    });
+  } catch (err) {
+    if (err instanceof Error && err.name === 'AbortError') {
+      throw new Error('请求超时，请检查网络或 API 端点');
+    }
+    throw err;
+  }
 
   if (!response.ok) {
     const rawText = await response.text();

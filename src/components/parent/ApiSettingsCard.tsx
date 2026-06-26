@@ -65,22 +65,19 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
     }
   };
 
-  const handleProviderChange = async (e: React.ChangeEvent<HTMLSelectElement>) => {
+  const handleProviderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const next = e.target.value as AIProvider;
     setProvider(next);
-    setEndpoint('');
-    setModel('');
+    setEndpoint(PROVIDER_DEFAULTS[next].endpoint);
+    setModel(PROVIDER_DEFAULTS[next].model);
     clearFeedback();
-    // Persist immediately with cleared endpoint/model so stale custom values
-    // are not sent to OpenAI/Anthropic on the next generation.
-    await persist({
-      apiProvider: next,
-      apiEndpoint: undefined,
-      apiModel: undefined
-    });
   };
 
   const handleSave = async () => {
+    if (provider === 'custom' && !endpoint.trim()) {
+      setSaveError('自定义提供商需要填写 API Endpoint');
+      return;
+    }
     await persist({
       apiProvider: provider,
       apiKey: apiKey.trim(),

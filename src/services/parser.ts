@@ -4,6 +4,13 @@ const QUESTION_TYPES: QuestionType[] = ['choice', 'fillblank', 'spelling'];
 const SUBJECTS: Subject[] = ['chinese', 'math', 'english'];
 const DIFFICULTIES: Difficulty[] = [1, 2, 3];
 
+function generateQuestionId(): string {
+  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
+    return crypto.randomUUID();
+  }
+  return `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+}
+
 export class ParserError extends Error {
   constructor(message: string) {
     super(message);
@@ -197,7 +204,7 @@ export function validateQuestions(
     }
 
     valid.push({
-      id: crypto.randomUUID(),
+      id: generateQuestionId(),
       subject: config.subject,
       topic: config.topic,
       difficulty: config.difficulty,

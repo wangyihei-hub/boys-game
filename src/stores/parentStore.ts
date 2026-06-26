@@ -18,6 +18,7 @@ interface ParentState {
   confirmRedemption: (id: string) => Promise<void>;
   generateQuestions: (config: QuestionGenerationConfig) => Promise<void>;
   clearError: () => void;
+  clearGenerationResult: () => void;
 }
 
 const DEFAULT_SETTINGS: ParentSettings = {
@@ -89,7 +90,7 @@ export const useParentStore = create<ParentState>((set, get) => ({
       set({ error: '家长设置未加载' });
       return;
     }
-    set({ generating: true, error: null });
+    set({ generating: true, error: null, lastResult: null });
     try {
       const result = await generateQuestionsFromAI(config, {
         apiProvider: settings.apiProvider,
@@ -102,10 +103,13 @@ export const useParentStore = create<ParentState>((set, get) => ({
       }
       set({ lastResult: result, generating: false, error: null });
     } catch (err) {
-      set({ generating: false, error: err instanceof Error ? err.message : '生成题目失败' });
+      set({ generating: false, error: err instanceof Error ? err.message : '生成题目失败', lastResult: null });
     }
   },
   clearError() {
     set({ error: null });
+  },
+  clearGenerationResult() {
+    set({ lastResult: null });
   }
 }));

@@ -45,7 +45,7 @@ export function QuestionBank() {
     }
     return SUBJECT_GROUPS.map(g => ({
       ...g,
-      questions: bySubject[g.subject]
+      questions: bySubject[g.subject].sort((a, b) => b.generatedAt - a.generatedAt)
     }));
   }, [questions]);
 
