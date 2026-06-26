@@ -4,6 +4,7 @@ import { ParentLayout } from './components/layout/ParentLayout';
 import { PlayHome } from './pages/PlayHome';
 import { ParentDashboard } from './pages/ParentDashboard';
 import { GenerateQuestions } from './pages/GenerateQuestions';
+import { QuestionBank } from './pages/QuestionBank';
 
 export const router = createHashRouter([
   {
@@ -22,7 +23,8 @@ export const router = createHashRouter([
     element: <ParentLayout />,
     children: [
       { index: true, element: <ParentDashboard /> },
-      { path: 'generate', element: <GenerateQuestions /> }
+      { path: 'generate', element: <GenerateQuestions /> },
+      { path: 'bank', element: <QuestionBank /> }
     ]
   }
 ]);
