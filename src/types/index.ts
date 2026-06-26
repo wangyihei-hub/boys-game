@@ -55,14 +55,33 @@ export interface Redemption {
   confirmedAt?: number;
 }
 
+export type AIProvider = 'openai' | 'anthropic' | 'custom';
+
+export interface QuestionGenerationConfig {
+  subject: Subject;
+  topic: string;
+  difficulty: Difficulty;
+  count: number;
+  grade: 4 | 5;
+}
+
+export interface GenerationResult {
+  success: number;
+  failed: number;
+  questions: Question[];
+  rawResponse?: string;
+  durationMs: number;
+}
+
 export interface ParentSettings {
   dailyStarLimit: number;
   dailyMinuteLimit: number;
   eyeCareIntervalMinutes: number;
   restModeStartHour: number;
   apiKey?: string;
-  apiProvider?: 'openai' | 'anthropic' | 'custom';
+  apiProvider?: AIProvider;
   apiEndpoint?: string;
+  apiModel?: string;
 }
 
 export interface Achievement {
