@@ -11,6 +11,8 @@ import { Achievements } from './pages/Achievements';
 import { DailyTasks } from './pages/DailyTasks';
 import { Lottery } from './pages/Lottery';
 import { Shop } from './pages/Shop';
+import { EquipmentPanel } from './components/play/EquipmentPanel';
+import { PetPanel } from './components/play/PetPanel';
 import { ParentDashboard } from './pages/ParentDashboard';
 import { GenerateQuestions } from './pages/GenerateQuestions';
 import { QuestionBank } from './pages/QuestionBank';
@@ -36,7 +38,9 @@ export const router = createHashRouter([
       { path: 'achievements', element: <Achievements /> },
       { path: 'tasks', element: <DailyTasks /> },
       { path: 'lottery', element: <Lottery /> },
-      { path: 'shop', element: <Shop /> }
+      { path: 'shop', element: <Shop /> },
+      { path: 'equipment', element: <EquipmentPanel /> },
+      { path: 'pet', element: <PetPanel /> }
     ]
   },
   {

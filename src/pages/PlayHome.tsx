@@ -4,8 +4,12 @@ import { Map, Star, Trophy, Zap, BookOpen, Ticket, ShoppingBag, Clock } from 'lu
 import { useProfileStore } from '../stores/profileStore';
 import { useParentStore } from '../stores/parentStore';
 import { useGameStore, computeRegionProgress } from '../stores/gameStore';
+import { useEconomyStore } from '../stores/economyStore';
 import { useHealthGuard } from '../hooks/useHealthGuard';
 import { nextLevelExp } from '../services/battleLogic';
+import { getEquipmentDef } from '../services/equipmentLogic';
+import { getPetInstance } from '../services/petLogic';
+import type { EquipmentSlot } from '../types';
 
 function limitBarColor(percent: number) {
   if (percent >= 100) return 'bg-red-500';
@@ -24,14 +28,18 @@ export function PlayHome() {
   const parentLoaded = useParentStore(state => state.loaded);
   const loadParentData = useParentStore(state => state.loadParentData);
 
+  const inventory = useEconomyStore(state => state.inventory);
+  const loadInventory = useEconomyStore(state => state.loadInventory);
+
   const { isRestModeActive } = useHealthGuard();
 
   useEffect(() => {
     loadProgress();
+    loadInventory();
     if (!parentLoaded) {
       loadParentData();
     }
-  }, [loadProgress, loadParentData, parentLoaded]);
+  }, [loadProgress, loadInventory, loadParentData, parentLoaded]);
 
   if (!profile) return null;
 
@@ -65,6 +73,42 @@ export function PlayHome() {
               className="h-full rounded-full bg-indigo-500"
               style={{ width: `${expPercent}%` }}
             />
+          </div>
+          <div className="mt-2 flex flex-wrap items-center gap-1">
+            {(
+              [
+                ['weapon', '⚔️'],
+                ['shield', '🛡️'],
+                ['staff', '🪄'],
+                ['shoes', '👟']
+              ] as [EquipmentSlot, string][]
+            ).map(([slot, placeholder]) => {
+              const equippedId = profile.equippedItems[slot];
+              const def = equippedId ? getEquipmentDef(equippedId) : undefined;
+              return (
+                <span
+                  key={slot}
+                  className={[
+                    'flex h-7 w-7 items-center justify-center rounded-lg text-sm',
+                    def ? 'bg-indigo-100' : 'bg-slate-100 text-slate-300'
+                  ].join(' ')}
+                  title={def?.name ?? '空'}
+                >
+                  {def?.icon ?? placeholder}
+                </span>
+              );
+            })}
+            {(() => {
+              const activePet = getPetInstance(inventory, profile.activePet);
+              return (
+                <span
+                  className="flex h-7 w-7 items-center justify-center rounded-lg bg-amber-100 text-sm"
+                  title={activePet ? '出战宠物' : '无宠物'}
+                >
+                  {activePet?.def.icon ?? '🐾'}
+                </span>
+              );
+            })()}
           </div>
         </div>
         <div className="text-right">
@@ -193,6 +237,28 @@ export function PlayHome() {
           </div>
           <span className="font-bold text-slate-700">虚拟商城</span>
           <span className="text-xs text-slate-500">装扮基地</span>
+        </Link>
+
+        <Link
+          to="/play/equipment"
+          className="card flex flex-col items-center gap-2 text-center transition hover:bg-slate-50 active:scale-95"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-slate-100 text-slate-600">
+            🛡️
+          </div>
+          <span className="font-bold text-slate-700">我的装备</span>
+          <span className="text-xs text-slate-500">强化战斗力</span>
+        </Link>
+
+        <Link
+          to="/play/pet"
+          className="card flex flex-col items-center gap-2 text-center transition hover:bg-orange-50 active:scale-95"
+        >
+          <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-orange-100 text-orange-600">
+            🐱
+          </div>
+          <span className="font-bold text-slate-700">我的宠物</span>
+          <span className="text-xs text-slate-500">培养小伙伴</span>
         </Link>
       </div>
 
