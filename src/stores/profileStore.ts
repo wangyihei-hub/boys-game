@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import type { Profile } from '../types';
 import { getProfile, saveProfile } from '../db';
+import { calculateLevelUp } from '../services/battleLogic';
 
 interface ProfileState {
   profile: Profile | null;
@@ -9,6 +10,8 @@ interface ProfileState {
   loadProfile: () => Promise<void>;
   updateProfile: (updates: Partial<Profile>) => Promise<void>;
   addStars: (amount: number) => Promise<void>;
+  addExp: (amount: number) => Promise<{ newLevel: number; newExp: number; levelUps: number }>;
+  applyBattleRewards: (stars: number, exp: number) => Promise<{ newLevel: number; newExp: number; levelUps: number }>;
   clearError: () => void;
 }
 
@@ -60,6 +63,39 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       set({ profile: next, error: null });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : '保存星星失败' });
+    }
+  },
+  async addExp(amount) {
+    try {
+      const current = get().profile;
+      if (!current) return { newLevel: 1, newExp: 0, levelUps: 0 };
+      const { newLevel, newExp, levelUps } = calculateLevelUp(current.level, current.exp, amount);
+      const next = { ...current, level: newLevel, exp: newExp };
+      await saveProfile(next);
+      set({ profile: next, error: null });
+      return { newLevel, newExp, levelUps };
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '保存经验失败' });
+      return { newLevel: get().profile?.level ?? 1, newExp: get().profile?.exp ?? 0, levelUps: 0 };
+    }
+  },
+  async applyBattleRewards(stars, exp) {
+    try {
+      const current = get().profile;
+      if (!current) return { newLevel: 1, newExp: 0, levelUps: 0 };
+      const { newLevel, newExp, levelUps } = calculateLevelUp(current.level, current.exp, exp);
+      const next = {
+        ...current,
+        stars: Math.max(0, current.stars + stars),
+        level: newLevel,
+        exp: newExp
+      };
+      await saveProfile(next);
+      set({ profile: next, error: null });
+      return { newLevel, newExp, levelUps };
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '保存战斗奖励失败' });
+      return { newLevel: get().profile?.level ?? 1, newExp: get().profile?.exp ?? 0, levelUps: 0 };
     }
   },
   clearError() {

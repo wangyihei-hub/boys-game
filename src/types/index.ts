@@ -91,3 +91,45 @@ export interface Achievement {
   icon: string;
   unlockedAt?: number;
 }
+
+export type StageStatus = 'locked' | 'unlocked' | 'passed';
+
+export interface Stage {
+  id: string;
+  subject: Subject;
+  regionName: string;
+  stageNumber: number;
+  name: string;
+  difficulty: Difficulty;
+  questionCount: number;
+  monsterHp: number;
+  isBoss: boolean;
+}
+
+export interface Progress {
+  id: string;
+  subject: Subject;
+  stageId: string;
+  status: StageStatus;
+  stars: number;
+  bestScore: number;
+}
+
+export type BattleResult = 'win' | 'lose' | 'escape';
+
+export interface BattleAnswer {
+  questionId: string;
+  correct: boolean;
+  timeMs: number;
+}
+
+export interface BattleRecord {
+  id: string;
+  subject: Subject;
+  stageId: string;
+  result: BattleResult;
+  durationMs: number;
+  starsEarned: number;
+  expEarned: number;
+  createdAt: number;
+}

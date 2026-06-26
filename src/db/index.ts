@@ -1,8 +1,10 @@
 import { openDB, DBSchema, IDBPDatabase } from 'idb';
 import type {
   Achievement,
+  BattleRecord,
   ParentSettings,
   Profile,
+  Progress,
   Question,
   Redemption,
   Reward,
@@ -10,7 +12,7 @@ import type {
 } from '../types';
 
 const DB_NAME = 'boys-game-db';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 interface GameDB extends DBSchema {
   profiles: { key: string; value: Profile };
@@ -20,6 +22,8 @@ interface GameDB extends DBSchema {
   redemptions: { key: string; value: Redemption; indexes: { 'by-status': string } };
   achievements: { key: string; value: Achievement };
   parentSettings: { key: string; value: ParentSettings & { id: string } };
+  progress: { key: string; value: Progress; indexes: { 'by-subject': Subject } };
+  battleRecords: { key: string; value: BattleRecord; indexes: { 'by-subject-stage': [Subject, string] } };
 }
 
 let dbPromise: Promise<IDBPDatabase<GameDB>> | null = null;
@@ -39,6 +43,12 @@ export function getDB() {
           redemptionStore.createIndex('by-status', 'status');
           db.createObjectStore('achievements', { keyPath: 'id' });
           db.createObjectStore('parentSettings', { keyPath: 'id' });
+        }
+        if (oldVersion < 2) {
+          const progressStore = db.createObjectStore('progress', { keyPath: 'id' });
+          progressStore.createIndex('by-subject', 'subject');
+          const battleRecordStore = db.createObjectStore('battleRecords', { keyPath: 'id' });
+          battleRecordStore.createIndex('by-subject-stage', ['subject', 'stageId']);
         }
       }
     }).catch(err => {
@@ -145,4 +155,38 @@ export async function getParentSettings(id = 'default'): Promise<ParentSettings 
 export async function saveParentSettings(settings: ParentSettings, id = 'default'): Promise<void> {
   const db = await getDB();
   await db.put('parentSettings', { ...settings, id });
+}
+
+export async function getProgress(id: string): Promise<Progress | undefined> {
+  const db = await getDB();
+  return db.get('progress', id);
+}
+
+export async function getProgressBySubject(subject: Subject): Promise<Progress[]> {
+  const db = await getDB();
+  return db.getAllFromIndex('progress', 'by-subject', subject);
+}
+
+export async function saveProgress(progress: Progress): Promise<void> {
+  const db = await getDB();
+  await db.put('progress', progress);
+}
+
+export async function saveProgressBatch(progressList: Progress[]): Promise<void> {
+  const db = await getDB();
+  const tx = db.transaction('progress', 'readwrite');
+  for (const p of progressList) {
+    await tx.store.put(p);
+  }
+  await tx.done;
+}
+
+export async function getBattleRecords(subject: Subject, stageId: string): Promise<BattleRecord[]> {
+  const db = await getDB();
+  return db.getAllFromIndex('battleRecords', 'by-subject-stage', [subject, stageId]);
+}
+
+export async function saveBattleRecord(record: BattleRecord): Promise<void> {
+  const db = await getDB();
+  await db.put('battleRecords', record);
 }

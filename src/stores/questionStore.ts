@@ -1,6 +1,7 @@
 import { create } from 'zustand';
-import type { Question } from '../types';
+import type { Difficulty, Question, Subject } from '../types';
 import { deleteQuestions as deleteQuestionsFromDB, getQuestions, saveQuestions } from '../db';
+import { getSeedQuestionsBySubjectAndDifficulty } from '../data/seedQuestions';
 
 interface QuestionState {
   questions: Question[];
@@ -9,6 +10,7 @@ interface QuestionState {
   loadQuestions: () => Promise<void>;
   saveGeneratedQuestions: (questions: Question[]) => Promise<void>;
   deleteQuestions: (ids: string[]) => Promise<void>;
+  getQuestionsForBattle: (subject: Subject, difficulty: Difficulty, count: number) => Question[];
   clearError: () => void;
 }
 
@@ -44,6 +46,15 @@ export const useQuestionStore = create<QuestionState>((set, get) => ({
     } catch (err) {
       set({ error: err instanceof Error ? err.message : '删除题目失败' });
     }
+  },
+  getQuestionsForBattle(subject, difficulty, count) {
+    const userQuestions = get().questions.filter(
+      q => q.subject === subject && q.difficulty === difficulty
+    );
+    const seedQuestions = getSeedQuestionsBySubjectAndDifficulty(subject, difficulty);
+    const pool = [...userQuestions, ...seedQuestions];
+    const shuffled = pool.sort(() => Math.random() - 0.5);
+    return shuffled.slice(0, count);
   },
   clearError() {
     set({ error: null });
