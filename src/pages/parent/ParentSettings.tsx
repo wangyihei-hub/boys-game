@@ -1,14 +1,15 @@
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, Gift, Plus, RotateCcw } from 'lucide-react';
+import { ArrowLeft, Calendar, Gift, Plus, RotateCcw, Shield } from 'lucide-react';
 import { useParentStore } from '../../stores/parentStore';
 import { DailyTaskForm } from '../../components/parent/DailyTaskForm';
 import { LotteryPrizeForm } from '../../components/parent/LotteryPrizeForm';
+import { PinSettingsCard } from '../../components/parent/PinSettingsCard';
 import { getTodayKey } from '../../services/dailyTaskLogic';
 import { createDefaultLotteryPool } from '../../services/lotteryLogic';
 import type { DailyTask, LotteryPrize } from '../../types';
 
-type Tab = 'tasks' | 'lottery';
+type Tab = 'tasks' | 'lottery' | 'security';
 
 export function ParentSettings() {
   const dailyTasks = useParentStore(state => state.dailyTasks);
@@ -148,6 +149,20 @@ export function ParentSettings() {
         >
           <span className="flex items-center justify-center gap-2">
             <Gift className="h-4 w-4" /> 抽奖奖池
+          </span>
+        </button>
+        <button
+          type="button"
+          onClick={() => setActiveTab('security')}
+          className={[
+            'flex-1 rounded-xl px-4 py-2 text-sm font-bold transition',
+            activeTab === 'security'
+              ? 'bg-indigo-600 text-white'
+              : 'bg-white text-slate-600 hover:bg-slate-50'
+          ].join(' ')}
+        >
+          <span className="flex items-center justify-center gap-2">
+            <Shield className="h-4 w-4" /> 数据安全
           </span>
         </button>
       </div>
@@ -311,6 +326,12 @@ export function ParentSettings() {
               ))}
             </div>
           )}
+        </div>
+      )}
+
+      {activeTab === 'security' && (
+        <div className="space-y-4">
+          <PinSettingsCard />
         </div>
       )}
     </div>
