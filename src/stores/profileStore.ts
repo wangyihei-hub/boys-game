@@ -133,13 +133,17 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
     try {
       const current = get().profile;
       if (!current) return { newLevel: 1, newExp: 0, levelUps: 0, newlyUnlocked: [] };
-      const { newLevel, newExp, levelUps } = calculateLevelUp(current.level, current.exp, exp);
-      const nextStars = Math.max(0, current.stars + stars);
-      const next = { ...current, stars: nextStars, level: newLevel, exp: newExp };
-      const transaction = createTransaction('earn', stars, '战斗奖励', current.stars);
+
+      // Record star reward through applyTransaction so daily stats are updated exactly once.
+      await get().applyTransaction('earn', stars, '战斗奖励');
+
+      const afterStars = get().profile;
+      if (!afterStars) return { newLevel: 1, newExp: 0, levelUps: 0, newlyUnlocked: [] };
+
+      const { newLevel, newExp, levelUps } = calculateLevelUp(afterStars.level, afterStars.exp, exp);
+      const next = { ...afterStars, level: newLevel, exp: newExp };
       await saveProfile(next);
-      await saveTransaction(transaction);
-      await get().recordStarsEarned(stars);
+      set({ profile: next, error: null });
 
       const newlyUnlocked: AchievementId[] = [];
       const achievements = get().achievements;
@@ -161,8 +165,6 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
           await saveAchievement(achievement);
         }
         set({ profile: next, achievements: nextAchievements, error: null });
-      } else {
-        set({ profile: next, error: null });
       }
       return { newLevel, newExp, levelUps, newlyUnlocked };
     } catch (err) {

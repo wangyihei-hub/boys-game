@@ -27,6 +27,7 @@ import {
   saveWrongQuestion
 } from '../db';
 import { generateDailyTasks, getTodayKey, updateTaskProgress } from '../services/dailyTaskLogic';
+import { useProfileStore } from './profileStore';
 
 export const STAGES: Stage[] = [
   // 语文之森
@@ -167,6 +168,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     const { newLevel, newExp, levelUps } = calculateLevelUp(playerLevel, currentExp, exp);
 
     const durationMs = Math.round(performance.now() - battle.startTime);
+    const minutes = Math.max(1, Math.ceil(durationMs / 60000));
+    await useProfileStore.getState().recordMinutesPlayed(minutes);
+
     const record: BattleRecord = {
       id: `${battle.stage.subject}-${battle.stage.id}-${Date.now()}`,
       subject: battle.stage.subject,
