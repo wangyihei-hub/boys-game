@@ -1,6 +1,8 @@
 import { create } from 'zustand';
-import type { ParentSettings, Reward, Redemption } from '../types';
+import type { GenerationResult, ParentSettings, QuestionGenerationConfig, Reward, Redemption } from '../types';
 import { getParentSettings, saveParentSettings, getRewards, saveReward, getRedemptions, saveRedemption } from '../db';
+import { generateQuestions as generateQuestionsFromAI } from '../services/aiQuestion';
+import { useQuestionStore } from './questionStore';
 
 interface ParentState {
   settings: ParentSettings | null;
@@ -8,10 +10,13 @@ interface ParentState {
   redemptions: Redemption[];
   loaded: boolean;
   error: string | null;
+  generating: boolean;
+  lastResult: GenerationResult | null;
   loadParentData: () => Promise<void>;
   updateSettings: (settings: ParentSettings) => Promise<void>;
   addReward: (reward: Reward) => Promise<void>;
   confirmRedemption: (id: string) => Promise<void>;
+  generateQuestions: (config: QuestionGenerationConfig) => Promise<void>;
   clearError: () => void;
 }
 
@@ -28,6 +33,8 @@ export const useParentStore = create<ParentState>((set, get) => ({
   redemptions: [],
   loaded: false,
   error: null,
+  generating: false,
+  lastResult: null,
   async loadParentData() {
     try {
       const [settings, rewards, redemptions] = await Promise.all([
@@ -74,6 +81,28 @@ export const useParentStore = create<ParentState>((set, get) => ({
       set({ redemptions: get().redemptions.map(r => (r.id === id ? updated : r)), error: null });
     } catch (err) {
       set({ error: err instanceof Error ? err.message : '确认兑换失败' });
+    }
+  },
+  async generateQuestions(config) {
+    const settings = get().settings;
+    if (!settings) {
+      set({ error: '家长设置未加载' });
+      return;
+    }
+    set({ generating: true, error: null });
+    try {
+      const result = await generateQuestionsFromAI(config, {
+        apiProvider: settings.apiProvider,
+        apiKey: settings.apiKey,
+        apiEndpoint: settings.apiEndpoint,
+        apiModel: settings.apiModel
+      });
+      if (result.questions.length > 0) {
+        await useQuestionStore.getState().saveGeneratedQuestions(result.questions);
+      }
+      set({ lastResult: result, generating: false, error: null });
+    } catch (err) {
+      set({ generating: false, error: err instanceof Error ? err.message : '生成题目失败' });
     }
   },
   clearError() {

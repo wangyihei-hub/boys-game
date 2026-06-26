@@ -5,7 +5,8 @@ import type {
   Profile,
   Question,
   Redemption,
-  Reward
+  Reward,
+  Subject
 } from '../types';
 
 const DB_NAME = 'boys-game-db';
@@ -88,6 +89,26 @@ export async function saveQuestions(questions: Question[]): Promise<void> {
     await tx.store.put(q);
   }
   await tx.done;
+}
+
+export async function deleteQuestions(ids: string[]): Promise<void> {
+  const db = await getDB();
+  const tx = db.transaction('questions', 'readwrite');
+  for (const id of ids) {
+    await tx.store.delete(id);
+  }
+  await tx.done;
+}
+
+export async function getQuestionsBySubject(subject: Subject): Promise<Question[]> {
+  const db = await getDB();
+  const range = IDBKeyRange.bound([subject, ''], [subject, '\uffff']);
+  return db.getAllFromIndex('questions', 'by-subject-topic', range);
+}
+
+export async function countQuestions(): Promise<number> {
+  const db = await getDB();
+  return db.count('questions');
 }
 
 export async function getRewards(): Promise<Reward[]> {
