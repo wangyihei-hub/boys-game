@@ -1,19 +1,26 @@
 import { createBrowserRouter, Navigate } from 'react-router-dom';
-import { App } from './App';
+import { PlayLayout } from './components/layout/PlayLayout';
+import { ParentLayout } from './components/layout/ParentLayout';
+import { PlayHome } from './pages/PlayHome';
+import { ParentDashboard } from './pages/ParentDashboard';
 
 export const router = createBrowserRouter([
   {
     path: '/',
-    element: <App />,
+    element: <Navigate to="/play" replace />
+  },
+  {
+    path: '/play',
+    element: <PlayLayout />,
     children: [
-      {
-        index: true,
-        element: <Navigate to="/play" replace />
-      },
-      {
-        path: 'play',
-        element: <div>学科小勇士 - 游戏加载中...</div>
-      }
+      { index: true, element: <PlayHome /> }
+    ]
+  },
+  {
+    path: '/parent',
+    element: <ParentLayout />,
+    children: [
+      { index: true, element: <ParentDashboard /> }
     ]
   }
 ]);
