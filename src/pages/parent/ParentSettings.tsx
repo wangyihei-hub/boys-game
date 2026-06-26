@@ -5,6 +5,7 @@ import { useParentStore } from '../../stores/parentStore';
 import { DailyTaskForm } from '../../components/parent/DailyTaskForm';
 import { LotteryPrizeForm } from '../../components/parent/LotteryPrizeForm';
 import { PinSettingsCard } from '../../components/parent/PinSettingsCard';
+import { DataExportImportCard } from '../../components/parent/DataExportImportCard';
 import { getTodayKey } from '../../services/dailyTaskLogic';
 import { createDefaultLotteryPool } from '../../services/lotteryLogic';
 import type { DailyTask, LotteryPrize } from '../../types';
@@ -332,6 +333,7 @@ export function ParentSettings() {
       {activeTab === 'security' && (
         <div className="space-y-4">
           <PinSettingsCard />
+          <DataExportImportCard />
         </div>
       )}
     </div>
