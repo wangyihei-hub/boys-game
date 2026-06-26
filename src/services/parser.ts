@@ -11,21 +11,102 @@ export class ParserError extends Error {
   }
 }
 
-export function extractJson(text: string): unknown {
-  const trimmed = text.trim();
-  if (!trimmed) {
-    throw new ParserError('Empty response');
-  }
-
-  const fenceMatch = trimmed.match(/```(?:json)?\s*([\s\S]*?)\s*```/);
-  const jsonText = fenceMatch ? fenceMatch[1].trim() : trimmed;
-
+function parseJsonText(jsonText: string): unknown {
   try {
     return JSON.parse(jsonText);
   } catch (err) {
     const message = err instanceof Error ? err.message : 'Unknown JSON parse error';
     throw new ParserError(`Invalid JSON: ${message}`);
   }
+}
+
+function findFirstJson(text: string): string | null {
+  const startMatch = text.search(/[\[{]/);
+  if (startMatch === -1) {
+    return null;
+  }
+
+  const open = text[startMatch];
+  const close = open === '[' ? ']' : '}';
+  let depth = 0;
+  let inString = false;
+  let escape = false;
+
+  for (let i = startMatch; i < text.length; i += 1) {
+    const ch = text[i];
+
+    if (inString) {
+      if (escape) {
+        escape = false;
+        continue;
+      }
+      if (ch === '\\') {
+        escape = true;
+        continue;
+      }
+      if (ch === '"') {
+        inString = false;
+      }
+      continue;
+    }
+
+    if (ch === '"') {
+      inString = true;
+      continue;
+    }
+
+    if (ch === open) {
+      depth += 1;
+    } else if (ch === close) {
+      depth -= 1;
+      if (depth === 0) {
+        return text.slice(startMatch, i + 1);
+      }
+    }
+  }
+
+  return null;
+}
+
+function extractFencedJson(text: string): string | undefined {
+  const fenceRegex = /```([a-z]*)\s*([\s\S]*?)\s*```/gi;
+  let firstJsonLike: string | undefined;
+
+  let match;
+  while ((match = fenceRegex.exec(text)) !== null) {
+    const language = match[1].toLowerCase();
+    const content = match[2].trim();
+
+    if (language === 'json') {
+      return content;
+    }
+
+    if (firstJsonLike === undefined && /^[\[{]/.test(content)) {
+      firstJsonLike = content;
+    }
+  }
+
+  return firstJsonLike;
+}
+
+export function extractJson(text: string): unknown {
+  const trimmed = text.trim();
+  if (!trimmed) {
+    throw new ParserError('Empty response');
+  }
+
+  const fencedJson = extractFencedJson(trimmed);
+  if (fencedJson !== undefined) {
+    return parseJsonText(fencedJson);
+  }
+
+  const stripped = trimmed.replace(/```[\s\S]*?```/g, '');
+  const firstJson = findFirstJson(stripped);
+  if (firstJson === null) {
+    throw new ParserError('No JSON array or object found');
+  }
+
+  return parseJsonText(firstJson);
 }
 
 function isPlainObject(value: unknown): value is Record<string, unknown> {
@@ -121,10 +202,10 @@ export function validateQuestions(
       topic: config.topic,
       difficulty: config.difficulty,
       type: item.type,
-      question: item.question,
-      options: item.type === 'choice' ? item.options : undefined,
-      answer: item.answer,
-      explanation: item.explanation,
+      question: item.question.trim(),
+      options: item.type === 'choice' ? (item.options as string[]).map((opt) => opt.trim()) : undefined,
+      answer: item.type === 'choice' ? item.answer : (item.answer as string).trim(),
+      explanation: item.explanation.trim(),
       generatedAt,
     });
   }

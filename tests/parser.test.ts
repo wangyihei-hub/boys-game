@@ -46,6 +46,43 @@ Hope this helps!`;
     expect(() => extractJson('')).toThrow(ParserError);
     expect(() => extractJson('   ')).toThrow(ParserError);
   });
+
+  it('prefers a ```json fence over an earlier non-JSON fenced block', () => {
+    const raw = `Here is an unrelated example:
+
+\`\`\`
+not json
+\`\`\`
+
+And the questions:
+
+\`\`\`json
+[
+  { "type": "choice", "question": "Pick 2", "options": ["1", "2", "3", "4"], "answer": 1, "explanation": "two" }
+]
+\`\`\`
+`;
+    const result = extractJson(raw);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+  });
+
+  it('falls back to the first [ or { after stripping fenced blocks without a json tag', () => {
+    const raw = `Preamble
+
+\`\`\`
+not json
+\`\`\`
+
+\`\`\`
+[{ "type": "fillblank", "question": "Q", "answer": "A", "explanation": "E" }]
+\`\`\`
+
+Trailing text.`;
+    const result = extractJson(raw);
+    expect(Array.isArray(result)).toBe(true);
+    expect(result).toHaveLength(1);
+  });
 });
 
 describe('validateQuestions', () => {
@@ -133,6 +170,37 @@ describe('validateQuestions', () => {
     const { valid, invalid } = validateQuestions(raw, baseConfig);
     expect(valid).toHaveLength(0);
     expect(invalid).toBe(4);
+  });
+
+  it('trims whitespace from accepted strings during enrichment', () => {
+    const raw = [
+      {
+        type: 'choice',
+        question: '  choice question  ',
+        options: ['  a  ', 'b', '  c', 'd  '],
+        answer: 0,
+        explanation:  '  choice explanation  ',
+      },
+      {
+        type: 'fillblank',
+        question: '  fillblank question  ',
+        answer: '  answer  ',
+        explanation: '  fillblank explanation  ',
+      },
+    ];
+
+    const { valid, invalid } = validateQuestions(raw, baseConfig);
+    expect(invalid).toBe(0);
+    expect(valid).toHaveLength(2);
+
+    const [choice, fillblank] = valid;
+    expect(choice.question).toBe('choice question');
+    expect(choice.options).toEqual(['a', 'b', 'c', 'd']);
+    expect(choice.explanation).toBe('choice explanation');
+
+    expect(fillblank.question).toBe('fillblank question');
+    expect(fillblank.answer).toBe('answer');
+    expect(fillblank.explanation).toBe('fillblank explanation');
   });
 
   it('rejects choice questions with invalid answer indices', () => {
