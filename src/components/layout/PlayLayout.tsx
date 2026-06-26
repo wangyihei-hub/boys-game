@@ -1,12 +1,16 @@
 import { Outlet } from 'react-router-dom';
 import { useEffect } from 'react';
 import { useProfileStore } from '../../stores/profileStore';
+import { useHealthGuard } from '../../hooks/useHealthGuard';
+import { RestModeOverlay } from '../play/RestModeOverlay';
+import { EyeCareModal } from '../play/EyeCareModal';
 
 export function PlayLayout() {
   const loadProfile = useProfileStore(state => state.loadProfile);
   const loaded = useProfileStore(state => state.loaded);
   const error = useProfileStore(state => state.error);
   const clearError = useProfileStore(state => state.clearError);
+  const { isRestModeActive, showEyeCare, dismissEyeCare } = useHealthGuard();
 
   useEffect(() => {
     loadProfile();
@@ -35,6 +39,8 @@ export function PlayLayout() {
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <RestModeOverlay isActive={isRestModeActive} />
+      <EyeCareModal show={showEyeCare} onDismiss={dismissEyeCare} />
       <header className="bg-indigo-600 p-4 text-white">
         <h1 className="text-xl font-bold">学科小勇士</h1>
       </header>
