@@ -10,6 +10,7 @@ export default defineConfig({
       manifest: {
         name: '学科小勇士',
         short_name: '学科小勇士',
+        lang: 'zh-CN',
         description: '家庭版学科闯关游戏',
         theme_color: '#4f46e5',
         background_color: '#ffffff',
@@ -24,6 +25,9 @@ export default defineConfig({
   test: {
     environment: 'jsdom',
     globals: true,
-    setupFiles: ['./tests/setup.ts']
+    setupFiles: ['./tests/setup.ts'],
+    sequence: {
+      concurrent: false
+    }
   }
 });

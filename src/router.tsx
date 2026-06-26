@@ -1,10 +1,10 @@
-import { createBrowserRouter, Navigate } from 'react-router-dom';
+import { createHashRouter, Navigate } from 'react-router-dom';
 import { PlayLayout } from './components/layout/PlayLayout';
 import { ParentLayout } from './components/layout/ParentLayout';
 import { PlayHome } from './pages/PlayHome';
 import { ParentDashboard } from './pages/ParentDashboard';
 
-export const router = createBrowserRouter([
+export const router = createHashRouter([
   {
     path: '/',
     element: <Navigate to="/play" replace />

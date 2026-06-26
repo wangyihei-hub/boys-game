@@ -5,6 +5,8 @@ import { useParentStore } from '../../stores/parentStore';
 export function ParentLayout() {
   const loadParentData = useParentStore(state => state.loadParentData);
   const loaded = useParentStore(state => state.loaded);
+  const error = useParentStore(state => state.error);
+  const clearError = useParentStore(state => state.clearError);
 
   useEffect(() => {
     loadParentData();
@@ -12,6 +14,23 @@ export function ParentLayout() {
 
   if (!loaded) {
     return <div className="flex h-screen items-center justify-center">加载中...</div>;
+  }
+
+  if (error) {
+    return (
+      <div className="flex h-screen flex-col items-center justify-center gap-4 p-4 text-center">
+        <div className="rounded-lg bg-red-100 p-4 text-red-700">
+          <p className="font-bold">加载失败</p>
+          <p className="text-sm">{error}</p>
+        </div>
+        <button
+          onClick={() => { clearError(); loadParentData(); }}
+          className="rounded-lg bg-slate-800 px-4 py-2 text-white"
+        >
+          重试
+        </button>
+      </div>
+    );
   }
 
   return (

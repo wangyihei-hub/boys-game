@@ -7,10 +7,12 @@ interface ParentState {
   rewards: Reward[];
   redemptions: Redemption[];
   loaded: boolean;
+  error: string | null;
   loadParentData: () => Promise<void>;
   updateSettings: (settings: ParentSettings) => Promise<void>;
   addReward: (reward: Reward) => Promise<void>;
   confirmRedemption: (id: string) => Promise<void>;
+  clearError: () => void;
 }
 
 const DEFAULT_SETTINGS: ParentSettings = {
@@ -25,35 +27,56 @@ export const useParentStore = create<ParentState>((set, get) => ({
   rewards: [],
   redemptions: [],
   loaded: false,
+  error: null,
   async loadParentData() {
-    const [settings, rewards, redemptions] = await Promise.all([
-      getParentSettings('default'),
-      getRewards(),
-      getRedemptions()
-    ]);
-    set({
-      settings: settings ?? DEFAULT_SETTINGS,
-      rewards,
-      redemptions,
-      loaded: true
-    });
-    if (!settings) {
-      await saveParentSettings(DEFAULT_SETTINGS);
+    try {
+      const [settings, rewards, redemptions] = await Promise.all([
+        getParentSettings('default'),
+        getRewards(),
+        getRedemptions()
+      ]);
+      set({
+        settings: settings ?? DEFAULT_SETTINGS,
+        rewards,
+        redemptions,
+        loaded: true,
+        error: null
+      });
+      if (!settings) {
+        await saveParentSettings(DEFAULT_SETTINGS);
+      }
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '加载家长数据失败', loaded: true });
     }
   },
   async updateSettings(settings) {
-    await saveParentSettings(settings);
-    set({ settings });
+    try {
+      await saveParentSettings(settings);
+      set({ settings, error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '保存设置失败' });
+    }
   },
   async addReward(reward) {
-    await saveReward(reward);
-    set({ rewards: [...get().rewards, reward] });
+    try {
+      await saveReward(reward);
+      set({ rewards: [...get().rewards, reward], error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '保存奖励失败' });
+    }
   },
   async confirmRedemption(id) {
-    const redemption = get().redemptions.find(r => r.id === id);
-    if (!redemption) return;
-    const updated = { ...redemption, status: 'confirmed' as const, confirmedAt: Date.now() };
-    await saveRedemption(updated);
-    set({ redemptions: get().redemptions.map(r => (r.id === id ? updated : r)) });
+    try {
+      const redemption = get().redemptions.find(r => r.id === id);
+      if (!redemption) return;
+      const updated = { ...redemption, status: 'confirmed' as const, confirmedAt: Date.now() };
+      await saveRedemption(updated);
+      set({ redemptions: get().redemptions.map(r => (r.id === id ? updated : r)), error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '确认兑换失败' });
+    }
+  },
+  clearError() {
+    set({ error: null });
   }
 }));
