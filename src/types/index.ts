@@ -173,39 +173,32 @@ export interface EquipmentDef {
   name: string;
   slot: EquipmentSlot;
   icon: string;
+  level: number;
+  description: string;
   attackBonus?: number;
   hpBonus?: number;
   critBonus?: number;
   timeBonus?: number;
-  description: string;
-  requiredLevel?: number;
-}
-
-export type PetSkill =
-  | 'heal'
-  | 'shield'
-  | 'attack_boost'
-  | 'time_boost'
-  | 'hint'
-  | 'lucky';
-
-export interface PetEvolution {
-  stage: number;
-  name: string;
-  icon: string;
-  skill: PetSkill;
-  bondRequired: number;
-  attackBonus?: number;
-  hpBonus?: number;
+  starCost?: number;
 }
 
 export interface PetDef {
   id: string;
   name: string;
   icon: string;
-  skill: PetSkill;
-  evolutions: PetEvolution[];
   description: string;
+  skill: 'hint' | 'exclude' | 'heal' | 'double_stars';
+  skillDescription: string;
+  evolutions: {
+    stage: number;
+    name: string;
+    icon: string;
+    requirement: {
+      type: 'correct_count' | 'subject_correct_count' | 'consecutive_days';
+      target: number;
+      subject?: Subject;
+    };
+  }[];
 }
 
 export interface InventoryItem {
