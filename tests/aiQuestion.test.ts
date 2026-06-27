@@ -216,6 +216,36 @@ describe('generateQuestions', () => {
     expect(globalThis.fetch).not.toHaveBeenCalled();
   });
 
+  it('returns validated questions for local provider without API key or network', async () => {
+    const result = await generateQuestions(baseConfig, {
+      ...baseSettings,
+      apiProvider: 'local',
+      apiKey: undefined,
+    });
+
+    expect(globalThis.fetch).not.toHaveBeenCalled();
+    expect(result.success).toBe(baseConfig.count);
+    expect(result.failed).toBe(0);
+    expect(result.questions).toHaveLength(baseConfig.count);
+    expect(result.questions[0].subject).toBe('math');
+    expect(result.questions[0].topic).toBe('fraction-addition');
+    expect(result.durationMs).toBeGreaterThanOrEqual(0);
+  });
+
+  it('validates local generated questions for each subject', async () => {
+    const subjects = ['chinese', 'math', 'english'] as const;
+
+    for (const subject of subjects) {
+      const result = await generateQuestions(
+        { ...baseConfig, subject, topic: 'general', count: 5 },
+        { apiProvider: 'local' }
+      );
+      expect(result.success).toBe(5);
+      expect(result.failed).toBe(0);
+      expect(result.questions.every(q => q.subject === subject)).toBe(true);
+    }
+  });
+
   it('allows custom provider without an API key', async () => {
     globalThis.fetch = mockFetch(createOpenAIResponse(JSON.stringify(validQuestions)));
 

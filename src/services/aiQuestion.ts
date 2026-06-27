@@ -1,6 +1,7 @@
 import type { GenerationResult, ParentSettings, QuestionGenerationConfig } from '../types';
 import { getPromptBuilder } from './prompts';
 import { extractJson, validateQuestions } from './parser';
+import { generateLocalQuestions } from './localQuestionGenerator';
 
 export type AISettings = Pick<ParentSettings, 'apiProvider' | 'apiKey' | 'apiEndpoint' | 'apiModel'>;
 
@@ -160,8 +161,23 @@ export async function generateQuestions(
   const startTime = performance.now();
   const safeConfig = { ...config, count: clampCount(config.count) };
 
-  if (!settings.apiKey && settings.apiProvider !== 'custom') {
+  if (!settings.apiKey && settings.apiProvider !== 'custom' && settings.apiProvider !== 'local') {
     throw new Error('API key is required');
+  }
+
+  if (settings.apiProvider === 'local') {
+    const rawQuestions = await generateLocalQuestions(safeConfig);
+    const { valid, invalid, error } = validateQuestions(rawQuestions, safeConfig);
+    if (error) {
+      throw new Error(error);
+    }
+    return {
+      success: valid.length,
+      failed: invalid,
+      questions: valid,
+      rawResponse: JSON.stringify(rawQuestions, null, 2),
+      durationMs: Math.round(performance.now() - startTime),
+    };
   }
 
   let payload: RequestPayload;

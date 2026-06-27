@@ -69,7 +69,7 @@ export interface Transaction {
   createdAt: number;
 }
 
-export type AIProvider = 'openai' | 'anthropic' | 'custom';
+export type AIProvider = 'openai' | 'anthropic' | 'custom' | 'local';
 
 export interface QuestionGenerationConfig {
   subject: Subject;

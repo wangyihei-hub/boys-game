@@ -18,13 +18,18 @@ const PROVIDER_DEFAULTS: Record<AIProvider, { endpoint: string; model: string }>
   custom: {
     endpoint: '',
     model: ''
+  },
+  local: {
+    endpoint: '',
+    model: 'local'
   }
 };
 
 const PROVIDER_LABELS: Record<AIProvider, string> = {
   openai: 'OpenAI',
   anthropic: 'Anthropic',
-  custom: '自定义'
+  custom: '自定义',
+  local: '本地出题（无需 API Key）'
 };
 
 export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
@@ -103,62 +108,67 @@ export function ApiSettingsCard({ settings, onSave }: ApiSettingsCardProps) {
           <option value="openai">{PROVIDER_LABELS.openai}</option>
           <option value="anthropic">{PROVIDER_LABELS.anthropic}</option>
           <option value="custom">{PROVIDER_LABELS.custom}</option>
+          <option value="local">{PROVIDER_LABELS.local}</option>
         </select>
       </div>
 
-      <div className="space-y-1">
-        <label htmlFor="api-key" className="block text-sm font-semibold text-slate-700">
-          API Key
-        </label>
-        <input
-          id="api-key"
-          type="password"
-          value={apiKey}
-          onChange={e => {
-            setApiKey(e.target.value);
-            clearFeedback();
-          }}
-          placeholder={provider === 'custom' ? '可选' : '请输入 API Key'}
-          className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
-        />
-        <p className="text-xs text-slate-500">密钥仅在本地浏览器中使用，不会上传到服务器。</p>
-      </div>
+      {provider !== 'local' && (
+        <>
+          <div className="space-y-1">
+            <label htmlFor="api-key" className="block text-sm font-semibold text-slate-700">
+              API Key
+            </label>
+            <input
+              id="api-key"
+              type="password"
+              value={apiKey}
+              onChange={e => {
+                setApiKey(e.target.value);
+                clearFeedback();
+              }}
+              placeholder={provider === 'custom' ? '可选' : '请输入 API Key'}
+              className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
+            />
+            <p className="text-xs text-slate-500">密钥仅在本地浏览器中使用，不会上传到服务器。</p>
+          </div>
 
-      {provider === 'custom' && (
-        <div className="space-y-1">
-          <label htmlFor="api-endpoint" className="block text-sm font-semibold text-slate-700">
-            API Endpoint
-          </label>
-          <input
-            id="api-endpoint"
-            type="url"
-            value={endpoint}
-            onChange={e => {
-              setEndpoint(e.target.value);
-              clearFeedback();
-            }}
-            placeholder="https://api.example.com/v1/chat/completions"
-            className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
-          />
-        </div>
+          {provider === 'custom' && (
+            <div className="space-y-1">
+              <label htmlFor="api-endpoint" className="block text-sm font-semibold text-slate-700">
+                API Endpoint
+              </label>
+              <input
+                id="api-endpoint"
+                type="url"
+                value={endpoint}
+                onChange={e => {
+                  setEndpoint(e.target.value);
+                  clearFeedback();
+                }}
+                placeholder="https://api.example.com/v1/chat/completions"
+                className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
+              />
+            </div>
+          )}
+
+          <div className="space-y-1">
+            <label htmlFor="api-model" className="block text-sm font-semibold text-slate-700">
+              模型
+            </label>
+            <input
+              id="api-model"
+              type="text"
+              value={model}
+              onChange={e => {
+                setModel(e.target.value);
+                clearFeedback();
+              }}
+              placeholder={provider === 'custom' ? '请输入模型名称' : PROVIDER_DEFAULTS[provider].model}
+              className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
+            />
+          </div>
+        </>
       )}
-
-      <div className="space-y-1">
-        <label htmlFor="api-model" className="block text-sm font-semibold text-slate-700">
-          模型
-        </label>
-        <input
-          id="api-model"
-          type="text"
-          value={model}
-          onChange={e => {
-            setModel(e.target.value);
-            clearFeedback();
-          }}
-          placeholder={provider === 'custom' ? '请输入模型名称' : PROVIDER_DEFAULTS[provider].model}
-          className="w-full rounded-xl border-2 border-slate-200 px-3 py-2 outline-none focus:border-indigo-500"
-        />
-      </div>
 
       <div className="flex items-center gap-3">
         <button
