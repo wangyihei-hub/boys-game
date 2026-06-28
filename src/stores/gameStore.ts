@@ -27,34 +27,43 @@ import {
   saveDailyTasks,
   saveProgressBatch,
   saveWrongQuestion
-} from '../db';
+} from '../db/dataAccess';
 import { generateDailyTasks, getTodayKey, updateTaskProgress } from '../services/dailyTaskLogic';
 import { useProfileStore } from './profileStore';
 
 export const STAGES: Stage[] = [
-  // 语文之森
-  { id: 'c1', subject: 'chinese', regionName: '语文之森', stageNumber: 1, name: '字词小径', difficulty: 1, questionCount: 3, monsterHp: 30, isBoss: false },
-  { id: 'c2', subject: 'chinese', regionName: '语文之森', stageNumber: 2, name: '成语小溪', difficulty: 1, questionCount: 3, monsterHp: 40, isBoss: false },
-  { id: 'c3', subject: 'chinese', regionName: '语文之森', stageNumber: 3, name: '古诗山丘', difficulty: 2, questionCount: 4, monsterHp: 50, isBoss: false },
-  { id: 'c4', subject: 'chinese', regionName: '语文之森', stageNumber: 4, name: '阅读森林', difficulty: 2, questionCount: 4, monsterHp: 60, isBoss: false },
-  { id: 'c5', subject: 'chinese', regionName: '语文之森', stageNumber: 5, name: '写作营地', difficulty: 3, questionCount: 5, monsterHp: 75, isBoss: false },
-  { id: 'c6', subject: 'chinese', regionName: '语文之森', stageNumber: 6, name: '语文巨兽', difficulty: 3, questionCount: 5, monsterHp: 180, isBoss: true },
+  // 语文之森 — 9 stages
+  { id: 'c1', subject: 'chinese', regionName: '语文之森', stageNumber: 1, name: '字词小径', difficulty: 1, questionCount: 4, monsterHp: 30, isBoss: false },
+  { id: 'c2', subject: 'chinese', regionName: '语文之森', stageNumber: 2, name: '成语小溪', difficulty: 1, questionCount: 4, monsterHp: 40, isBoss: false },
+  { id: 'c3', subject: 'chinese', regionName: '语文之森', stageNumber: 3, name: '句子山谷', difficulty: 1, questionCount: 5, monsterHp: 50, isBoss: false },
+  { id: 'c4', subject: 'chinese', regionName: '语文之森', stageNumber: 4, name: '古诗山丘', difficulty: 2, questionCount: 5, monsterHp: 60, isBoss: false },
+  { id: 'c5', subject: 'chinese', regionName: '语文之森', stageNumber: 5, name: '阅读森林', difficulty: 2, questionCount: 6, monsterHp: 75, isBoss: false },
+  { id: 'c6', subject: 'chinese', regionName: '语文之森', stageNumber: 6, name: '写作营地', difficulty: 2, questionCount: 6, monsterHp: 90, isBoss: false },
+  { id: 'c7', subject: 'chinese', regionName: '语文之森', stageNumber: 7, name: '文言古道', difficulty: 3, questionCount: 7, monsterHp: 110, isBoss: false },
+  { id: 'c8', subject: 'chinese', regionName: '语文之森', stageNumber: 8, name: '综合高地', difficulty: 3, questionCount: 7, monsterHp: 130, isBoss: false },
+  { id: 'c9', subject: 'chinese', regionName: '语文之森', stageNumber: 9, name: '语文巨兽', difficulty: 3, questionCount: 7, monsterHp: 220, isBoss: true },
 
-  // 数学迷宫
-  { id: 'm1', subject: 'math', regionName: '数学迷宫', stageNumber: 1, name: '加法入口', difficulty: 1, questionCount: 3, monsterHp: 30, isBoss: false },
-  { id: 'm2', subject: 'math', regionName: '数学迷宫', stageNumber: 2, name: '减法走廊', difficulty: 1, questionCount: 3, monsterHp: 40, isBoss: false },
-  { id: 'm3', subject: 'math', regionName: '数学迷宫', stageNumber: 3, name: '乘法房间', difficulty: 2, questionCount: 4, monsterHp: 50, isBoss: false },
-  { id: 'm4', subject: 'math', regionName: '数学迷宫', stageNumber: 4, name: '除法厅堂', difficulty: 2, questionCount: 4, monsterHp: 60, isBoss: false },
-  { id: 'm5', subject: 'math', regionName: '数学迷宫', stageNumber: 5, name: '应用题回廊', difficulty: 3, questionCount: 5, monsterHp: 75, isBoss: false },
-  { id: 'm6', subject: 'math', regionName: '数学迷宫', stageNumber: 6, name: '数学魔王', difficulty: 3, questionCount: 5, monsterHp: 180, isBoss: true },
+  // 数学迷宫 — 9 stages
+  { id: 'm1', subject: 'math', regionName: '数学迷宫', stageNumber: 1, name: '加法入口', difficulty: 1, questionCount: 4, monsterHp: 30, isBoss: false },
+  { id: 'm2', subject: 'math', regionName: '数学迷宫', stageNumber: 2, name: '减法走廊', difficulty: 1, questionCount: 4, monsterHp: 40, isBoss: false },
+  { id: 'm3', subject: 'math', regionName: '数学迷宫', stageNumber: 3, name: '乘法房间', difficulty: 1, questionCount: 5, monsterHp: 50, isBoss: false },
+  { id: 'm4', subject: 'math', regionName: '数学迷宫', stageNumber: 4, name: '除法厅堂', difficulty: 2, questionCount: 5, monsterHp: 60, isBoss: false },
+  { id: 'm5', subject: 'math', regionName: '数学迷宫', stageNumber: 5, name: '方程回廊', difficulty: 2, questionCount: 6, monsterHp: 75, isBoss: false },
+  { id: 'm6', subject: 'math', regionName: '数学迷宫', stageNumber: 6, name: '图形密室', difficulty: 2, questionCount: 6, monsterHp: 90, isBoss: false },
+  { id: 'm7', subject: 'math', regionName: '数学迷宫', stageNumber: 7, name: '统计塔楼', difficulty: 3, questionCount: 7, monsterHp: 110, isBoss: false },
+  { id: 'm8', subject: 'math', regionName: '数学迷宫', stageNumber: 8, name: '综合广场', difficulty: 3, questionCount: 7, monsterHp: 130, isBoss: false },
+  { id: 'm9', subject: 'math', regionName: '数学迷宫', stageNumber: 9, name: '数学魔王', difficulty: 3, questionCount: 7, monsterHp: 220, isBoss: true },
 
-  // 英语海岸
-  { id: 'e1', subject: 'english', regionName: '英语海岸', stageNumber: 1, name: '单词沙滩', difficulty: 1, questionCount: 3, monsterHp: 30, isBoss: false },
-  { id: 'e2', subject: 'english', regionName: '英语海岸', stageNumber: 2, name: '句型浅湾', difficulty: 1, questionCount: 3, monsterHp: 40, isBoss: false },
-  { id: 'e3', subject: 'english', regionName: '英语海岸', stageNumber: 3, name: '对话港口', difficulty: 2, questionCount: 4, monsterHp: 50, isBoss: false },
-  { id: 'e4', subject: 'english', regionName: '英语海岸', stageNumber: 4, name: '语法礁石', difficulty: 2, questionCount: 4, monsterHp: 60, isBoss: false },
-  { id: 'e5', subject: 'english', regionName: '英语海岸', stageNumber: 5, name: '阅读海域', difficulty: 3, questionCount: 5, monsterHp: 75, isBoss: false },
-  { id: 'e6', subject: 'english', regionName: '英语海岸', stageNumber: 6, name: '英语海怪', difficulty: 3, questionCount: 5, monsterHp: 180, isBoss: true }
+  // 英语海岸 — 9 stages
+  { id: 'e1', subject: 'english', regionName: '英语海岸', stageNumber: 1, name: '单词沙滩', difficulty: 1, questionCount: 4, monsterHp: 30, isBoss: false },
+  { id: 'e2', subject: 'english', regionName: '英语海岸', stageNumber: 2, name: '句型浅湾', difficulty: 1, questionCount: 4, monsterHp: 40, isBoss: false },
+  { id: 'e3', subject: 'english', regionName: '英语海岸', stageNumber: 3, name: '对话港口', difficulty: 1, questionCount: 5, monsterHp: 50, isBoss: false },
+  { id: 'e4', subject: 'english', regionName: '英语海岸', stageNumber: 4, name: '语法礁石', difficulty: 2, questionCount: 5, monsterHp: 60, isBoss: false },
+  { id: 'e5', subject: 'english', regionName: '英语海岸', stageNumber: 5, name: '阅读海域', difficulty: 2, questionCount: 6, monsterHp: 75, isBoss: false },
+  { id: 'e6', subject: 'english', regionName: '英语海岸', stageNumber: 6, name: '写作海湾', difficulty: 2, questionCount: 6, monsterHp: 90, isBoss: false },
+  { id: 'e7', subject: 'english', regionName: '英语海岸', stageNumber: 7, name: '完形暗礁', difficulty: 3, questionCount: 7, monsterHp: 110, isBoss: false },
+  { id: 'e8', subject: 'english', regionName: '英语海岸', stageNumber: 8, name: '综合灯塔', difficulty: 3, questionCount: 7, monsterHp: 130, isBoss: false },
+  { id: 'e9', subject: 'english', regionName: '英语海岸', stageNumber: 9, name: '英语海怪', difficulty: 3, questionCount: 7, monsterHp: 220, isBoss: true }
 ];
 
 export function getStageById(stageId: string): Stage | undefined {

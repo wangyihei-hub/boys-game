@@ -17,6 +17,14 @@ export interface Question {
   generatedAt: number;
 }
 
+export interface MinigameStats {
+  gomokuWins: number;
+  triviaCorrect: number;
+  memorySRankCount: number;
+  speedMathSRankCount: number;
+  wordChainCount: number;
+}
+
 export interface Profile {
   id: string;
   nickname: string;
@@ -30,6 +38,7 @@ export interface Profile {
     shoes?: string;
   };
   activePet?: string;
+  minigameStats?: MinigameStats;
   createdAt: number;
 }
 
@@ -87,6 +96,27 @@ export interface GenerationResult {
   durationMs: number;
 }
 
+export interface CurriculumConfig {
+  enabled: boolean;
+  grade: 4 | 5;
+  startDate: string; // ISO date YYYY-MM-DD
+  subjects: Subject[];
+  questionsPerLesson: number;
+}
+
+export interface CurriculumLesson {
+  subject: Subject;
+  topic: string;
+  difficulty: Difficulty;
+  questionCount: number;
+}
+
+export interface CurriculumDay {
+  dayIndex: number;
+  dateKey: string;
+  lessons: CurriculumLesson[];
+}
+
 export interface ParentSettings {
   dailyStarLimit: number;
   dailyMinuteLimit: number;
@@ -97,6 +127,7 @@ export interface ParentSettings {
   apiEndpoint?: string;
   apiModel?: string;
   pin?: string;
+  curriculum?: CurriculumConfig;
 }
 
 export interface WrongQuestion {
@@ -134,7 +165,12 @@ export type AchievementId =
   | 'win_streak_5'
   | 'collect_100_stars'
   | 'all_subject_passed'
-  | 'eye_care_guard';
+  | 'eye_care_guard'
+  | 'gomoku_win_3'
+  | 'trivia_master_100'
+  | 'memory_s_10'
+  | 'speed_math_s_3'
+  | 'word_chain_100';
 
 export interface Achievement {
   id: AchievementId;

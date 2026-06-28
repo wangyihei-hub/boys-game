@@ -48,8 +48,8 @@ describe('gameStore', () => {
       )
     }));
     const { passed, total } = computeRegionProgress(useGameStore.getState().progress, 'math');
-    expect(total).toBe(6);
-    expect(passed).toBe(6);
+    expect(total).toBe(9);
+    expect(passed).toBe(9);
   });
 
   it('starts a battle', () => {

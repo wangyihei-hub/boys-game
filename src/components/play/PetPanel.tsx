@@ -87,71 +87,73 @@ export function PetPanel() {
   }
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center gap-3">
-        <Link
-          to="/play"
-          className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300"
-        >
-          <ArrowLeft className="h-5 w-5" />
-        </Link>
-        <h1 className="text-xl font-bold text-slate-800">我的宠物</h1>
-      </div>
+    <div className="scene-pet -mx-2 -mt-2 min-h-full rounded-t-3xl p-3 sm:-mx-4 sm:-mt-4 sm:p-4">
+      <div className="mx-auto max-w-3xl space-y-4">
+        <div className="glass-card flex items-center gap-3">
+          <Link
+            to="/play"
+            className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300"
+          >
+            <ArrowLeft className="h-5 w-5" />
+          </Link>
+          <h1 className="text-xl font-bold text-slate-800">我的宠物</h1>
+        </div>
 
-      <div className="card space-y-3">
-        <h2 className="font-bold text-slate-700">出战宠物</h2>
-        {activePetInstance ? (
-          <ActivePetCard
-            instance={activePetInstance}
-            foodCount={foodCount}
-            battleRecords={battleRecords}
-            dailyTasks={dailyTasks}
-            onFeed={handleFeed}
-            onEvolve={handleEvolve}
-          />
-        ) : (
-          <p className="text-center text-sm text-slate-500">还没有选择出战宠物，从下方选择一只吧！</p>
-        )}
-      </div>
+        <div className="glass-card space-y-3">
+          <h2 className="font-bold text-slate-700">出战宠物</h2>
+          {activePetInstance ? (
+            <ActivePetCard
+              instance={activePetInstance}
+              foodCount={foodCount}
+              battleRecords={battleRecords}
+              dailyTasks={dailyTasks}
+              onFeed={handleFeed}
+              onEvolve={handleEvolve}
+            />
+          ) : (
+            <p className="text-center text-sm text-slate-500">还没有选择出战宠物，从下方选择一只吧！</p>
+          )}
+        </div>
 
-      <div className="card space-y-3">
-        <h2 className="font-bold text-slate-700">已拥有宠物</h2>
-        {ownedPets.length === 0 ? (
-          <p className="text-center text-sm text-slate-500">还没有宠物，去虚拟商城看看吧！</p>
-        ) : (
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {ownedPets.map(petItem => {
-              const { icon, name, stage } = petIconAndName(petItem);
-              const def = getPetDef(petItem.petDefId ?? '');
-              const isActive = profile.activePet === petItem.id;
-              return (
-                <div
-                  key={petItem.id}
-                  className={[
-                    'flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center',
-                    isActive
-                      ? 'border-indigo-300 bg-indigo-50'
-                      : 'border-slate-200 bg-white'
-                  ].join(' ')}
-                >
-                  <PetAvatar icon={icon} size="md" badge={`Lv.${stage + 1}`} />
-                  <div>
-                    <p className="font-bold text-slate-700">{name}</p>
-                    <p className="text-xs text-slate-500">{def?.skillDescription}</p>
-                  </div>
-                  <button
-                    type="button"
-                    onClick={() => handleSetActive(petItem)}
-                    disabled={isActive}
-                    className="btn-primary w-full py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+        <div className="glass-card space-y-3">
+          <h2 className="font-bold text-slate-700">已拥有宠物</h2>
+          {ownedPets.length === 0 ? (
+            <p className="text-center text-sm text-slate-500">还没有宠物，去虚拟商城看看吧！</p>
+          ) : (
+            <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+              {ownedPets.map(petItem => {
+                const { icon, name, stage } = petIconAndName(petItem);
+                const def = getPetDef(petItem.petDefId ?? '');
+                const isActive = profile.activePet === petItem.id;
+                return (
+                  <div
+                    key={petItem.id}
+                    className={[
+                      'flex flex-col items-center gap-2 rounded-xl border-2 p-3 text-center',
+                      isActive
+                        ? 'border-indigo-300 bg-indigo-50/80'
+                        : 'border-slate-200 bg-white/60'
+                    ].join(' ')}
                   >
-                    {isActive ? '出战中' : '出战'}
-                  </button>
-                </div>
-              );
-            })}
-          </div>
-        )}
+                    <PetAvatar icon={icon} size="md" badge={`Lv.${stage + 1}`} />
+                    <div>
+                      <p className="font-bold text-slate-700">{name}</p>
+                      <p className="text-xs text-slate-500">{def?.skillDescription}</p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => handleSetActive(petItem)}
+                      disabled={isActive}
+                      className="btn-primary w-full py-1.5 text-sm disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                      {isActive ? '出战中' : '出战'}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </div>
       </div>
     </div>
   );
@@ -189,8 +191,12 @@ function ActivePetCard({
   const evolutionStatus = checkEvolution(instance, battleRecords, dailyTasks);
 
   return (
-    <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-indigo-100 bg-indigo-50 p-4 text-center sm:flex-row sm:text-left">
-      <PetAvatar icon={currentIcon} size="lg" badge={`Lv.${stage + 1}`} />
+    <div className="flex flex-col items-center gap-3 rounded-xl border-2 border-indigo-100 bg-indigo-50/80 p-4 text-center sm:flex-row sm:text-left">
+      <div className="perspective-1000">
+        <div className="flex h-24 w-24 items-center justify-center rounded-2xl bg-white text-5xl shadow-lg transition hover:rotate-y-12">
+          {currentIcon}
+        </div>
+      </div>
       <div className="flex-1 space-y-2">
         <div>
           <p className="text-lg font-bold text-slate-800">{currentName}</p>

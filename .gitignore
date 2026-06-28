@@ -3,6 +3,12 @@ node_modules/
 
 # Build output
 dist/
+dist-server/
+
+# Local data and logs
+data/
+server-debug.log
+*.log
 
 # Worktrees
 .worktrees/

@@ -61,7 +61,7 @@ describe('achievementLogic', () => {
 
   it('unlocks first_boss only for boss wins', () => {
     const current = makeAchievements();
-    const records = [makeRecord({ result: 'win', stageId: 'm6', subject: 'math' })];
+    const records = [makeRecord({ result: 'win', stageId: 'm9', subject: 'math' })];
     const { newlyUnlocked } = checkAchievements(current, {
       level: 1,
       totalStarsEarned: 0,

@@ -38,13 +38,13 @@ export function PlayLayout() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className="flex min-h-screen flex-col bg-slate-50">
       <RestModeOverlay isActive={isRestModeActive} />
       <EyeCareModal show={showEyeCare} onDismiss={dismissEyeCare} />
-      <header className="bg-indigo-600 p-4 text-white">
-        <h1 className="text-xl font-bold">学科小勇士</h1>
+      <header className="shrink-0 bg-indigo-600 px-4 py-3 text-white sm:py-4">
+        <h1 className="text-lg font-bold sm:text-xl">学科小勇士</h1>
       </header>
-      <main className="p-4">
+      <main className="flex-1 p-2 pb-[calc(0.5rem+env(safe-area-inset-bottom))] sm:p-4">
         <Outlet />
       </main>
     </div>

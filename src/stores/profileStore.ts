@@ -1,5 +1,5 @@
 import { create } from 'zustand';
-import type { Achievement, AchievementId, DailyStats, Profile, TransactionType } from '../types';
+import type { Achievement, AchievementId, DailyStats, MinigameStats, Profile, TransactionType } from '../types';
 import {
   getAchievements as getAchievementsFromDB,
   getAllBattleRecords,
@@ -16,7 +16,7 @@ import {
   saveInventoryItem,
   saveProfile,
   saveTransaction
-} from '../db';
+} from '../db/dataAccess';
 
 import { calculateLevelUp } from '../services/battleLogic';
 import { computeNextBalance, createTransaction } from '../services/economyLogic';
@@ -53,6 +53,9 @@ interface ProfileState {
   setActivePet: (petItemId: string | undefined) => Promise<void>;
   feedPet: (petItemId: string, foodItemId?: string) => Promise<{ success: boolean; error?: string }>;
   evolvePet: (petItemId: string) => Promise<{ success: boolean; error?: string }>;
+  incrementMinigameStat: (key: keyof MinigameStats, amount?: number) => Promise<{ newlyUnlocked: AchievementId[] }>;
+  checkMinigameAchievements: () => Promise<AchievementId[]>;
+  unlockEyeCareGuard: () => Promise<AchievementId[]>;
   clearError: () => void;
 }
 
@@ -64,6 +67,13 @@ function createDefaultProfile(): Profile {
     exp: 0,
     stars: 0,
     equippedItems: {},
+    minigameStats: {
+      gomokuWins: 0,
+      triviaCorrect: 0,
+      memorySRankCount: 0,
+      speedMathSRankCount: 0,
+      wordChainCount: 0
+    },
     createdAt: Date.now()
   };
 }
@@ -326,7 +336,86 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       return { success: false, error: message };
     }
   },
+  async incrementMinigameStat(key, amount = 1) {
+    try {
+      const current = get().profile;
+      if (!current) return { newlyUnlocked: [] };
+      const nextStats: MinigameStats = { ...(current.minigameStats ?? createDefaultProfile().minigameStats!), [key]: (current.minigameStats?.[key] ?? 0) + amount };
+      const next = { ...current, minigameStats: nextStats };
+      await saveProfile(next);
+      set({ profile: next, error: null });
+      const newlyUnlocked = await get().checkMinigameAchievements();
+      return { newlyUnlocked };
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '更新小游戏统计失败' });
+      return { newlyUnlocked: [] };
+    }
+  },
+  async checkMinigameAchievements() {
+    try {
+      const current = get().achievements;
+      const transactions = await getTransactions();
+      const totalStarsEarned = transactions
+        .filter(t => t.type === 'earn')
+        .reduce((sum, t) => sum + t.amount, 0);
+      const records = await getAllBattleRecords();
+      const progress = await Promise.all(
+        (['chinese', 'math', 'english'] as const).map(s => getProgressBySubject(s))
+      ).then(groups => groups.flat());
+      const { next, newlyUnlocked } = checkAchievements(current, {
+        level: get().profile?.level ?? 1,
+        totalStarsEarned,
+        records,
+        progress,
+        minigameStats: get().profile?.minigameStats
+      });
+      if (newlyUnlocked.length > 0) {
+        for (const achievement of next) {
+          await saveAchievement(achievement);
+        }
+        set({ achievements: next, error: null });
+      }
+      return newlyUnlocked;
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '检查小游戏成就失败' });
+      return [];
+    }
+  },
+  async unlockEyeCareGuard() {
+    try {
+      const current = get().achievements;
+      const { next, newlyUnlocked } = checkAchievements(current, {
+        level: get().profile?.level ?? 1,
+        totalStarsEarned: 0,
+        records: [],
+        progress: [],
+        minigameStats: get().profile?.minigameStats
+      });
+      if (!isUnlocked('eye_care_guard')) {
+        const achievement = next.find(a => a.id === 'eye_care_guard');
+        if (achievement && !achievement.unlockedAt) {
+          achievement.unlockedAt = Date.now();
+          newlyUnlocked.push('eye_care_guard');
+        }
+      }
+      if (newlyUnlocked.length > 0) {
+        for (const achievement of next) {
+          await saveAchievement(achievement);
+        }
+        set({ achievements: next, error: null });
+      }
+      return newlyUnlocked;
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '解锁护眼成就失败' });
+      return [];
+    }
+  },
   clearError() {
     set({ error: null });
   }
 }));
+
+function isUnlocked(id: AchievementId): boolean {
+  const achievements = useProfileStore.getState().achievements;
+  return achievements.find(a => a.id === id)?.unlockedAt !== undefined;
+}

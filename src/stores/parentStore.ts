@@ -15,9 +15,11 @@ import {
   getLotteryPool,
   saveLotteryPrize,
   deleteLotteryPrize as deleteLotteryPrizeFromDB
-} from '../db';
+} from '../db/dataAccess';
 import { generateQuestions as generateQuestionsFromAI } from '../services/aiQuestion';
-import { generateDailyTasks, getTodayKey, markTaskRewardClaimed } from '../services/dailyTaskLogic';
+import { generateDailyTasksWithCurriculum, getTodayKey, markTaskRewardClaimed } from '../services/dailyTaskLogic';
+import { generateCurriculumQuestionsForRange } from '../services/curriculumLogic';
+import type { CurriculumConfig } from '../types';
 import { createLotteryPrizeId } from '../services/lotteryLogic';
 import { isValidPinFormat } from '../services/pinLogic';
 import { useProfileStore } from './profileStore';
@@ -52,6 +54,8 @@ interface ParentState {
   updateLotteryPrize: (prize: LotteryPrize) => Promise<void>;
   deleteLotteryPrize: (id: string) => Promise<void>;
   generateQuestions: (config: QuestionGenerationConfig) => Promise<void>;
+  updateCurriculum: (curriculum: CurriculumConfig | undefined) => Promise<void>;
+  generateCurriculumQuestions: (startDayIndex?: number, endDayIndex?: number) => Promise<GenerationResult>;
   verifyPin: (input: string) => boolean;
   updatePin: (pin: string | undefined) => Promise<void>;
   clearError: () => void;
@@ -85,7 +89,8 @@ export const useParentStore = create<ParentState>((set, get) => ({
         getDailyTasks(today),
         getLotteryPool()
       ]);
-      const dailyTasks = loadedTasks.length > 0 ? loadedTasks : generateDailyTasks(today);
+      const curriculumConfig = settings?.curriculum;
+      const dailyTasks = loadedTasks.length > 0 ? loadedTasks : generateDailyTasksWithCurriculum(today, curriculumConfig);
       if (loadedTasks.length === 0) {
         await saveDailyTasks(dailyTasks);
       }
@@ -187,7 +192,8 @@ export const useParentStore = create<ParentState>((set, get) => ({
   async loadDailyTasks(dateKey = getTodayKey()) {
     try {
       const loadedTasks = await getDailyTasks(dateKey);
-      const tasks = loadedTasks.length > 0 ? loadedTasks : generateDailyTasks(dateKey);
+      const curriculumConfig = get().settings?.curriculum;
+      const tasks = loadedTasks.length > 0 ? loadedTasks : generateDailyTasksWithCurriculum(dateKey, curriculumConfig);
       if (loadedTasks.length === 0) {
         await saveDailyTasks(tasks);
       }
@@ -230,7 +236,8 @@ export const useParentStore = create<ParentState>((set, get) => ({
   async resetDailyTasks(dateKey = getTodayKey()) {
     try {
       await deleteDailyTasksFromDB(dateKey);
-      const tasks = generateDailyTasks(dateKey);
+      const curriculumConfig = get().settings?.curriculum;
+      const tasks = generateDailyTasksWithCurriculum(dateKey, curriculumConfig);
       for (const task of tasks) {
         await saveDailyTask(task);
       }
@@ -314,6 +321,51 @@ export const useParentStore = create<ParentState>((set, get) => ({
       set({ lastResult: result, generating: false, error: null });
     } catch (err) {
       set({ generating: false, error: err instanceof Error ? err.message : '生成题目失败', lastResult: null });
+    }
+  },
+  async updateCurriculum(curriculum) {
+    const current = get().settings;
+    if (!current) {
+      set({ error: '家长设置未加载' });
+      return;
+    }
+    const next = { ...current, curriculum };
+    try {
+      await saveParentSettings(next);
+      set({ settings: next, error: null });
+    } catch (err) {
+      set({ error: err instanceof Error ? err.message : '保存课程计划失败' });
+    }
+  },
+  async generateCurriculumQuestions(startDayIndex, endDayIndex) {
+    const settings = get().settings;
+    if (!settings) throw new Error('家长设置未加载');
+    const curriculum = settings.curriculum;
+    if (!curriculum || !curriculum.enabled) throw new Error('90 天课程未启用');
+
+    const startTime = performance.now();
+    set({ generating: true, error: null, lastResult: null });
+    try {
+      const { questions, generatedCount, failed } = await generateCurriculumQuestionsForRange(
+        curriculum,
+        startDayIndex,
+        endDayIndex
+      );
+      if (questions.length > 0) {
+        await useQuestionStore.getState().saveGeneratedQuestions(questions);
+      }
+      const result: GenerationResult = {
+        success: generatedCount,
+        failed,
+        questions,
+        durationMs: Math.round(performance.now() - startTime)
+      };
+      set({ lastResult: result, generating: false, error: null });
+      return result;
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '生成课程题目失败';
+      set({ generating: false, error: message, lastResult: null });
+      throw new Error(message);
     }
   },
   verifyPin(input) {

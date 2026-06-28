@@ -488,9 +488,98 @@ interface Stage {
 
 ---
 
-## 5. 技术架构调整
+## 5. 架构升级：本机服务 + H5 跨端
 
-### 5.1 新增模块
+### 5.1 升级背景
+
+V1.0 采用纯前端 PWA 架构，所有数据存储在浏览器 IndexedDB 中，孩子只能在家长电脑上玩游戏。V2.0 升级为 **本机服务 + H5 跨端** 架构，实现以下核心变化：
+
+1. **电脑端作为家庭服务器**：家长电脑运行 Node.js 本地服务，统一管理游戏数据和业务逻辑
+2. **家长端仍在电脑端运行**：通过浏览器访问 localhost，体验不变，管理功能更强大
+3. **孩子端改为 H5 跨端页面**：手机、平板等任何设备通过局域网 WiFi 访问，无需安装 App
+4. **数据集中存储**：从 IndexedDB（浏览器内）迁移到 SQLite（服务端），支持多设备共享同一份数据
+
+### 5.2 新架构全景图
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                    家长电脑 (家庭服务器 + 管理端)                       │
+│                                                                     │
+│  ┌─────────────────────────────────────────────────────────────┐   │
+│  │              Node.js Server (Express + SQLite)                │   │
+│  │                                                              │   │
+│  │  ┌──────────────────┐  ┌───────────────────────────────┐    │   │
+│  │  │   REST API 层     │  │   静态资源服务 (Vite build)     │    │   │
+│  │  │  /api/profile/*   │  │   /           → 入口页         │    │   │
+│  │  │  /api/game/*      │  │   /play       → 孩子端 H5     │    │   │
+│  │  │  /api/question/*  │  │   /parent     → 家长管理端    │    │   │
+│  │  │  /api/admin/*     │  │   /assets/*   → 静态资源      │    │   │
+│  │  └────────┬─────────┘  └───────────────────────────────┘    │   │
+│  │           │                                                  │   │
+│  │  ┌────────┴──────────────────────────────────────────┐      │   │
+│  │  │              SQLite (better-sqlite3)                │      │   │
+│  │  │  profiles | progress | questions | rewards | ...    │      │   │
+│  │  └───────────────────────────────────────────────────┘      │   │
+│  └─────────────────────────────────────────────────────────────┘   │
+│                                                                     │
+│  家长端: http://localhost:3456/parent          (电脑浏览器)           │
+│  孩子端: http://localhost:3456/play            (电脑上测试用)          │
+└──────────────────────────┬──────────────────────────────────────────┘
+                           │
+                  同一 WiFi 局域网
+                           │
+        ┌──────────────────┴──────────────────┐
+        │                                     │
+┌───────┴──────────┐                ┌─────────┴──────────┐
+│   手机 (横屏)     │                │   平板              │
+│   孩子端 H5       │                │   孩子端 H5         │
+│ http://IP:3456   │                │ http://IP:3456     │
+│     /play        │                │     /play          │
+└──────────────────┘                └────────────────────┘
+```
+
+### 5.3 技术选型
+
+| 层级 | 选型 | 说明 |
+|---|---|---|
+| 服务框架 | Express 4.x | 轻量、生态完善、适合家庭本地服务 |
+| 数据库 | better-sqlite3 | 零配置、文件型、同步 API 简单可靠 |
+| API 风格 | RESTful JSON | 前端 fetch 调用，无额外依赖 |
+| 静态服务 | express.static | 直接托管 Vite build 产物 |
+| 开发代理 | Vite proxy | 开发时将 /api 请求代理到 Express |
+| 启动方式 | 单一命令 `npm start` | 先启动 Express 服务，Vite dev server 代理 API |
+| 局域网访问 | 绑定 `0.0.0.0` | 同 WiFi 下其他设备通过本机 IP 访问 |
+| 进程守护 | 可选 PM2 / node-windows | 生产环境保持服务持续运行 |
+
+### 5.4 数据层迁移：IndexedDB → SQLite
+
+#### 5.4.1 迁移策略
+
+| 阶段 | 内容 |
+|---|---|
+| 首次启动 | 自动检测 IndexedDB 中是否有旧数据，如有则弹出迁移确认 |
+| 迁移执行 | 读取 IndexedDB 全部数据 → 转换为 SQLite schema → 写入 → 验证行数一致 |
+| 迁移后 | IndexedDB 数据保留不删除（作为备份），后续读写全部走 SQLite |
+| 新用户 | 直接初始化 SQLite 空库，跳过迁移 |
+
+#### 5.4.2 数据模型映射
+
+IndexedDB 的 13 个 Object Store 全部映射为 SQLite 表，保持字段对应关系不变，字符 ID 均使用 TEXT 类型。迁移工具 `server/migration.ts` 负责一对一转换。
+
+### 5.5 新增模块
+
+#### 服务端模块
+
+| 模块 | 路径 | 职责 |
+|---|---|---|
+| 服务入口 | `server/index.ts` | Express 启动、中间件、端口监听 |
+| 数据库 | `server/db.ts` | SQLite 连接、建表、迁移 |
+| API 路由 | `server/routes/` | 按资源拆分路由文件 |
+| 游戏逻辑 | `server/services/` | 服务端战斗、出题、奖励等核心逻辑 |
+| 迁移工具 | `server/migration.ts` | IndexedDB → SQLite 数据迁移 |
+| 二维码 | `server/qrcode.ts` | 生成本机局域网访问二维码 |
+
+#### 客户端新增模块
 
 | 模块 | 路径 | 职责 |
 |---|---|---|
@@ -502,54 +591,61 @@ interface Stage {
 | 词语词典 | `src/data/wordDictionary.ts` | 常见词语库，支持接龙判定 |
 | 粒子系统 | `src/components/effects/ParticleSystem.ts` | Canvas 粒子特效 |
 | 动画系统 | `src/animations/` | 统一动画定义和播放控制 |
+| 移动端适配 | `src/hooks/useMobile.ts` | 检测设备类型、横竖屏切换 |
+| 触摸手势 | `src/hooks/useGesture.ts` | 滑动手势支持（地图滚动、翻牌等） |
 
-### 5.2 重构模块
+### 5.6 重构模块
+
+#### 客户端重构
 
 | 模块 | 改动 |
 |---|---|
-| `src/services/aiQuestion.ts` | 增加批量生成模式、自动补充模式 |
+| `src/stores/*` | 所有 Zustand store 改用 fetch API 替代直接 IndexedDB 读写 |
+| `src/services/aiQuestion.ts` | 改为调用服务端 `/api/question/generate`，不再直接操作 IndexedDB |
 | `src/stores/gameStore.ts` | 支持 270 关卡状态、副本进度、每日计划 |
-| `src/pages/WorldMap.tsx` | 重写为横版可滚动地图 |
+| `src/pages/WorldMap.tsx` | 重写为横版可滚动地图，支持触摸滑动 |
 | `src/pages/Battle.tsx` | 重写战斗场景，接入粒子系统和动画系统 |
-| `src/pages/PlayHome.tsx` | 重写为场景化冒险营地 |
-| `src/components/play/` | 大量组件重写，新增特效组件 |
-| `src/styles/index.css` | 新增场景背景、动画关键帧、粒子样式 |
+| `src/pages/PlayHome.tsx` | 重写为场景化冒险营地，支持横竖屏切换 |
+| `src/components/play/` | 大量组件重写，新增特效组件，全部支持移动端触控 |
+| `src/styles/index.css` | 新增场景背景、动画关键帧、粒子样式，响应式断点 |
+| `src/main.tsx` | 增加设备检测、局域网地址提示、服务端连接状态 |
 
-### 5.3 数据模型变更
+#### 服务端核心逻辑（从客户端迁移到服务端）
 
-```typescript
-// 新增：关卡定义
-interface StageDefinition {
-  id: string;
-  day: number;
-  subject: Subject;
-  name: string;
-  knowledgePoints: string[];
-  difficulty: Difficulty;
-  questionCount: number;
-  isBoss: boolean;
-  monsterName: string;
-  monsterHP: number;
-  rewards: { stars: number; exp: number; fragments?: string };
-}
+| 逻辑 | 原位置（V1.0） | 新位置（V2.0） |
+|---|---|---|
+| 题目生成与存储 | `src/services/aiQuestion.ts` → IndexedDB | `server/services/questionService.ts` → SQLite |
+| 战斗结算 | `src/stores/gameStore.ts` → IndexedDB | `server/services/battleService.ts` → SQLite |
+| 奖励兑换 | `src/stores/gameStore.ts` → IndexedDB | `server/services/rewardService.ts` → SQLite |
+| 星星流水 | `src/stores/gameStore.ts` → IndexedDB | `server/services/starService.ts` → SQLite |
+| 家长设置 | `src/stores/parentStore.ts` → IndexedDB | `server/services/settingService.ts` → SQLite |
+| 数据导入导出 | `src/services/exportImportLogic.ts` | `server/services/backupService.ts` |
 
-// 新增：副本进度
-interface DungeonProgress {
-  type: 'gomoku' | 'trivia' | 'memory' | 'speedmath' | 'wordchain';
-  totalPlays: number;
-  totalWins: number;
-  bestScore: number;
-  unlockedAchievements: string[];
-}
+### 5.7 多设备支持
 
-// 修改：Profile 增加副本字段
-interface Profile {
-  // ... 现有字段
-  currentDay: number;          // 当前暑假天数
-  dungeonProgress: DungeonProgress[];
-  curriculumPlan?: CurriculumPlan;
-}
-```
+架构升级天然支持多设备同时访问：
+
+- **多孩子场景**：同一家庭多个孩子各自用自己手机/平板，选择自己的档案登录
+- **数据隔离**：每个 Profile 独立存储进度，互不干扰
+- **星星共享**：家庭星星池统一管理，所有孩子共享兑换同一个奖励池
+- **并发安全**：SQLite 的 WAL 模式支持多读单写，家庭场景足够
+
+### 5.8 离线降级策略
+
+| 场景 | 策略 |
+|---|---|
+| 手机断网（WiFi 断开） | 显示"连接中断"提示，保留已加载题目可继续答题，结果缓存到 localStorage，恢复连接后自动同步 |
+| 服务端未启动 | 孩子端显示"请先打开电脑上的学科小勇士"提示 + 家长端本地可访问 localhost 管理 |
+| 服务端崩溃 | 家长端可手动重启服务（npm start），孩子端自动重连 |
+
+### 5.9 安全设计
+
+| 层面 | 措施 |
+|---|---|
+| 网络隔离 | 仅监听局域网（0.0.0.0），不暴露到公网，路由器 NAT 天然隔离 |
+| 家长 PIN | 孩子端切换档案、查看家长设置需输入 PIN 码验证 |
+| API 鉴权 | 孩子端 API 仅能操作自己的档案数据；管理类 API 仅 localhost 可调用 |
+| 数据备份 | 家长端提供一键备份 SQLite 文件到本地，支持导出 JSON |
 
 ---
 
@@ -559,20 +655,64 @@ interface Profile {
 
 | 期数 | 内容 | 预估工期 | 优先级 |
 |---|---|---|---|
+| Phase 0 | 架构升级：Express 服务 + SQLite + API 层 | 3-4 天 | P0 |
 | Phase 1 | 课程规划器 + 自动出题 + 关卡数据 | 3-4 天 | P0 |
-| Phase 2 | UI 重构：战斗场景 + 世界地图 | 4-5 天 | P0 |
-| Phase 3 | UI 重构：首页 + 商城 + 成就 + 装备/宠物 | 3-4 天 | P1 |
+| Phase 2 | UI 重构：战斗场景 + 世界地图 + H5 适配 | 4-5 天 | P0 |
+| Phase 3 | UI 重构：首页 + 商城 + 成就 + 装备/宠物 + 移动端 | 3-4 天 | P1 |
 | Phase 4 | 副本玩法：五子棋 + 百科小博士 | 2-3 天 | P1 |
 | Phase 5 | 副本玩法：记忆翻翻乐 + 速算大闯关 + 词语接龙 | 2-3 天 | P1 |
-| Phase 6 | 动画打磨 + 音效 + 性能优化 | 3-4 天 | P2 |
+| Phase 6 | 动画打磨 + 音效 + 性能优化 + 多设备测试 | 3-4 天 | P2 |
 
-### 6.2 验收标准
+### 6.2 Phase 0 详细任务（架构升级）
 
-- 系统启动后自动生成完整 90 天关卡题目，家长无需手动出题
-- 战斗场景动画流畅，连击/暴击有明确的视觉反馈
-- 5 个副本玩法可玩，有完整的胜负判定和奖励
-- 整体 UI 风格统一，有"游戏"的感觉而非"做题软件"
-- 所有现有测试通过，新增模块有对应单元测试
+1. **搭建 Express 服务框架**（`server/index.ts`）
+   - 端口 3456，绑定 0.0.0.0
+   - `express.static` 托管 Vite build 产物（`dist/`）
+   - CORS 中间件（允许局域网跨域）
+   - 请求日志中间件
+
+2. **SQLite 数据库初始化**（`server/db.ts`）
+   - better-sqlite3 建库文件 `data/game.db`
+   - 按原 IndexedDB schema 建立对应的 13 张表
+   - WAL 模式开启（支持并发读）
+   - 提供 db 单例给所有 service 使用
+
+3. **REST API 路由设计**
+   - `GET/POST/PUT /api/profile/:id` — 孩子档案 CRUD
+   - `GET /api/progress/:profileId` — 关卡进度
+   - `POST /api/battle/:profileId` — 发起战斗、提交答案
+   - `GET /api/questions/:stageId` — 获取关卡题目
+   - `POST /api/questions/generate` — 触发 AI 出题
+   - `GET/POST/PUT /api/rewards` — 奖励池管理
+   - `POST /api/redeem` — 兑换奖励
+   - `GET/POST /api/settings` — 家长设置
+   - `POST /api/backup/export` — 数据导出
+
+4. **数据迁移工具**（`server/migration.ts`）
+   - 读取浏览器 IndexedDB → 写入 SQLite
+   - 迁移验证（行数对比）
+   - 迁移日志记录
+
+5. **客户端改造**
+   - `src/api/` 封装 fetch 请求层
+   - Zustand store 所有 async action 改为调用 API
+   - `vite.config.ts` 添加 proxy：`/api` → `http://localhost:3456`
+   - 增加连接状态指示器（服务端在线/离线）
+
+6. **启动脚本**
+   - `npm start`：启动 Express → 启动 Vite dev
+   - `npm run server`：仅启动 Express（生产模式）
+   - 控制台打印本机 IP + 二维码，方便手机扫码访问
+
+### 6.3 验收标准
+
+- Express 服务正常启动，localhost:3456 可访问
+- 所有 API 端点可通过 curl 测试通过
+- 数据从 IndexedDB 迁移到 SQLite 无丢失
+- 手机同 WiFi 下可通过 IP:3456/play 打开孩子端
+- 家长端 localhost:3456/parent 功能完整
+- 现有 174 个测试全部通过（客户端逻辑不变的前提下）
+- 新增 API 路由有对应集成测试
 
 ---
 
@@ -583,3 +723,6 @@ interface Profile {
 3. **性能**：战斗场景的粒子特效和动画可能影响低端设备，需要做性能降级（关闭粒子/简化动画）
 4. **副本平衡性**：五子棋 AI 难度需要调优，避免孩子一直输或一直赢
 5. **数据迁移**：已有用户数据需要平滑迁移到新的关卡结构
+6. **SQLite 并发**：better-sqlite3 为同步 API，需确保单线程写入，WAL 模式缓解读锁冲突
+7. **局域网稳定性**：依赖 WiFi 质量，需做好离线降级和自动重连
+8. **移动端兼容**：不同手机浏览器的 CSS 兼容性需要充分测试（iOS Safari / Android Chrome）

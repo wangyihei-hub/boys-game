@@ -1,6 +1,6 @@
 import { useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Activity, BookOpen, Sparkles, Gift, ClipboardList, Settings } from 'lucide-react';
+import { Activity, BookOpen, Sparkles, Gift, ClipboardList, Settings, GraduationCap } from 'lucide-react';
 import { ApiSettingsCard } from '../components/parent/ApiSettingsCard';
 import { useParentStore } from '../stores/parentStore';
 import { useProfileStore } from '../stores/profileStore';
@@ -115,6 +115,19 @@ export function ParentDashboard() {
           <div>
             <h3 className="text-lg font-bold">兑换审批</h3>
             <p className="text-sm text-slate-500">确认或拒绝孩子的星星兑换申请</p>
+          </div>
+        </Link>
+
+        <Link
+          to="/parent/curriculum"
+          className="card flex items-center gap-4 transition hover:bg-teal-50 active:scale-95"
+        >
+          <div className="flex h-14 w-14 shrink-0 items-center justify-center rounded-2xl bg-teal-100 text-teal-600">
+            <GraduationCap className="h-7 w-7" />
+          </div>
+          <div>
+            <h3 className="text-lg font-bold">90 天课程</h3>
+            <p className="text-sm text-slate-500">自动生成学习计划与对应题库</p>
           </div>
         </Link>
 

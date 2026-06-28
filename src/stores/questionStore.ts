@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 import type { Difficulty, Question, Subject } from '../types';
-import { deleteQuestions as deleteQuestionsFromDB, getQuestions, saveQuestions } from '../db';
+import { deleteQuestions as deleteQuestionsFromDB, getQuestions, saveQuestions } from '../db/dataAccess';
 import { getSeedQuestionsBySubjectAndDifficulty } from '../data/seedQuestions';
 
 interface QuestionState {

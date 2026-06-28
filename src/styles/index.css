@@ -21,4 +21,84 @@
   .btn-secondary {
     @apply rounded-xl bg-slate-200 px-4 py-2 font-semibold text-slate-800 hover:bg-slate-300 active:scale-95;
   }
+
+  .scene-chinese {
+    background: radial-gradient(circle at 20% 30%, rgba(34, 197, 94, 0.15), transparent 40%),
+      linear-gradient(180deg, #ecfdf5 0%, #d1fae5 60%, #a7f3d0 100%);
+  }
+  .scene-math {
+    background: radial-gradient(circle at 80% 20%, rgba(59, 130, 246, 0.15), transparent 40%),
+      linear-gradient(180deg, #eff6ff 0%, #dbeafe 60%, #bfdbfe 100%);
+  }
+  .scene-english {
+    background: radial-gradient(circle at 50% 30%, rgba(234, 179, 8, 0.15), transparent 40%),
+      linear-gradient(180deg, #fefce8 0%, #fef9c3 60%, #fde68a 100%);
+  }
+
+  .map-track {
+    @apply relative h-[420px] min-w-[768px] overflow-hidden rounded-3xl border-4 border-white/60 bg-white/30 shadow-inner;
+  }
+
+  .map-zone-chinese {
+    background: linear-gradient(135deg, #dcfce7 0%, #bbf7d0 50%, #86efac 100%);
+  }
+  .map-zone-math {
+    background: linear-gradient(135deg, #dbeafe 0%, #93c5fd 50%, #60a5fa 100%);
+  }
+  .map-zone-english {
+    background: linear-gradient(135deg, #fef9c3 0%, #fde047 50%, #facc15 100%);
+  }
+
+  .battle-arena {
+    @apply relative flex min-h-[60vh] flex-col justify-between overflow-hidden rounded-3xl border-4 border-white/60 p-4 shadow-xl sm:p-6;
+  }
+
+  .scene-camp {
+    background: radial-gradient(circle at 50% 80%, rgba(79, 70, 229, 0.12), transparent 50%),
+      linear-gradient(180deg, #f8fafc 0%, #e0e7ff 50%, #c7d2fe 100%);
+  }
+
+  .scene-shop {
+    background: radial-gradient(circle at 80% 10%, rgba(245, 158, 11, 0.15), transparent 40%),
+      linear-gradient(180deg, #fffbeb 0%, #fef3c7 60%, #fde68a 100%);
+  }
+
+  .scene-achievements {
+    background: radial-gradient(circle at 20% 10%, rgba(245, 158, 11, 0.12), transparent 40%),
+      linear-gradient(180deg, #fffbeb 0%, #fef9c3 60%, #fde68a 100%);
+  }
+
+  .scene-equipment {
+    background: radial-gradient(circle at 50% 20%, rgba(99, 102, 241, 0.12), transparent 40%),
+      linear-gradient(180deg, #eef2ff 0%, #e0e7ff 60%, #c7d2fe 100%);
+  }
+
+  .scene-pet {
+    background: radial-gradient(circle at 50% 30%, rgba(249, 115, 22, 0.12), transparent 40%),
+      linear-gradient(180deg, #fff7ed 0%, #ffedd5 60%, #fed7aa 100%);
+  }
+
+  .glass-card {
+    @apply rounded-2xl border border-white/60 bg-white/70 p-4 shadow-sm backdrop-blur-sm;
+  }
+
+  .badge-3d {
+    transform-style: preserve-3d;
+    transition: transform 0.6s;
+  }
+  .badge-3d.flipped {
+    transform: rotateY(180deg);
+  }
+}
+
+@layer utilities {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom, 0px);
+  }
+  .touch-pan-x {
+    touch-action: pan-x;
+  }
+  .perspective-1000 {
+    perspective: 1000px;
+  }
 }

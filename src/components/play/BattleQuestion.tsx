@@ -84,7 +84,7 @@ export function BattleQuestion({
                   disabled={isDisabled}
                   onClick={() => handleSelect(index)}
                   className={[
-                    'rounded-xl border-2 px-4 py-3 text-left font-semibold transition',
+                    'rounded-xl border-2 px-4 py-4 text-left text-base font-semibold transition active:scale-[0.98] sm:py-3',
                     selected === index
                       ? 'border-indigo-600 bg-indigo-50 text-indigo-700'
                       : index === hintOption
@@ -110,7 +110,7 @@ export function BattleQuestion({
                   handleSelect(e.currentTarget.value.trim());
                 }
               }}
-              className="w-full rounded-xl border-2 border-slate-200 px-4 py-3 outline-none focus:border-indigo-500"
+              className="w-full rounded-xl border-2 border-slate-200 px-4 py-4 text-lg outline-none focus:border-indigo-500 sm:py-3"
             />
             <button
               type="button"
@@ -119,7 +119,7 @@ export function BattleQuestion({
                 const input = document.querySelector('input[type="text"]') as HTMLInputElement;
                 if (input) handleSelect(input.value.trim());
               }}
-              className="btn-primary w-full disabled:opacity-60"
+              className="btn-primary w-full py-3 text-base disabled:opacity-60"
             >
               提交答案
             </button>

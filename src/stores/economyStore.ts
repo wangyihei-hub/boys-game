@@ -8,7 +8,7 @@ import {
   getTransactions,
   saveInventoryItem,
   saveLotteryPrize
-} from '../db';
+} from '../db/dataAccess';
 import { canAfford, createRedemption, createRewardId } from '../services/economyLogic';
 import { createPetInstance } from '../services/petLogic';
 import {
@@ -45,6 +45,7 @@ interface EconomyState {
   drawLottery: () => Promise<{ success: boolean; prize?: { name: string; icon: string; type: string }; error?: string }>;
   buyShopItem: (item: Omit<InventoryItem, 'count'>, cost: number) => Promise<{ success: boolean; error?: string }>;
   synthesizeFragment: () => Promise<{ success: boolean; reward?: Reward; error?: string }>;
+  grantMinigameReward: (reward: { type: 'stars'; amount: number } | { type: 'item'; item: Omit<InventoryItem, 'count'> }) => Promise<{ success: boolean; error?: string }>;
   clearError: () => void;
 }
 
@@ -301,6 +302,26 @@ export const useEconomyStore = create<EconomyState>((set, get) => ({
       return { success: true, reward };
     } catch (err) {
       const message = err instanceof Error ? err.message : '合成失败';
+      set({ error: message });
+      return { success: false, error: message };
+    }
+  },
+  async grantMinigameReward(reward) {
+    try {
+      if (reward.type === 'stars') {
+        await useProfileStore.getState().applyTransaction('earn', reward.amount, '小游戏奖励');
+      } else {
+        const newItem: InventoryItem =
+          reward.item.type === 'pet' && reward.item.petDefId
+            ? createPetInstance(reward.item.petDefId)
+            : { ...reward.item, count: 1 };
+        const nextInventory = updateInventory(get().inventory, newItem);
+        await saveInventoryItem(nextInventory.find(i => i.id === newItem.id)!);
+        set({ inventory: nextInventory, error: null });
+      }
+      return { success: true };
+    } catch (err) {
+      const message = err instanceof Error ? err.message : '发放小游戏奖励失败';
       set({ error: message });
       return { success: false, error: message };
     }
