@@ -14,6 +14,8 @@ export default {
         shake: 'shake 0.4s ease-in-out 1',
         floatUp: 'floatUp 0.8s ease-out forwards',
         pulseGlow: 'pulseGlow 1.5s ease-in-out infinite',
+        campfireFlicker: 'campfireFlicker 1.5s ease-in-out infinite',
+        tentSway: 'tentSway 4s ease-in-out infinite',
         attackLunge: 'attackLunge 0.4s ease-in-out 1',
         attackLungeLeft: 'attackLungeLeft 0.4s ease-in-out 1',
         hurtFlash: 'hurtFlash 0.3s ease-in-out 1',
@@ -38,6 +40,14 @@ export default {
         pulseGlow: {
           '0%, 100%': { boxShadow: '0 0 0 0 rgba(245, 158, 11, 0.4)' },
           '50%': { boxShadow: '0 0 16px 8px rgba(245, 158, 11, 0)' }
+        },
+        campfireFlicker: {
+          '0%, 100%': { opacity: '0.7', transform: 'scale(1)' },
+          '50%': { opacity: '1', transform: 'scale(1.05)' }
+        },
+        tentSway: {
+          '0%, 100%': { transform: 'rotate(-1deg)' },
+          '50%': { transform: 'rotate(1deg)' }
         },
         attackLunge: {
           '0%': { transform: 'translateX(0)' },
