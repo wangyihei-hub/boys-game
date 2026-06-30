@@ -180,7 +180,7 @@ export function Battle() {
 
   if (loadError) {
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 p-4">
         <div className="card text-center">
           <div className="mb-2 text-5xl">⚡</div>
           <h2 className="text-xl font-bold">无法开始战斗</h2>
@@ -257,7 +257,7 @@ export function Battle() {
   if (currentBattle.finished) {
     const correctCount = currentBattle.answers.filter((a: BattleAnswer) => a.correct).length;
     return (
-      <div className="space-y-4">
+      <div className="space-y-4 p-4">
         <div className="card text-center">
           <div className="mb-2 text-5xl">
             {currentBattle.result === 'win' ? '🏆' : '💔'}
@@ -285,7 +285,7 @@ export function Battle() {
   const levelName = assertV3Level(subject, currentBattle.levelNumber).topic;
 
   return (
-    <div className="flex h-full flex-col gap-3">
+    <div className="flex h-full flex-col gap-3 p-4">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-base font-bold sm:text-lg">

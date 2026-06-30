@@ -18,7 +18,7 @@ export function HeroAvatar({ profile, bounce, attacking, hurt }: HeroAvatarProps
           hurt ? 'animate-hurtFlash' : ''
         ].join(' ')}
       >
-        🧒
+        {profile.avatar ?? '🧒'}
       </div>
       <div className="text-center">
         <p className="text-sm font-bold text-slate-800 sm:text-base">{profile.nickname}</p>
