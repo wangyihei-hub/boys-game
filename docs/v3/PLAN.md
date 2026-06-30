@@ -203,7 +203,7 @@ src/data/v3/bank/
 8. 实施 4.2-4.9 代码改造
 9. npm run test:types && npm test -- --run && npm run build
 10. 把 9500 道新题 + Boss 渲染为 3 份 markdown，按 5 节上传飞书
-11. git commit + push 到 github & gitee
+11. git commit + push 到 github
 ```
 
 ## 7. 重要历史决策与陷阱（来自 MEMORY）
