@@ -1,0 +1,602 @@
+[
+  {
+    "level": 1,
+    "grade": 4,
+    "topic": "动物词汇",
+    "difficulty": 1
+  },
+  {
+    "level": 2,
+    "grade": 4,
+    "topic": "颜色词汇",
+    "difficulty": 1
+  },
+  {
+    "level": 3,
+    "grade": 4,
+    "topic": "数字词汇",
+    "difficulty": 1
+  },
+  {
+    "level": 4,
+    "grade": 4,
+    "topic": "家庭成员",
+    "difficulty": 1
+  },
+  {
+    "level": 5,
+    "grade": 4,
+    "topic": "身体部位",
+    "difficulty": 1
+  },
+  {
+    "level": 6,
+    "grade": 4,
+    "topic": "食物饮料",
+    "difficulty": 1
+  },
+  {
+    "level": 7,
+    "grade": 4,
+    "topic": "水果词汇",
+    "difficulty": 1
+  },
+  {
+    "level": 8,
+    "grade": 4,
+    "topic": "学校用品",
+    "difficulty": 1
+  },
+  {
+    "level": 9,
+    "grade": 4,
+    "topic": "教室场所",
+    "difficulty": 1
+  },
+  {
+    "level": 10,
+    "grade": 4,
+    "topic": "交通工具",
+    "difficulty": 1
+  },
+  {
+    "level": 11,
+    "grade": 4,
+    "topic": "衣服服饰",
+    "difficulty": 1
+  },
+  {
+    "level": 12,
+    "grade": 4,
+    "topic": "天气词汇",
+    "difficulty": 1
+  },
+  {
+    "level": 13,
+    "grade": 4,
+    "topic": "季节月份",
+    "difficulty": 1
+  },
+  {
+    "level": 14,
+    "grade": 4,
+    "topic": "星期日期",
+    "difficulty": 1
+  },
+  {
+    "level": 15,
+    "grade": 4,
+    "topic": "动物特征",
+    "difficulty": 1
+  },
+  {
+    "level": 16,
+    "grade": 4,
+    "topic": "职业词汇",
+    "difficulty": 1
+  },
+  {
+    "level": 17,
+    "grade": 4,
+    "topic": "运动爱好",
+    "difficulty": 1
+  },
+  {
+    "level": 18,
+    "grade": 4,
+    "topic": "房间家居",
+    "difficulty": 1
+  },
+  {
+    "level": 19,
+    "grade": 4,
+    "topic": "情绪感受",
+    "difficulty": 1
+  },
+  {
+    "level": 20,
+    "grade": 4,
+    "topic": "国家语言",
+    "difficulty": 1
+  },
+  {
+    "level": 21,
+    "grade": 4,
+    "topic": "冠词 a / an / the",
+    "difficulty": 1
+  },
+  {
+    "level": 22,
+    "grade": 4,
+    "topic": "人称代词",
+    "difficulty": 1
+  },
+  {
+    "level": 23,
+    "grade": 4,
+    "topic": "物主代词",
+    "difficulty": 1
+  },
+  {
+    "level": 24,
+    "grade": 4,
+    "topic": "指示代词",
+    "difficulty": 1
+  },
+  {
+    "level": 25,
+    "grade": 4,
+    "topic": "there be 句型",
+    "difficulty": 1
+  },
+  {
+    "level": 26,
+    "grade": 4,
+    "topic": "一般现在时 be动词",
+    "difficulty": 1
+  },
+  {
+    "level": 27,
+    "grade": 4,
+    "topic": "一般现在时 实义动词",
+    "difficulty": 1
+  },
+  {
+    "level": 28,
+    "grade": 4,
+    "topic": "现在进行时",
+    "difficulty": 1
+  },
+  {
+    "level": 29,
+    "grade": 4,
+    "topic": "祈使句",
+    "difficulty": 1
+  },
+  {
+    "level": 30,
+    "grade": 4,
+    "topic": "情态动词 can",
+    "difficulty": 1
+  },
+  {
+    "level": 31,
+    "grade": 4,
+    "topic": "介词 in / on / under",
+    "difficulty": 1
+  },
+  {
+    "level": 32,
+    "grade": 4,
+    "topic": "介词 at / to / from",
+    "difficulty": 1
+  },
+  {
+    "level": 33,
+    "grade": 4,
+    "topic": "特殊疑问句 what / who",
+    "difficulty": 1
+  },
+  {
+    "level": 34,
+    "grade": 4,
+    "topic": "特殊疑问句 where / when",
+    "difficulty": 2
+  },
+  {
+    "level": 35,
+    "grade": 4,
+    "topic": "选择疑问句",
+    "difficulty": 2
+  },
+  {
+    "level": 36,
+    "grade": 4,
+    "topic": "名词单复数",
+    "difficulty": 2
+  },
+  {
+    "level": 37,
+    "grade": 4,
+    "topic": "不可数名词",
+    "difficulty": 2
+  },
+  {
+    "level": 38,
+    "grade": 4,
+    "topic": "形容词",
+    "difficulty": 2
+  },
+  {
+    "level": 39,
+    "grade": 4,
+    "topic": "副词",
+    "difficulty": 2
+  },
+  {
+    "level": 40,
+    "grade": 4,
+    "topic": "连词 and / but / or",
+    "difficulty": 2
+  },
+  {
+    "level": 41,
+    "grade": 4,
+    "topic": "情景问候",
+    "difficulty": 2
+  },
+  {
+    "level": 42,
+    "grade": 4,
+    "topic": "购物对话",
+    "difficulty": 2
+  },
+  {
+    "level": 43,
+    "grade": 4,
+    "topic": "问路与指路",
+    "difficulty": 2
+  },
+  {
+    "level": 44,
+    "grade": 4,
+    "topic": "点餐用语",
+    "difficulty": 2
+  },
+  {
+    "level": 45,
+    "grade": 4,
+    "topic": "电话用语",
+    "difficulty": 2
+  },
+  {
+    "level": 46,
+    "grade": 4,
+    "topic": "日常作息",
+    "difficulty": 2
+  },
+  {
+    "level": 47,
+    "grade": 4,
+    "topic": "学校生活",
+    "difficulty": 2
+  },
+  {
+    "level": 48,
+    "grade": 4,
+    "topic": "假期活动",
+    "difficulty": 2
+  },
+  {
+    "level": 49,
+    "grade": 4,
+    "topic": "看图写句",
+    "difficulty": 2
+  },
+  {
+    "level": 50,
+    "grade": 4,
+    "topic": "四年级综合",
+    "difficulty": 2
+  },
+  {
+    "level": 51,
+    "grade": 5,
+    "topic": "动物进阶",
+    "difficulty": 2
+  },
+  {
+    "level": 52,
+    "grade": 5,
+    "topic": "自然地理",
+    "difficulty": 2
+  },
+  {
+    "level": 53,
+    "grade": 5,
+    "topic": "城市设施",
+    "difficulty": 2
+  },
+  {
+    "level": 54,
+    "grade": 5,
+    "topic": "节日文化",
+    "difficulty": 2
+  },
+  {
+    "level": 55,
+    "grade": 5,
+    "topic": "健康医疗",
+    "difficulty": 2
+  },
+  {
+    "level": 56,
+    "grade": 5,
+    "topic": "科技产品",
+    "difficulty": 2
+  },
+  {
+    "level": 57,
+    "grade": 5,
+    "topic": "兴趣爱好进阶",
+    "difficulty": 2
+  },
+  {
+    "level": 58,
+    "grade": 5,
+    "topic": "食物烹饪",
+    "difficulty": 2
+  },
+  {
+    "level": 59,
+    "grade": 5,
+    "topic": "旅行词汇",
+    "difficulty": 2
+  },
+  {
+    "level": 60,
+    "grade": 5,
+    "topic": "环境保护",
+    "difficulty": 2
+  },
+  {
+    "level": 61,
+    "grade": 5,
+    "topic": "学科科目进阶",
+    "difficulty": 2
+  },
+  {
+    "level": 62,
+    "grade": 5,
+    "topic": "情感品质",
+    "difficulty": 2
+  },
+  {
+    "level": 63,
+    "grade": 5,
+    "topic": "动词短语",
+    "difficulty": 2
+  },
+  {
+    "level": 64,
+    "grade": 5,
+    "topic": "形容词进阶",
+    "difficulty": 2
+  },
+  {
+    "level": 65,
+    "grade": 5,
+    "topic": "副词进阶",
+    "difficulty": 2
+  },
+  {
+    "level": 66,
+    "grade": 5,
+    "topic": "连词进阶",
+    "difficulty": 2
+  },
+  {
+    "level": 67,
+    "grade": 5,
+    "topic": "同义词",
+    "difficulty": 3
+  },
+  {
+    "level": 68,
+    "grade": 5,
+    "topic": "反义词",
+    "difficulty": 3
+  },
+  {
+    "level": 69,
+    "grade": 5,
+    "topic": "词性转换",
+    "difficulty": 3
+  },
+  {
+    "level": 70,
+    "grade": 5,
+    "topic": "易混淆词",
+    "difficulty": 3
+  },
+  {
+    "level": 71,
+    "grade": 5,
+    "topic": "一般过去时 be动词",
+    "difficulty": 3
+  },
+  {
+    "level": 72,
+    "grade": 5,
+    "topic": "一般过去时 规则动词",
+    "difficulty": 3
+  },
+  {
+    "level": 73,
+    "grade": 5,
+    "topic": "一般过去时 不规则动词",
+    "difficulty": 3
+  },
+  {
+    "level": 74,
+    "grade": 5,
+    "topic": "一般将来时 will",
+    "difficulty": 3
+  },
+  {
+    "level": 75,
+    "grade": 5,
+    "topic": "一般将来时 be going to",
+    "difficulty": 3
+  },
+  {
+    "level": 76,
+    "grade": 5,
+    "topic": "现在完成时",
+    "difficulty": 3
+  },
+  {
+    "level": 77,
+    "grade": 5,
+    "topic": "形容词比较级",
+    "difficulty": 3
+  },
+  {
+    "level": 78,
+    "grade": 5,
+    "topic": "形容词最高级",
+    "difficulty": 3
+  },
+  {
+    "level": 79,
+    "grade": 5,
+    "topic": "副词比较级最高级",
+    "difficulty": 3
+  },
+  {
+    "level": 80,
+    "grade": 5,
+    "topic": "情态动词 may / must / should",
+    "difficulty": 3
+  },
+  {
+    "level": 81,
+    "grade": 5,
+    "topic": "代词 some / any",
+    "difficulty": 3
+  },
+  {
+    "level": 82,
+    "grade": 5,
+    "topic": "代词 many / much",
+    "difficulty": 3
+  },
+  {
+    "level": 83,
+    "grade": 5,
+    "topic": "介词进阶",
+    "difficulty": 3
+  },
+  {
+    "level": 84,
+    "grade": 5,
+    "topic": "时间介词",
+    "difficulty": 3
+  },
+  {
+    "level": 85,
+    "grade": 5,
+    "topic": "定冠词 the 进阶",
+    "difficulty": 3
+  },
+  {
+    "level": 86,
+    "grade": 5,
+    "topic": "感叹句",
+    "difficulty": 3
+  },
+  {
+    "level": 87,
+    "grade": 5,
+    "topic": "反意疑问句",
+    "difficulty": 3
+  },
+  {
+    "level": 88,
+    "grade": 5,
+    "topic": "宾语从句",
+    "difficulty": 3
+  },
+  {
+    "level": 89,
+    "grade": 5,
+    "topic": "状语从句",
+    "difficulty": 3
+  },
+  {
+    "level": 90,
+    "grade": 5,
+    "topic": "被动语态初识",
+    "difficulty": 3
+  },
+  {
+    "level": 91,
+    "grade": 5,
+    "topic": "阅读理解 细节",
+    "difficulty": 3
+  },
+  {
+    "level": 92,
+    "grade": 5,
+    "topic": "阅读理解 词义",
+    "difficulty": 3
+  },
+  {
+    "level": 93,
+    "grade": 5,
+    "topic": "阅读理解 主旨",
+    "difficulty": 3
+  },
+  {
+    "level": 94,
+    "grade": 5,
+    "topic": "阅读理解 推理",
+    "difficulty": 3
+  },
+  {
+    "level": 95,
+    "grade": 5,
+    "topic": "完形填空",
+    "difficulty": 3
+  },
+  {
+    "level": 96,
+    "grade": 5,
+    "topic": "情景交际",
+    "difficulty": 3
+  },
+  {
+    "level": 97,
+    "grade": 5,
+    "topic": "书面表达句型",
+    "difficulty": 3
+  },
+  {
+    "level": 98,
+    "grade": 5,
+    "topic": "文化常识",
+    "difficulty": 3
+  },
+  {
+    "level": 99,
+    "grade": 5,
+    "topic": "综合复习",
+    "difficulty": 3
+  },
+  {
+    "level": 100,
+    "grade": 5,
+    "topic": "毕业挑战",
+    "difficulty": 3
+  }
+]

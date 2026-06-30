@@ -1,0 +1,602 @@
+[
+  {
+    "level": 1,
+    "grade": 4,
+    "topic": "大数的认识（一）",
+    "difficulty": 1
+  },
+  {
+    "level": 2,
+    "grade": 4,
+    "topic": "大数的认识（二）",
+    "difficulty": 1
+  },
+  {
+    "level": 3,
+    "grade": 4,
+    "topic": "大数的认识（三）",
+    "difficulty": 1
+  },
+  {
+    "level": 4,
+    "grade": 4,
+    "topic": "大数的认识（四）",
+    "difficulty": 1
+  },
+  {
+    "level": 5,
+    "grade": 4,
+    "topic": "大数的认识（五）",
+    "difficulty": 1
+  },
+  {
+    "level": 6,
+    "grade": 4,
+    "topic": "四则运算（一）",
+    "difficulty": 1
+  },
+  {
+    "level": 7,
+    "grade": 4,
+    "topic": "四则运算（二）",
+    "difficulty": 1
+  },
+  {
+    "level": 8,
+    "grade": 4,
+    "topic": "四则运算（三）",
+    "difficulty": 1
+  },
+  {
+    "level": 9,
+    "grade": 4,
+    "topic": "四则运算（四）",
+    "difficulty": 1
+  },
+  {
+    "level": 10,
+    "grade": 4,
+    "topic": "四则运算（五）",
+    "difficulty": 1
+  },
+  {
+    "level": 11,
+    "grade": 4,
+    "topic": "运算定律（一）",
+    "difficulty": 1
+  },
+  {
+    "level": 12,
+    "grade": 4,
+    "topic": "运算定律（二）",
+    "difficulty": 1
+  },
+  {
+    "level": 13,
+    "grade": 4,
+    "topic": "运算定律（三）",
+    "difficulty": 1
+  },
+  {
+    "level": 14,
+    "grade": 4,
+    "topic": "运算定律（四）",
+    "difficulty": 1
+  },
+  {
+    "level": 15,
+    "grade": 4,
+    "topic": "运算定律（五）",
+    "difficulty": 1
+  },
+  {
+    "level": 16,
+    "grade": 4,
+    "topic": "小数的意义和性质（一）",
+    "difficulty": 1
+  },
+  {
+    "level": 17,
+    "grade": 4,
+    "topic": "小数的意义和性质（二）",
+    "difficulty": 1
+  },
+  {
+    "level": 18,
+    "grade": 4,
+    "topic": "小数的意义和性质（三）",
+    "difficulty": 1
+  },
+  {
+    "level": 19,
+    "grade": 4,
+    "topic": "小数的意义和性质（四）",
+    "difficulty": 1
+  },
+  {
+    "level": 20,
+    "grade": 4,
+    "topic": "小数的意义和性质（五）",
+    "difficulty": 1
+  },
+  {
+    "level": 21,
+    "grade": 4,
+    "topic": "小数的加法和减法（一）",
+    "difficulty": 1
+  },
+  {
+    "level": 22,
+    "grade": 4,
+    "topic": "小数的加法和减法（二）",
+    "difficulty": 1
+  },
+  {
+    "level": 23,
+    "grade": 4,
+    "topic": "小数的加法和减法（三）",
+    "difficulty": 1
+  },
+  {
+    "level": 24,
+    "grade": 4,
+    "topic": "小数的加法和减法（四）",
+    "difficulty": 1
+  },
+  {
+    "level": 25,
+    "grade": 4,
+    "topic": "小数的加法和减法（五）",
+    "difficulty": 1
+  },
+  {
+    "level": 26,
+    "grade": 4,
+    "topic": "三角形（一）",
+    "difficulty": 1
+  },
+  {
+    "level": 27,
+    "grade": 4,
+    "topic": "三角形（二）",
+    "difficulty": 1
+  },
+  {
+    "level": 28,
+    "grade": 4,
+    "topic": "三角形（三）",
+    "difficulty": 1
+  },
+  {
+    "level": 29,
+    "grade": 4,
+    "topic": "三角形（四）",
+    "difficulty": 1
+  },
+  {
+    "level": 30,
+    "grade": 4,
+    "topic": "三角形（五）",
+    "difficulty": 1
+  },
+  {
+    "level": 31,
+    "grade": 4,
+    "topic": "三位数乘两位数（一）",
+    "difficulty": 1
+  },
+  {
+    "level": 32,
+    "grade": 4,
+    "topic": "三位数乘两位数（二）",
+    "difficulty": 1
+  },
+  {
+    "level": 33,
+    "grade": 4,
+    "topic": "三位数乘两位数（三）",
+    "difficulty": 1
+  },
+  {
+    "level": 34,
+    "grade": 4,
+    "topic": "三位数乘两位数（四）",
+    "difficulty": 2
+  },
+  {
+    "level": 35,
+    "grade": 4,
+    "topic": "三位数乘两位数（五）",
+    "difficulty": 2
+  },
+  {
+    "level": 36,
+    "grade": 4,
+    "topic": "除数是两位数的除法（一）",
+    "difficulty": 2
+  },
+  {
+    "level": 37,
+    "grade": 4,
+    "topic": "除数是两位数的除法（二）",
+    "difficulty": 2
+  },
+  {
+    "level": 38,
+    "grade": 4,
+    "topic": "除数是两位数的除法（三）",
+    "difficulty": 2
+  },
+  {
+    "level": 39,
+    "grade": 4,
+    "topic": "除数是两位数的除法（四）",
+    "difficulty": 2
+  },
+  {
+    "level": 40,
+    "grade": 4,
+    "topic": "除数是两位数的除法（五）",
+    "difficulty": 2
+  },
+  {
+    "level": 41,
+    "grade": 4,
+    "topic": "平均数与条形统计图（一）",
+    "difficulty": 2
+  },
+  {
+    "level": 42,
+    "grade": 4,
+    "topic": "平均数与条形统计图（二）",
+    "difficulty": 2
+  },
+  {
+    "level": 43,
+    "grade": 4,
+    "topic": "平均数与条形统计图（三）",
+    "difficulty": 2
+  },
+  {
+    "level": 44,
+    "grade": 4,
+    "topic": "平均数与条形统计图（四）",
+    "difficulty": 2
+  },
+  {
+    "level": 45,
+    "grade": 4,
+    "topic": "平均数与条形统计图（五）",
+    "difficulty": 2
+  },
+  {
+    "level": 46,
+    "grade": 4,
+    "topic": "四年级综合应用（一）",
+    "difficulty": 2
+  },
+  {
+    "level": 47,
+    "grade": 4,
+    "topic": "四年级综合应用（二）",
+    "difficulty": 2
+  },
+  {
+    "level": 48,
+    "grade": 4,
+    "topic": "四年级综合应用（三）",
+    "difficulty": 2
+  },
+  {
+    "level": 49,
+    "grade": 4,
+    "topic": "四年级综合应用（四）",
+    "difficulty": 2
+  },
+  {
+    "level": 50,
+    "grade": 4,
+    "topic": "四年级综合应用（五）",
+    "difficulty": 2
+  },
+  {
+    "level": 51,
+    "grade": 5,
+    "topic": "小数乘法（一）",
+    "difficulty": 2
+  },
+  {
+    "level": 52,
+    "grade": 5,
+    "topic": "小数乘法（二）",
+    "difficulty": 2
+  },
+  {
+    "level": 53,
+    "grade": 5,
+    "topic": "小数乘法（三）",
+    "difficulty": 2
+  },
+  {
+    "level": 54,
+    "grade": 5,
+    "topic": "小数乘法（四）",
+    "difficulty": 2
+  },
+  {
+    "level": 55,
+    "grade": 5,
+    "topic": "小数乘法（五）",
+    "difficulty": 2
+  },
+  {
+    "level": 56,
+    "grade": 5,
+    "topic": "小数除法（一）",
+    "difficulty": 2
+  },
+  {
+    "level": 57,
+    "grade": 5,
+    "topic": "小数除法（二）",
+    "difficulty": 2
+  },
+  {
+    "level": 58,
+    "grade": 5,
+    "topic": "小数除法（三）",
+    "difficulty": 2
+  },
+  {
+    "level": 59,
+    "grade": 5,
+    "topic": "小数除法（四）",
+    "difficulty": 2
+  },
+  {
+    "level": 60,
+    "grade": 5,
+    "topic": "小数除法（五）",
+    "difficulty": 2
+  },
+  {
+    "level": 61,
+    "grade": 5,
+    "topic": "简易方程（一）",
+    "difficulty": 2
+  },
+  {
+    "level": 62,
+    "grade": 5,
+    "topic": "简易方程（二）",
+    "difficulty": 2
+  },
+  {
+    "level": 63,
+    "grade": 5,
+    "topic": "简易方程（三）",
+    "difficulty": 2
+  },
+  {
+    "level": 64,
+    "grade": 5,
+    "topic": "简易方程（四）",
+    "difficulty": 2
+  },
+  {
+    "level": 65,
+    "grade": 5,
+    "topic": "简易方程（五）",
+    "difficulty": 2
+  },
+  {
+    "level": 66,
+    "grade": 5,
+    "topic": "多边形的面积（一）",
+    "difficulty": 2
+  },
+  {
+    "level": 67,
+    "grade": 5,
+    "topic": "多边形的面积（二）",
+    "difficulty": 3
+  },
+  {
+    "level": 68,
+    "grade": 5,
+    "topic": "多边形的面积（三）",
+    "difficulty": 3
+  },
+  {
+    "level": 69,
+    "grade": 5,
+    "topic": "多边形的面积（四）",
+    "difficulty": 3
+  },
+  {
+    "level": 70,
+    "grade": 5,
+    "topic": "多边形的面积（五）",
+    "difficulty": 3
+  },
+  {
+    "level": 71,
+    "grade": 5,
+    "topic": "因数与倍数（一）",
+    "difficulty": 3
+  },
+  {
+    "level": 72,
+    "grade": 5,
+    "topic": "因数与倍数（二）",
+    "difficulty": 3
+  },
+  {
+    "level": 73,
+    "grade": 5,
+    "topic": "因数与倍数（三）",
+    "difficulty": 3
+  },
+  {
+    "level": 74,
+    "grade": 5,
+    "topic": "因数与倍数（四）",
+    "difficulty": 3
+  },
+  {
+    "level": 75,
+    "grade": 5,
+    "topic": "因数与倍数（五）",
+    "difficulty": 3
+  },
+  {
+    "level": 76,
+    "grade": 5,
+    "topic": "长方体和正方体（一）",
+    "difficulty": 3
+  },
+  {
+    "level": 77,
+    "grade": 5,
+    "topic": "长方体和正方体（二）",
+    "difficulty": 3
+  },
+  {
+    "level": 78,
+    "grade": 5,
+    "topic": "长方体和正方体（三）",
+    "difficulty": 3
+  },
+  {
+    "level": 79,
+    "grade": 5,
+    "topic": "长方体和正方体（四）",
+    "difficulty": 3
+  },
+  {
+    "level": 80,
+    "grade": 5,
+    "topic": "长方体和正方体（五）",
+    "difficulty": 3
+  },
+  {
+    "level": 81,
+    "grade": 5,
+    "topic": "分数的意义和性质（一）",
+    "difficulty": 3
+  },
+  {
+    "level": 82,
+    "grade": 5,
+    "topic": "分数的意义和性质（二）",
+    "difficulty": 3
+  },
+  {
+    "level": 83,
+    "grade": 5,
+    "topic": "分数的意义和性质（三）",
+    "difficulty": 3
+  },
+  {
+    "level": 84,
+    "grade": 5,
+    "topic": "分数的意义和性质（四）",
+    "difficulty": 3
+  },
+  {
+    "level": 85,
+    "grade": 5,
+    "topic": "分数的意义和性质（五）",
+    "difficulty": 3
+  },
+  {
+    "level": 86,
+    "grade": 5,
+    "topic": "分数的加法和减法（一）",
+    "difficulty": 3
+  },
+  {
+    "level": 87,
+    "grade": 5,
+    "topic": "分数的加法和减法（二）",
+    "difficulty": 3
+  },
+  {
+    "level": 88,
+    "grade": 5,
+    "topic": "分数的加法和减法（三）",
+    "difficulty": 3
+  },
+  {
+    "level": 89,
+    "grade": 5,
+    "topic": "分数的加法和减法（四）",
+    "difficulty": 3
+  },
+  {
+    "level": 90,
+    "grade": 5,
+    "topic": "分数的加法和减法（五）",
+    "difficulty": 3
+  },
+  {
+    "level": 91,
+    "grade": 5,
+    "topic": "折线统计图（一）",
+    "difficulty": 3
+  },
+  {
+    "level": 92,
+    "grade": 5,
+    "topic": "折线统计图（二）",
+    "difficulty": 3
+  },
+  {
+    "level": 93,
+    "grade": 5,
+    "topic": "折线统计图（三）",
+    "difficulty": 3
+  },
+  {
+    "level": 94,
+    "grade": 5,
+    "topic": "折线统计图（四）",
+    "difficulty": 3
+  },
+  {
+    "level": 95,
+    "grade": 5,
+    "topic": "折线统计图（五）",
+    "difficulty": 3
+  },
+  {
+    "level": 96,
+    "grade": 5,
+    "topic": "五年级综合应用（一）",
+    "difficulty": 3
+  },
+  {
+    "level": 97,
+    "grade": 5,
+    "topic": "五年级综合应用（二）",
+    "difficulty": 3
+  },
+  {
+    "level": 98,
+    "grade": 5,
+    "topic": "五年级综合应用（三）",
+    "difficulty": 3
+  },
+  {
+    "level": 99,
+    "grade": 5,
+    "topic": "五年级综合应用（四）",
+    "difficulty": 3
+  },
+  {
+    "level": 100,
+    "grade": 5,
+    "topic": "五年级综合应用（五）",
+    "difficulty": 3
+  }
+]
