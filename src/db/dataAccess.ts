@@ -103,10 +103,10 @@ export async function saveProgressBatch(progressList: Progress[]): Promise<void>
 
 // ========== Battle Records ==========
 
-export async function getBattleRecords(subject: Subject, stageId: string): Promise<BattleRecord[]> {
-  if (useServer()) return api.get<BattleRecord[]>(`/battle/records?subject=${subject}&stageId=${stageId}`);
+export async function getBattleRecords(subject: Subject, levelNumber: number): Promise<BattleRecord[]> {
+  if (useServer()) return api.get<BattleRecord[]>(`/battle/records?subject=${subject}&levelNumber=${levelNumber}`);
   const { getBattleRecords: idbGet } = await import('./index.js');
-  return idbGet(subject, stageId);
+  return idbGet(subject, levelNumber);
 }
 
 export async function getAllBattleRecords(): Promise<BattleRecord[]> {

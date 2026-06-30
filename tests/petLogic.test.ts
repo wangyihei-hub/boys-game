@@ -39,7 +39,7 @@ function makeWinRecord(subject: 'chinese' | 'math' | 'english' = 'math'): Battle
   return {
     id: `win-${Math.random().toString(36).slice(2)}`,
     subject,
-    stageId: 'm1',
+    levelNumber: 1,
     result: 'win',
     durationMs: 1000,
     starsEarned: 5,

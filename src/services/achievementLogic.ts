@@ -1,4 +1,3 @@
-import { STAGES } from '../stores/gameStore';
 import type { Achievement, AchievementId, BattleRecord, MinigameStats, Progress } from '../types';
 
 export const ACHIEVEMENT_DEFINITIONS: Achievement[] = [
@@ -49,8 +48,8 @@ export function checkAchievements(
   }
 
   if (!isUnlocked('first_boss')) {
-    const bossStageIds = new Set(STAGES.filter(s => s.isBoss).map(s => s.id));
-    const hasBossWin = context.records.some(r => r.result === 'win' && bossStageIds.has(r.stageId));
+    // In V3 every level contains a boss module, so any winning record counts as a boss win.
+    const hasBossWin = context.records.some(r => r.result === 'win' && r.levelNumber >= 1);
     if (hasBossWin) unlock('first_boss');
   }
 

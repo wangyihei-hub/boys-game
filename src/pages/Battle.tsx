@@ -1,22 +1,23 @@
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { MonsterAvatar } from '../components/play/MonsterAvatar';
 import { HeroAvatar } from '../components/play/HeroAvatar';
 import { BattleQuestion } from '../components/play/BattleQuestion';
 import { ComboIndicator } from '../components/play/ComboIndicator';
 import type { BattleAnswer, Question, Subject } from '../types';
-import { useGameStore, getStageById } from '../stores/gameStore';
+import { useGameStore } from '../stores/gameStore';
 import { useProfileStore } from '../stores/profileStore';
 import { useEconomyStore } from '../stores/economyStore';
-import { getAnswerTimeLimitMs, getMaxPlayerHp, getHintOption, getExcludedOption } from '../services/battleLogic';
+import { getAnswerTimeLimitMs, getHintOption, getExcludedOption } from '../services/battleLogic';
 import { computeEquipmentBonuses } from '../services/equipmentLogic';
 import { getPetInstance, computePetSkillEffect } from '../services/petLogic';
 import type { PetSkillEffect } from '../services/petLogic';
+import { buildBattleQuestions } from '../services/v3BattleQuestions';
+import { assertV3Level } from '../data/v3';
 
 interface FloatingText {
   id: number;
   value: string;
-  type: 'damage' | 'heal';
   side: 'hero' | 'monster';
   offsetX: number;
 }
@@ -27,135 +28,183 @@ const SCENE_CLASS: Record<Subject, string> = {
   english: 'scene-english'
 };
 
+const SUBJECT_LABEL: Record<Subject, string> = {
+  chinese: '语文',
+  math: '数学',
+  english: '英语'
+};
+
+function isSubject(value: string): value is Subject {
+  return value === 'chinese' || value === 'math' || value === 'english';
+}
+
 export function Battle() {
-  const { subject, stageId } = useParams<{ subject: string; stageId: string }>();
+  const { subject: subjectParam, levelNumber: levelNumberParam } = useParams<{
+    subject: string;
+    levelNumber: string;
+  }>();
   const navigate = useNavigate();
 
   const profile = useProfileStore(state => state.profile);
   const applyBattleRewards = useProfileStore(state => state.applyBattleRewards);
   const checkBattleAchievements = useProfileStore(state => state.checkBattleAchievements);
+  const consumeStaminaForLevel = useProfileStore(state => state.consumeStaminaForLevel);
+  const refreshStaminaNow = useProfileStore(state => state.refreshStaminaNow);
   const currentBattle = useGameStore(state => state.currentBattle);
+  const startBattle = useGameStore(state => state.startBattle);
   const submitAnswer = useGameStore(state => state.submitAnswer);
   const finishBattle = useGameStore(state => state.finishBattle);
   const clearCurrentBattle = useGameStore(state => state.clearCurrentBattle);
+  const submitTimeout = useGameStore(state => state.submitTimeout);
   const inventory = useEconomyStore(state => state.inventory);
   const loadInventory = useEconomyStore(state => state.loadInventory);
-  const submitTimeout = useGameStore(state => state.submitTimeout);
 
   const [monsterShake, setMonsterShake] = useState(false);
   const [heroBounce, setHeroBounce] = useState(false);
   const [isFinishing, setIsFinishing] = useState(false);
   const [hintOption, setHintOption] = useState<number | undefined>(undefined);
-  const [healAmount, setHealAmount] = useState(0);
-
   const [heroAttacking, setHeroAttacking] = useState(false);
   const [monsterAttacking, setMonsterAttacking] = useState(false);
   const [heroHurt, setHeroHurt] = useState(false);
   const [monsterHurt, setMonsterHurt] = useState(false);
   const [floatingTexts, setFloatingTexts] = useState<FloatingText[]>([]);
+  const [loadError, setLoadError] = useState<string | null>(null);
 
-  const prevMonsterHpRef = useRef<number | undefined>(undefined);
-  const prevPlayerHpRef = useRef<number | undefined>(undefined);
-  const floatIdRef = useRef(0);
+  const floatIdRef = useMemo(() => ({ current: 0 }), []);
 
   useEffect(() => {
     loadInventory();
   }, [loadInventory]);
 
+  // Initialize battle: validate params, refresh stamina, consume stamina, build questions.
   useEffect(() => {
-    if (!currentBattle && stageId && subject) {
-      const stage = getStageById(stageId);
-      if (!stage || stage.subject !== subject) {
-        navigate('/play/map');
+    let cancelled = false;
+
+    async function init() {
+      if (!subjectParam || !isSubject(subjectParam)) {
+        navigate('/play');
+        return;
       }
+      const levelNumber = parseInt(levelNumberParam ?? '', 10);
+      if (Number.isNaN(levelNumber) || levelNumber < 1 || levelNumber > 100) {
+        navigate('/play');
+        return;
+      }
+
+      // Already in a battle for the same level? Keep it.
+      if (currentBattle?.subject === subjectParam && currentBattle.levelNumber === levelNumber) {
+        return;
+      }
+
+      // Clear any stale battle.
+      clearCurrentBattle();
+
+      await refreshStaminaNow();
+      const check = await consumeStaminaForLevel();
+      if (!check.ok) {
+        setLoadError(check.reason === 'daily_limit' ? '今日已通过 10 关，明天再来吧！' : '体力不足，稍等一会恢复后再挑战！');
+        return;
+      }
+
+      let questions: Question[];
+      try {
+        questions = buildBattleQuestions(subjectParam, levelNumber);
+      } catch {
+        navigate('/play');
+        return;
+      }
+
+      if (cancelled) return;
+      startBattle(subjectParam, levelNumber, questions);
     }
-  }, [currentBattle, stageId, subject, navigate]);
+
+    init();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [subjectParam, levelNumberParam, navigate, currentBattle, clearCurrentBattle, refreshStaminaNow, consumeStaminaForLevel, startBattle]);
 
   useEffect(() => {
     setHintOption(undefined);
-    if (healAmount > 0) {
-      const timer = window.setTimeout(() => setHealAmount(0), 800);
-      return () => window.clearTimeout(timer);
-    }
   }, [currentBattle?.currentIndex]);
 
-  const addFloatingText = (value: string, side: 'hero' | 'monster', type: 'damage' | 'heal') => {
+  const addFloatingText = (value: string, side: 'hero' | 'monster') => {
     const id = ++floatIdRef.current;
     const offsetX = Math.round((Math.random() - 0.5) * 40);
-    setFloatingTexts(prev => [...prev, { id, value, side, type, offsetX }]);
+    setFloatingTexts(prev => [...prev, { id, value, side, offsetX }]);
     window.setTimeout(() => {
       setFloatingTexts(prev => prev.filter(f => f.id !== id));
     }, 800);
   };
 
+  // Attack / hurt animations on answer submission.
   useEffect(() => {
-    if (!currentBattle) {
-      prevMonsterHpRef.current = undefined;
-      prevPlayerHpRef.current = undefined;
-      return;
-    }
+    if (!currentBattle || currentBattle.answers.length === 0) return;
 
-    const monsterHp = currentBattle.monsterHp;
-    const playerHp = currentBattle.playerHp;
-    let monsterTimer: number | undefined;
+    const lastAnswer = currentBattle.answers[currentBattle.answers.length - 1];
     let heroTimer: number | undefined;
+    let monsterTimer: number | undefined;
     let attackTimer: number | undefined;
     let mAttackTimer: number | undefined;
 
-    if (prevMonsterHpRef.current !== undefined && monsterHp !== prevMonsterHpRef.current) {
-      const diff = monsterHp - prevMonsterHpRef.current;
-      if (diff < 0) {
-        setMonsterShake(true);
-        setHeroAttacking(true);
-        setMonsterHurt(true);
-        addFloatingText(String(Math.abs(diff)), 'monster', 'damage');
-        monsterTimer = window.setTimeout(() => setMonsterShake(false), 400);
-        attackTimer = window.setTimeout(() => {
-          setHeroAttacking(false);
-          setMonsterHurt(false);
-        }, 400);
-      } else if (diff > 0) {
-        addFloatingText(`+${diff}`, 'monster', 'heal');
-      }
+    if (lastAnswer.correct) {
+      setMonsterShake(true);
+      setHeroAttacking(true);
+      setMonsterHurt(true);
+      addFloatingText('命中！', 'monster');
+      monsterTimer = window.setTimeout(() => setMonsterShake(false), 400);
+      attackTimer = window.setTimeout(() => {
+        setHeroAttacking(false);
+        setMonsterHurt(false);
+      }, 400);
+    } else {
+      setHeroBounce(true);
+      setMonsterAttacking(true);
+      setHeroHurt(true);
+      addFloatingText('失误', 'hero');
+      heroTimer = window.setTimeout(() => setHeroBounce(false), 400);
+      mAttackTimer = window.setTimeout(() => {
+        setMonsterAttacking(false);
+        setHeroHurt(false);
+      }, 400);
     }
-
-    if (prevPlayerHpRef.current !== undefined && playerHp !== prevPlayerHpRef.current) {
-      const diff = playerHp - prevPlayerHpRef.current;
-      if (diff < 0) {
-        setHeroBounce(true);
-        setMonsterAttacking(true);
-        setHeroHurt(true);
-        addFloatingText(String(Math.abs(diff)), 'hero', 'damage');
-        heroTimer = window.setTimeout(() => setHeroBounce(false), 400);
-        mAttackTimer = window.setTimeout(() => {
-          setMonsterAttacking(false);
-          setHeroHurt(false);
-        }, 400);
-      } else if (diff > 0) {
-        addFloatingText(`+${diff}`, 'hero', 'heal');
-      }
-    }
-
-    prevMonsterHpRef.current = monsterHp;
-    prevPlayerHpRef.current = playerHp;
 
     return () => {
-      if (monsterTimer !== undefined) window.clearTimeout(monsterTimer);
       if (heroTimer !== undefined) window.clearTimeout(heroTimer);
+      if (monsterTimer !== undefined) window.clearTimeout(monsterTimer);
       if (attackTimer !== undefined) window.clearTimeout(attackTimer);
       if (mAttackTimer !== undefined) window.clearTimeout(mAttackTimer);
     };
-  }, [currentBattle?.monsterHp, currentBattle?.playerHp]);
+  }, [currentBattle?.answers.length]);
 
-  if (!currentBattle || !profile) {
+  if (loadError) {
+    return (
+      <div className="space-y-4">
+        <div className="card text-center">
+          <div className="mb-2 text-5xl">⚡</div>
+          <h2 className="text-xl font-bold">无法开始战斗</h2>
+          <p className="text-slate-500">{loadError}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => navigate('/play')}
+          className="btn-primary w-full"
+        >
+          返回营地
+        </button>
+      </div>
+    );
+  }
+
+  if (!currentBattle || !profile || !subjectParam || !isSubject(subjectParam)) {
     return (
       <div className="flex h-64 items-center justify-center text-slate-500">加载战斗中…</div>
     );
   }
 
-  const stage = currentBattle.stage;
+  const subject = subjectParam;
   const bonuses = computeEquipmentBonuses(inventory, profile.equippedItems);
-  const maxPlayerHp = getMaxPlayerHp(profile.level, bonuses);
 
   const petInstance = getPetInstance(inventory, profile.activePet);
   const petEffect: PetSkillEffect | undefined = useMemo(
@@ -176,18 +225,11 @@ export function Battle() {
     if (answer === '') {
       submitTimeout(bonuses);
     } else {
-      const question: Question = currentBattle.questions[currentBattle.currentIndex];
+      const question = currentBattle.questions[currentBattle.currentIndex];
       const isCorrect = question.answer === answer;
 
       if (!isCorrect && petEffect?.skill === 'hint') {
         setHintOption(getHintOption(question, petEffect));
-      }
-
-      if (isCorrect && petEffect?.skill === 'heal') {
-        const correctCount = currentBattle.answers.filter(a => a.correct).length + 1;
-        if (correctCount % 3 === 0) {
-          setHealAmount(petEffect.healAmount ?? 0);
-        }
       }
 
       submitAnswer(answer, profile.level, bonuses, petEffect);
@@ -200,9 +242,7 @@ export function Battle() {
     try {
       const result = await finishBattle(profile.level, profile.exp, petEffect);
       const rewardResult = await applyBattleRewards(result.stars, result.exp);
-      if (subject && stageId) {
-        await checkBattleAchievements(subject, stageId);
-      }
+      await checkBattleAchievements(subject, currentBattle.levelNumber);
       navigate('/play/battle-result', { state: { ...result, ...rewardResult } });
     } catch {
       setIsFinishing(false);
@@ -211,7 +251,7 @@ export function Battle() {
 
   const handleEscape = () => {
     clearCurrentBattle();
-    navigate('/play/map');
+    navigate('/play');
   };
 
   if (currentBattle.finished) {
@@ -241,13 +281,16 @@ export function Battle() {
     );
   }
 
-  const sceneClass = SCENE_CLASS[stage.subject];
+  const sceneClass = SCENE_CLASS[subject];
+  const levelName = assertV3Level(subject, currentBattle.levelNumber).topic;
 
   return (
     <div className="flex h-full flex-col gap-3">
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-base font-bold sm:text-lg">{stage.name}</h2>
+          <h2 className="text-base font-bold sm:text-lg">
+            {SUBJECT_LABEL[subject]} · {levelName}
+          </h2>
           <p className="text-xs text-slate-500">
             第 {currentBattle.currentIndex + 1}/{currentBattle.questions.length} 题
           </p>
@@ -266,15 +309,12 @@ export function Battle() {
           {floatingTexts.map(ft => (
             <div
               key={ft.id}
-              className={[
-                'absolute top-1/2 z-10 animate-floatUp text-2xl font-black shadow-sm',
-                ft.type === 'damage' ? 'text-red-600' : 'text-green-600'
-              ].join(' ')}
+              className="absolute top-1/2 z-10 animate-floatUp text-2xl font-black text-red-600 shadow-sm"
               style={{
                 left: ft.side === 'hero' ? `calc(25% + ${ft.offsetX}px)` : `calc(75% + ${ft.offsetX}px)`
               }}
             >
-              {ft.type === 'damage' ? `-${ft.value}` : ft.value}
+              {ft.value}
             </div>
           ))}
         </div>
@@ -283,8 +323,6 @@ export function Battle() {
           <div className="animate-slideInLeft">
             <HeroAvatar
               profile={profile}
-              hp={currentBattle.playerHp}
-              maxHp={maxPlayerHp}
               bounce={heroBounce}
               attacking={heroAttacking}
               hurt={heroHurt}
@@ -300,21 +338,16 @@ export function Battle() {
 
           <div className="animate-slideInRight">
             <MonsterAvatar
-              stage={stage}
-              hp={currentBattle.monsterHp}
-              maxHp={stage.monsterHp}
+              subject={subject}
+              title={levelName}
+              levelNumber={currentBattle.levelNumber}
+              isBoss={currentBattle.isBoss}
               shake={monsterShake}
               attacking={monsterAttacking}
               hurt={monsterHurt}
             />
           </div>
         </div>
-
-        {healAmount > 0 && (
-          <div className="absolute left-1/2 top-1/3 -translate-x-1/2 animate-bounceShort text-lg font-bold text-green-600">
-            +{healAmount} 生命恢复
-          </div>
-        )}
       </div>
 
       <div className="flex-1">

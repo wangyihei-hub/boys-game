@@ -1,0 +1,1811 @@
+[
+  {
+    "subject": "chinese",
+    "start": 11,
+    "end": 20,
+    "levels": [
+      {
+        "level": 11,
+        "grade": 4,
+        "topic": "关联词（转折、递进）",
+        "difficulty": 1
+      },
+      {
+        "level": 12,
+        "grade": 4,
+        "topic": "修辞手法：比喻",
+        "difficulty": 1
+      },
+      {
+        "level": 13,
+        "grade": 4,
+        "topic": "修辞手法：拟人",
+        "difficulty": 1
+      },
+      {
+        "level": 14,
+        "grade": 4,
+        "topic": "修辞手法：排比、夸张",
+        "difficulty": 1
+      },
+      {
+        "level": 15,
+        "grade": 4,
+        "topic": "病句修改：成分残缺",
+        "difficulty": 1
+      },
+      {
+        "level": 16,
+        "grade": 4,
+        "topic": "病句修改：搭配不当",
+        "difficulty": 1
+      },
+      {
+        "level": 17,
+        "grade": 4,
+        "topic": "病句修改：语序不当",
+        "difficulty": 1
+      },
+      {
+        "level": 18,
+        "grade": 4,
+        "topic": "标点符号基础",
+        "difficulty": 1
+      },
+      {
+        "level": 19,
+        "grade": 4,
+        "topic": "标点符号综合运用",
+        "difficulty": 1
+      },
+      {
+        "level": 20,
+        "grade": 4,
+        "topic": "扩句与缩句",
+        "difficulty": 1
+      }
+    ]
+  },
+  {
+    "subject": "chinese",
+    "start": 21,
+    "end": 30,
+    "levels": [
+      {
+        "level": 21,
+        "grade": 4,
+        "topic": "把字句与被字句",
+        "difficulty": 1
+      },
+      {
+        "level": 22,
+        "grade": 4,
+        "topic": "反问句改陈述句",
+        "difficulty": 1
+      },
+      {
+        "level": 23,
+        "grade": 4,
+        "topic": "句子排序",
+        "difficulty": 1
+      },
+      {
+        "level": 24,
+        "grade": 4,
+        "topic": "段落概括",
+        "difficulty": 1
+      },
+      {
+        "level": 25,
+        "grade": 4,
+        "topic": "古诗词默写",
+        "difficulty": 1
+      },
+      {
+        "level": 26,
+        "grade": 4,
+        "topic": "古诗词理解",
+        "difficulty": 1
+      },
+      {
+        "level": 27,
+        "grade": 4,
+        "topic": "古诗词作者与朝代",
+        "difficulty": 1
+      },
+      {
+        "level": 28,
+        "grade": 4,
+        "topic": "名言警句积累",
+        "difficulty": 1
+      },
+      {
+        "level": 29,
+        "grade": 4,
+        "topic": "歇后语与谚语",
+        "difficulty": 1
+      },
+      {
+        "level": 30,
+        "grade": 4,
+        "topic": "应用文格式：通知、留言条",
+        "difficulty": 1
+      }
+    ]
+  },
+  {
+    "subject": "chinese",
+    "start": 31,
+    "end": 40,
+    "levels": [
+      {
+        "level": 31,
+        "grade": 4,
+        "topic": "日记格式与写作",
+        "difficulty": 1
+      },
+      {
+        "level": 32,
+        "grade": 4,
+        "topic": "记叙文六要素",
+        "difficulty": 1
+      },
+      {
+        "level": 33,
+        "grade": 4,
+        "topic": "人物描写方法",
+        "difficulty": 1
+      },
+      {
+        "level": 34,
+        "grade": 4,
+        "topic": "环境描写的作用",
+        "difficulty": 2
+      },
+      {
+        "level": 35,
+        "grade": 4,
+        "topic": "找中心句",
+        "difficulty": 2
+      },
+      {
+        "level": 36,
+        "grade": 4,
+        "topic": "记叙文细节理解",
+        "difficulty": 2
+      },
+      {
+        "level": 37,
+        "grade": 4,
+        "topic": "联系上下文理解词义",
+        "difficulty": 2
+      },
+      {
+        "level": 38,
+        "grade": 4,
+        "topic": "说明文初识：说明对象",
+        "difficulty": 2
+      },
+      {
+        "level": 39,
+        "grade": 4,
+        "topic": "说明方法：举例子、列数字",
+        "difficulty": 2
+      },
+      {
+        "level": 40,
+        "grade": 4,
+        "topic": "说明方法：打比方、作比较",
+        "difficulty": 2
+      }
+    ]
+  },
+  {
+    "subject": "chinese",
+    "start": 41,
+    "end": 50,
+    "levels": [
+      {
+        "level": 41,
+        "grade": 4,
+        "topic": "说明文语言准确性",
+        "difficulty": 2
+      },
+      {
+        "level": 42,
+        "grade": 4,
+        "topic": "童话与寓言寓意",
+        "difficulty": 2
+      },
+      {
+        "level": 43,
+        "grade": 4,
+        "topic": "续写故事逻辑",
+        "difficulty": 2
+      },
+      {
+        "level": 44,
+        "grade": 4,
+        "topic": "词语的感情色彩",
+        "difficulty": 2
+      },
+      {
+        "level": 45,
+        "grade": 4,
+        "topic": "选词填空综合",
+        "difficulty": 2
+      },
+      {
+        "level": 46,
+        "grade": 4,
+        "topic": "句子仿写",
+        "difficulty": 2
+      },
+      {
+        "level": 47,
+        "grade": 4,
+        "topic": "口语交际：劝告与表达",
+        "difficulty": 2
+      },
+      {
+        "level": 48,
+        "grade": 4,
+        "topic": "综合性学习：传统文化",
+        "difficulty": 2
+      },
+      {
+        "level": 49,
+        "grade": 4,
+        "topic": "四年级期末综合（一）",
+        "difficulty": 2
+      },
+      {
+        "level": 50,
+        "grade": 4,
+        "topic": "四年级期末综合（二）",
+        "difficulty": 2
+      }
+    ]
+  },
+  {
+    "subject": "chinese",
+    "start": 51,
+    "end": 60,
+    "levels": [
+      {
+        "level": 51,
+        "grade": 5,
+        "topic": "多音字辨析进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 52,
+        "grade": 5,
+        "topic": "形近字与易错字",
+        "difficulty": 2
+      },
+      {
+        "level": 53,
+        "grade": 5,
+        "topic": "同音异形字辨析",
+        "difficulty": 2
+      },
+      {
+        "level": 54,
+        "grade": 5,
+        "topic": "查字典与字义选择",
+        "difficulty": 2
+      },
+      {
+        "level": 55,
+        "grade": 5,
+        "topic": "汉字造字法初识",
+        "difficulty": 2
+      },
+      {
+        "level": 56,
+        "grade": 5,
+        "topic": "词语感情色彩进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 57,
+        "grade": 5,
+        "topic": "近义词辨析进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 58,
+        "grade": 5,
+        "topic": "反义词与对偶",
+        "difficulty": 2
+      },
+      {
+        "level": 59,
+        "grade": 5,
+        "topic": "成语理解与运用进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 60,
+        "grade": 5,
+        "topic": "成语典故",
+        "difficulty": 2
+      }
+    ]
+  },
+  {
+    "subject": "chinese",
+    "start": 61,
+    "end": 70,
+    "levels": [
+      {
+        "level": 61,
+        "grade": 5,
+        "topic": "关联词综合运用",
+        "difficulty": 2
+      },
+      {
+        "level": 62,
+        "grade": 5,
+        "topic": "修辞辨析进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 63,
+        "grade": 5,
+        "topic": "修辞表达效果",
+        "difficulty": 2
+      },
+      {
+        "level": 64,
+        "grade": 5,
+        "topic": "病句修改综合",
+        "difficulty": 2
+      },
+      {
+        "level": 65,
+        "grade": 5,
+        "topic": "标点综合运用",
+        "difficulty": 2
+      },
+      {
+        "level": 66,
+        "grade": 5,
+        "topic": "句式变换进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 67,
+        "grade": 5,
+        "topic": "仿写与续写",
+        "difficulty": 3
+      },
+      {
+        "level": 68,
+        "grade": 5,
+        "topic": "概括主要内容",
+        "difficulty": 3
+      },
+      {
+        "level": 69,
+        "grade": 5,
+        "topic": "概括段落大意",
+        "difficulty": 3
+      },
+      {
+        "level": 70,
+        "grade": 5,
+        "topic": "体会思想感情",
+        "difficulty": 3
+      }
+    ]
+  },
+  {
+    "subject": "chinese",
+    "start": 71,
+    "end": 80,
+    "levels": [
+      {
+        "level": 71,
+        "grade": 5,
+        "topic": "古诗词默写进阶",
+        "difficulty": 3
+      },
+      {
+        "level": 72,
+        "grade": 5,
+        "topic": "古诗词鉴赏",
+        "difficulty": 3
+      },
+      {
+        "level": 73,
+        "grade": 5,
+        "topic": "古诗词拓展：边塞、田园",
+        "difficulty": 3
+      },
+      {
+        "level": 74,
+        "grade": 5,
+        "topic": "名言警句运用",
+        "difficulty": 3
+      },
+      {
+        "level": 75,
+        "grade": 5,
+        "topic": "文言文初识：字词解释",
+        "difficulty": 3
+      },
+      {
+        "level": 76,
+        "grade": 5,
+        "topic": "文言文初识：句子翻译",
+        "difficulty": 3
+      },
+      {
+        "level": 77,
+        "grade": 5,
+        "topic": "说明文阅读：说明方法综合",
+        "difficulty": 3
+      },
+      {
+        "level": 78,
+        "grade": 5,
+        "topic": "说明文阅读：信息提取",
+        "difficulty": 3
+      },
+      {
+        "level": 79,
+        "grade": 5,
+        "topic": "说明文阅读：语言准确性",
+        "difficulty": 3
+      },
+      {
+        "level": 80,
+        "grade": 5,
+        "topic": "记叙文阅读：人物情感",
+        "difficulty": 3
+      }
+    ]
+  },
+  {
+    "subject": "chinese",
+    "start": 81,
+    "end": 90,
+    "levels": [
+      {
+        "level": 81,
+        "grade": 5,
+        "topic": "记叙文阅读：细节与推理",
+        "difficulty": 3
+      },
+      {
+        "level": 82,
+        "grade": 5,
+        "topic": "记叙文阅读：写作顺序",
+        "difficulty": 3
+      },
+      {
+        "level": 83,
+        "grade": 5,
+        "topic": "记叙文阅读：环境描写作用",
+        "difficulty": 3
+      },
+      {
+        "level": 84,
+        "grade": 5,
+        "topic": "寓言与成语故事阅读",
+        "difficulty": 3
+      },
+      {
+        "level": 85,
+        "grade": 5,
+        "topic": "非连续性文本阅读",
+        "difficulty": 3
+      },
+      {
+        "level": 86,
+        "grade": 5,
+        "topic": "综合阅读：观点评价",
+        "difficulty": 3
+      },
+      {
+        "level": 87,
+        "grade": 5,
+        "topic": "应用文：书信格式",
+        "difficulty": 3
+      },
+      {
+        "level": 88,
+        "grade": 5,
+        "topic": "应用文：倡议书、演讲稿",
+        "difficulty": 3
+      },
+      {
+        "level": 89,
+        "grade": 5,
+        "topic": "修改作文：语病与标点",
+        "difficulty": 3
+      },
+      {
+        "level": 90,
+        "grade": 5,
+        "topic": "五年级上册综合（一）",
+        "difficulty": 3
+      }
+    ]
+  },
+  {
+    "subject": "chinese",
+    "start": 91,
+    "end": 100,
+    "levels": [
+      {
+        "level": 91,
+        "grade": 5,
+        "topic": "五年级上册综合（二）",
+        "difficulty": 3
+      },
+      {
+        "level": 92,
+        "grade": 5,
+        "topic": "五年级下册综合（一）",
+        "difficulty": 3
+      },
+      {
+        "level": 93,
+        "grade": 5,
+        "topic": "五年级下册综合（二）",
+        "difficulty": 3
+      },
+      {
+        "level": 94,
+        "grade": 5,
+        "topic": "文言文阅读进阶",
+        "difficulty": 3
+      },
+      {
+        "level": 95,
+        "grade": 5,
+        "topic": "古诗词对比阅读",
+        "difficulty": 3
+      },
+      {
+        "level": 96,
+        "grade": 5,
+        "topic": "现代诗阅读",
+        "difficulty": 3
+      },
+      {
+        "level": 97,
+        "grade": 5,
+        "topic": "跨学科传统文化",
+        "difficulty": 3
+      },
+      {
+        "level": 98,
+        "grade": 5,
+        "topic": "阅读策略：预测与提问",
+        "difficulty": 3
+      },
+      {
+        "level": 99,
+        "grade": 5,
+        "topic": "期末综合挑战（一）",
+        "difficulty": 3
+      },
+      {
+        "level": 100,
+        "grade": 5,
+        "topic": "期末综合挑战（二）",
+        "difficulty": 3
+      }
+    ]
+  },
+  {
+    "subject": "math",
+    "start": 11,
+    "end": 20,
+    "levels": [
+      {
+        "level": 11,
+        "grade": 4,
+        "topic": "运算定律（一）",
+        "difficulty": 1
+      },
+      {
+        "level": 12,
+        "grade": 4,
+        "topic": "运算定律（二）",
+        "difficulty": 1
+      },
+      {
+        "level": 13,
+        "grade": 4,
+        "topic": "运算定律（三）",
+        "difficulty": 1
+      },
+      {
+        "level": 14,
+        "grade": 4,
+        "topic": "运算定律（四）",
+        "difficulty": 1
+      },
+      {
+        "level": 15,
+        "grade": 4,
+        "topic": "运算定律（五）",
+        "difficulty": 1
+      },
+      {
+        "level": 16,
+        "grade": 4,
+        "topic": "小数的意义和性质（一）",
+        "difficulty": 1
+      },
+      {
+        "level": 17,
+        "grade": 4,
+        "topic": "小数的意义和性质（二）",
+        "difficulty": 1
+      },
+      {
+        "level": 18,
+        "grade": 4,
+        "topic": "小数的意义和性质（三）",
+        "difficulty": 1
+      },
+      {
+        "level": 19,
+        "grade": 4,
+        "topic": "小数的意义和性质（四）",
+        "difficulty": 1
+      },
+      {
+        "level": 20,
+        "grade": 4,
+        "topic": "小数的意义和性质（五）",
+        "difficulty": 1
+      }
+    ]
+  },
+  {
+    "subject": "math",
+    "start": 21,
+    "end": 30,
+    "levels": [
+      {
+        "level": 21,
+        "grade": 4,
+        "topic": "小数的加法和减法（一）",
+        "difficulty": 1
+      },
+      {
+        "level": 22,
+        "grade": 4,
+        "topic": "小数的加法和减法（二）",
+        "difficulty": 1
+      },
+      {
+        "level": 23,
+        "grade": 4,
+        "topic": "小数的加法和减法（三）",
+        "difficulty": 1
+      },
+      {
+        "level": 24,
+        "grade": 4,
+        "topic": "小数的加法和减法（四）",
+        "difficulty": 1
+      },
+      {
+        "level": 25,
+        "grade": 4,
+        "topic": "小数的加法和减法（五）",
+        "difficulty": 1
+      },
+      {
+        "level": 26,
+        "grade": 4,
+        "topic": "三角形（一）",
+        "difficulty": 1
+      },
+      {
+        "level": 27,
+        "grade": 4,
+        "topic": "三角形（二）",
+        "difficulty": 1
+      },
+      {
+        "level": 28,
+        "grade": 4,
+        "topic": "三角形（三）",
+        "difficulty": 1
+      },
+      {
+        "level": 29,
+        "grade": 4,
+        "topic": "三角形（四）",
+        "difficulty": 1
+      },
+      {
+        "level": 30,
+        "grade": 4,
+        "topic": "三角形（五）",
+        "difficulty": 1
+      }
+    ]
+  },
+  {
+    "subject": "math",
+    "start": 31,
+    "end": 40,
+    "levels": [
+      {
+        "level": 31,
+        "grade": 4,
+        "topic": "三位数乘两位数（一）",
+        "difficulty": 1
+      },
+      {
+        "level": 32,
+        "grade": 4,
+        "topic": "三位数乘两位数（二）",
+        "difficulty": 1
+      },
+      {
+        "level": 33,
+        "grade": 4,
+        "topic": "三位数乘两位数（三）",
+        "difficulty": 1
+      },
+      {
+        "level": 34,
+        "grade": 4,
+        "topic": "三位数乘两位数（四）",
+        "difficulty": 2
+      },
+      {
+        "level": 35,
+        "grade": 4,
+        "topic": "三位数乘两位数（五）",
+        "difficulty": 2
+      },
+      {
+        "level": 36,
+        "grade": 4,
+        "topic": "除数是两位数的除法（一）",
+        "difficulty": 2
+      },
+      {
+        "level": 37,
+        "grade": 4,
+        "topic": "除数是两位数的除法（二）",
+        "difficulty": 2
+      },
+      {
+        "level": 38,
+        "grade": 4,
+        "topic": "除数是两位数的除法（三）",
+        "difficulty": 2
+      },
+      {
+        "level": 39,
+        "grade": 4,
+        "topic": "除数是两位数的除法（四）",
+        "difficulty": 2
+      },
+      {
+        "level": 40,
+        "grade": 4,
+        "topic": "除数是两位数的除法（五）",
+        "difficulty": 2
+      }
+    ]
+  },
+  {
+    "subject": "math",
+    "start": 41,
+    "end": 50,
+    "levels": [
+      {
+        "level": 41,
+        "grade": 4,
+        "topic": "平均数与条形统计图（一）",
+        "difficulty": 2
+      },
+      {
+        "level": 42,
+        "grade": 4,
+        "topic": "平均数与条形统计图（二）",
+        "difficulty": 2
+      },
+      {
+        "level": 43,
+        "grade": 4,
+        "topic": "平均数与条形统计图（三）",
+        "difficulty": 2
+      },
+      {
+        "level": 44,
+        "grade": 4,
+        "topic": "平均数与条形统计图（四）",
+        "difficulty": 2
+      },
+      {
+        "level": 45,
+        "grade": 4,
+        "topic": "平均数与条形统计图（五）",
+        "difficulty": 2
+      },
+      {
+        "level": 46,
+        "grade": 4,
+        "topic": "四年级综合应用（一）",
+        "difficulty": 2
+      },
+      {
+        "level": 47,
+        "grade": 4,
+        "topic": "四年级综合应用（二）",
+        "difficulty": 2
+      },
+      {
+        "level": 48,
+        "grade": 4,
+        "topic": "四年级综合应用（三）",
+        "difficulty": 2
+      },
+      {
+        "level": 49,
+        "grade": 4,
+        "topic": "四年级综合应用（四）",
+        "difficulty": 2
+      },
+      {
+        "level": 50,
+        "grade": 4,
+        "topic": "四年级综合应用（五）",
+        "difficulty": 2
+      }
+    ]
+  },
+  {
+    "subject": "math",
+    "start": 51,
+    "end": 60,
+    "levels": [
+      {
+        "level": 51,
+        "grade": 5,
+        "topic": "小数乘法（一）",
+        "difficulty": 2
+      },
+      {
+        "level": 52,
+        "grade": 5,
+        "topic": "小数乘法（二）",
+        "difficulty": 2
+      },
+      {
+        "level": 53,
+        "grade": 5,
+        "topic": "小数乘法（三）",
+        "difficulty": 2
+      },
+      {
+        "level": 54,
+        "grade": 5,
+        "topic": "小数乘法（四）",
+        "difficulty": 2
+      },
+      {
+        "level": 55,
+        "grade": 5,
+        "topic": "小数乘法（五）",
+        "difficulty": 2
+      },
+      {
+        "level": 56,
+        "grade": 5,
+        "topic": "小数除法（一）",
+        "difficulty": 2
+      },
+      {
+        "level": 57,
+        "grade": 5,
+        "topic": "小数除法（二）",
+        "difficulty": 2
+      },
+      {
+        "level": 58,
+        "grade": 5,
+        "topic": "小数除法（三）",
+        "difficulty": 2
+      },
+      {
+        "level": 59,
+        "grade": 5,
+        "topic": "小数除法（四）",
+        "difficulty": 2
+      },
+      {
+        "level": 60,
+        "grade": 5,
+        "topic": "小数除法（五）",
+        "difficulty": 2
+      }
+    ]
+  },
+  {
+    "subject": "math",
+    "start": 61,
+    "end": 70,
+    "levels": [
+      {
+        "level": 61,
+        "grade": 5,
+        "topic": "简易方程（一）",
+        "difficulty": 2
+      },
+      {
+        "level": 62,
+        "grade": 5,
+        "topic": "简易方程（二）",
+        "difficulty": 2
+      },
+      {
+        "level": 63,
+        "grade": 5,
+        "topic": "简易方程（三）",
+        "difficulty": 2
+      },
+      {
+        "level": 64,
+        "grade": 5,
+        "topic": "简易方程（四）",
+        "difficulty": 2
+      },
+      {
+        "level": 65,
+        "grade": 5,
+        "topic": "简易方程（五）",
+        "difficulty": 2
+      },
+      {
+        "level": 66,
+        "grade": 5,
+        "topic": "多边形的面积（一）",
+        "difficulty": 2
+      },
+      {
+        "level": 67,
+        "grade": 5,
+        "topic": "多边形的面积（二）",
+        "difficulty": 3
+      },
+      {
+        "level": 68,
+        "grade": 5,
+        "topic": "多边形的面积（三）",
+        "difficulty": 3
+      },
+      {
+        "level": 69,
+        "grade": 5,
+        "topic": "多边形的面积（四）",
+        "difficulty": 3
+      },
+      {
+        "level": 70,
+        "grade": 5,
+        "topic": "多边形的面积（五）",
+        "difficulty": 3
+      }
+    ]
+  },
+  {
+    "subject": "math",
+    "start": 71,
+    "end": 80,
+    "levels": [
+      {
+        "level": 71,
+        "grade": 5,
+        "topic": "因数与倍数（一）",
+        "difficulty": 3
+      },
+      {
+        "level": 72,
+        "grade": 5,
+        "topic": "因数与倍数（二）",
+        "difficulty": 3
+      },
+      {
+        "level": 73,
+        "grade": 5,
+        "topic": "因数与倍数（三）",
+        "difficulty": 3
+      },
+      {
+        "level": 74,
+        "grade": 5,
+        "topic": "因数与倍数（四）",
+        "difficulty": 3
+      },
+      {
+        "level": 75,
+        "grade": 5,
+        "topic": "因数与倍数（五）",
+        "difficulty": 3
+      },
+      {
+        "level": 76,
+        "grade": 5,
+        "topic": "长方体和正方体（一）",
+        "difficulty": 3
+      },
+      {
+        "level": 77,
+        "grade": 5,
+        "topic": "长方体和正方体（二）",
+        "difficulty": 3
+      },
+      {
+        "level": 78,
+        "grade": 5,
+        "topic": "长方体和正方体（三）",
+        "difficulty": 3
+      },
+      {
+        "level": 79,
+        "grade": 5,
+        "topic": "长方体和正方体（四）",
+        "difficulty": 3
+      },
+      {
+        "level": 80,
+        "grade": 5,
+        "topic": "长方体和正方体（五）",
+        "difficulty": 3
+      }
+    ]
+  },
+  {
+    "subject": "math",
+    "start": 81,
+    "end": 90,
+    "levels": [
+      {
+        "level": 81,
+        "grade": 5,
+        "topic": "分数的意义和性质（一）",
+        "difficulty": 3
+      },
+      {
+        "level": 82,
+        "grade": 5,
+        "topic": "分数的意义和性质（二）",
+        "difficulty": 3
+      },
+      {
+        "level": 83,
+        "grade": 5,
+        "topic": "分数的意义和性质（三）",
+        "difficulty": 3
+      },
+      {
+        "level": 84,
+        "grade": 5,
+        "topic": "分数的意义和性质（四）",
+        "difficulty": 3
+      },
+      {
+        "level": 85,
+        "grade": 5,
+        "topic": "分数的意义和性质（五）",
+        "difficulty": 3
+      },
+      {
+        "level": 86,
+        "grade": 5,
+        "topic": "分数的加法和减法（一）",
+        "difficulty": 3
+      },
+      {
+        "level": 87,
+        "grade": 5,
+        "topic": "分数的加法和减法（二）",
+        "difficulty": 3
+      },
+      {
+        "level": 88,
+        "grade": 5,
+        "topic": "分数的加法和减法（三）",
+        "difficulty": 3
+      },
+      {
+        "level": 89,
+        "grade": 5,
+        "topic": "分数的加法和减法（四）",
+        "difficulty": 3
+      },
+      {
+        "level": 90,
+        "grade": 5,
+        "topic": "分数的加法和减法（五）",
+        "difficulty": 3
+      }
+    ]
+  },
+  {
+    "subject": "math",
+    "start": 91,
+    "end": 100,
+    "levels": [
+      {
+        "level": 91,
+        "grade": 5,
+        "topic": "折线统计图（一）",
+        "difficulty": 3
+      },
+      {
+        "level": 92,
+        "grade": 5,
+        "topic": "折线统计图（二）",
+        "difficulty": 3
+      },
+      {
+        "level": 93,
+        "grade": 5,
+        "topic": "折线统计图（三）",
+        "difficulty": 3
+      },
+      {
+        "level": 94,
+        "grade": 5,
+        "topic": "折线统计图（四）",
+        "difficulty": 3
+      },
+      {
+        "level": 95,
+        "grade": 5,
+        "topic": "折线统计图（五）",
+        "difficulty": 3
+      },
+      {
+        "level": 96,
+        "grade": 5,
+        "topic": "五年级综合应用（一）",
+        "difficulty": 3
+      },
+      {
+        "level": 97,
+        "grade": 5,
+        "topic": "五年级综合应用（二）",
+        "difficulty": 3
+      },
+      {
+        "level": 98,
+        "grade": 5,
+        "topic": "五年级综合应用（三）",
+        "difficulty": 3
+      },
+      {
+        "level": 99,
+        "grade": 5,
+        "topic": "五年级综合应用（四）",
+        "difficulty": 3
+      },
+      {
+        "level": 100,
+        "grade": 5,
+        "topic": "五年级综合应用（五）",
+        "difficulty": 3
+      }
+    ]
+  },
+  {
+    "subject": "english",
+    "start": 11,
+    "end": 20,
+    "levels": [
+      {
+        "level": 11,
+        "grade": 4,
+        "topic": "衣服服饰",
+        "difficulty": 1
+      },
+      {
+        "level": 12,
+        "grade": 4,
+        "topic": "天气词汇",
+        "difficulty": 1
+      },
+      {
+        "level": 13,
+        "grade": 4,
+        "topic": "季节月份",
+        "difficulty": 1
+      },
+      {
+        "level": 14,
+        "grade": 4,
+        "topic": "星期日期",
+        "difficulty": 1
+      },
+      {
+        "level": 15,
+        "grade": 4,
+        "topic": "动物特征",
+        "difficulty": 1
+      },
+      {
+        "level": 16,
+        "grade": 4,
+        "topic": "职业词汇",
+        "difficulty": 1
+      },
+      {
+        "level": 17,
+        "grade": 4,
+        "topic": "运动爱好",
+        "difficulty": 1
+      },
+      {
+        "level": 18,
+        "grade": 4,
+        "topic": "房间家居",
+        "difficulty": 1
+      },
+      {
+        "level": 19,
+        "grade": 4,
+        "topic": "情绪感受",
+        "difficulty": 1
+      },
+      {
+        "level": 20,
+        "grade": 4,
+        "topic": "国家语言",
+        "difficulty": 1
+      }
+    ]
+  },
+  {
+    "subject": "english",
+    "start": 21,
+    "end": 30,
+    "levels": [
+      {
+        "level": 21,
+        "grade": 4,
+        "topic": "冠词 a / an / the",
+        "difficulty": 1
+      },
+      {
+        "level": 22,
+        "grade": 4,
+        "topic": "人称代词",
+        "difficulty": 1
+      },
+      {
+        "level": 23,
+        "grade": 4,
+        "topic": "物主代词",
+        "difficulty": 1
+      },
+      {
+        "level": 24,
+        "grade": 4,
+        "topic": "指示代词",
+        "difficulty": 1
+      },
+      {
+        "level": 25,
+        "grade": 4,
+        "topic": "there be 句型",
+        "difficulty": 1
+      },
+      {
+        "level": 26,
+        "grade": 4,
+        "topic": "一般现在时 be动词",
+        "difficulty": 1
+      },
+      {
+        "level": 27,
+        "grade": 4,
+        "topic": "一般现在时 实义动词",
+        "difficulty": 1
+      },
+      {
+        "level": 28,
+        "grade": 4,
+        "topic": "现在进行时",
+        "difficulty": 1
+      },
+      {
+        "level": 29,
+        "grade": 4,
+        "topic": "祈使句",
+        "difficulty": 1
+      },
+      {
+        "level": 30,
+        "grade": 4,
+        "topic": "情态动词 can",
+        "difficulty": 1
+      }
+    ]
+  },
+  {
+    "subject": "english",
+    "start": 31,
+    "end": 40,
+    "levels": [
+      {
+        "level": 31,
+        "grade": 4,
+        "topic": "介词 in / on / under",
+        "difficulty": 1
+      },
+      {
+        "level": 32,
+        "grade": 4,
+        "topic": "介词 at / to / from",
+        "difficulty": 1
+      },
+      {
+        "level": 33,
+        "grade": 4,
+        "topic": "特殊疑问句 what / who",
+        "difficulty": 1
+      },
+      {
+        "level": 34,
+        "grade": 4,
+        "topic": "特殊疑问句 where / when",
+        "difficulty": 2
+      },
+      {
+        "level": 35,
+        "grade": 4,
+        "topic": "选择疑问句",
+        "difficulty": 2
+      },
+      {
+        "level": 36,
+        "grade": 4,
+        "topic": "名词单复数",
+        "difficulty": 2
+      },
+      {
+        "level": 37,
+        "grade": 4,
+        "topic": "不可数名词",
+        "difficulty": 2
+      },
+      {
+        "level": 38,
+        "grade": 4,
+        "topic": "形容词",
+        "difficulty": 2
+      },
+      {
+        "level": 39,
+        "grade": 4,
+        "topic": "副词",
+        "difficulty": 2
+      },
+      {
+        "level": 40,
+        "grade": 4,
+        "topic": "连词 and / but / or",
+        "difficulty": 2
+      }
+    ]
+  },
+  {
+    "subject": "english",
+    "start": 41,
+    "end": 50,
+    "levels": [
+      {
+        "level": 41,
+        "grade": 4,
+        "topic": "情景问候",
+        "difficulty": 2
+      },
+      {
+        "level": 42,
+        "grade": 4,
+        "topic": "购物对话",
+        "difficulty": 2
+      },
+      {
+        "level": 43,
+        "grade": 4,
+        "topic": "问路与指路",
+        "difficulty": 2
+      },
+      {
+        "level": 44,
+        "grade": 4,
+        "topic": "点餐用语",
+        "difficulty": 2
+      },
+      {
+        "level": 45,
+        "grade": 4,
+        "topic": "电话用语",
+        "difficulty": 2
+      },
+      {
+        "level": 46,
+        "grade": 4,
+        "topic": "日常作息",
+        "difficulty": 2
+      },
+      {
+        "level": 47,
+        "grade": 4,
+        "topic": "学校生活",
+        "difficulty": 2
+      },
+      {
+        "level": 48,
+        "grade": 4,
+        "topic": "假期活动",
+        "difficulty": 2
+      },
+      {
+        "level": 49,
+        "grade": 4,
+        "topic": "看图写句",
+        "difficulty": 2
+      },
+      {
+        "level": 50,
+        "grade": 4,
+        "topic": "四年级综合",
+        "difficulty": 2
+      }
+    ]
+  },
+  {
+    "subject": "english",
+    "start": 51,
+    "end": 60,
+    "levels": [
+      {
+        "level": 51,
+        "grade": 5,
+        "topic": "动物进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 52,
+        "grade": 5,
+        "topic": "自然地理",
+        "difficulty": 2
+      },
+      {
+        "level": 53,
+        "grade": 5,
+        "topic": "城市设施",
+        "difficulty": 2
+      },
+      {
+        "level": 54,
+        "grade": 5,
+        "topic": "节日文化",
+        "difficulty": 2
+      },
+      {
+        "level": 55,
+        "grade": 5,
+        "topic": "健康医疗",
+        "difficulty": 2
+      },
+      {
+        "level": 56,
+        "grade": 5,
+        "topic": "科技产品",
+        "difficulty": 2
+      },
+      {
+        "level": 57,
+        "grade": 5,
+        "topic": "兴趣爱好进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 58,
+        "grade": 5,
+        "topic": "食物烹饪",
+        "difficulty": 2
+      },
+      {
+        "level": 59,
+        "grade": 5,
+        "topic": "旅行词汇",
+        "difficulty": 2
+      },
+      {
+        "level": 60,
+        "grade": 5,
+        "topic": "环境保护",
+        "difficulty": 2
+      }
+    ]
+  },
+  {
+    "subject": "english",
+    "start": 61,
+    "end": 70,
+    "levels": [
+      {
+        "level": 61,
+        "grade": 5,
+        "topic": "学科科目进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 62,
+        "grade": 5,
+        "topic": "情感品质",
+        "difficulty": 2
+      },
+      {
+        "level": 63,
+        "grade": 5,
+        "topic": "动词短语",
+        "difficulty": 2
+      },
+      {
+        "level": 64,
+        "grade": 5,
+        "topic": "形容词进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 65,
+        "grade": 5,
+        "topic": "副词进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 66,
+        "grade": 5,
+        "topic": "连词进阶",
+        "difficulty": 2
+      },
+      {
+        "level": 67,
+        "grade": 5,
+        "topic": "同义词",
+        "difficulty": 3
+      },
+      {
+        "level": 68,
+        "grade": 5,
+        "topic": "反义词",
+        "difficulty": 3
+      },
+      {
+        "level": 69,
+        "grade": 5,
+        "topic": "词性转换",
+        "difficulty": 3
+      },
+      {
+        "level": 70,
+        "grade": 5,
+        "topic": "易混淆词",
+        "difficulty": 3
+      }
+    ]
+  },
+  {
+    "subject": "english",
+    "start": 71,
+    "end": 80,
+    "levels": [
+      {
+        "level": 71,
+        "grade": 5,
+        "topic": "一般过去时 be动词",
+        "difficulty": 3
+      },
+      {
+        "level": 72,
+        "grade": 5,
+        "topic": "一般过去时 规则动词",
+        "difficulty": 3
+      },
+      {
+        "level": 73,
+        "grade": 5,
+        "topic": "一般过去时 不规则动词",
+        "difficulty": 3
+      },
+      {
+        "level": 74,
+        "grade": 5,
+        "topic": "一般将来时 will",
+        "difficulty": 3
+      },
+      {
+        "level": 75,
+        "grade": 5,
+        "topic": "一般将来时 be going to",
+        "difficulty": 3
+      },
+      {
+        "level": 76,
+        "grade": 5,
+        "topic": "现在完成时",
+        "difficulty": 3
+      },
+      {
+        "level": 77,
+        "grade": 5,
+        "topic": "形容词比较级",
+        "difficulty": 3
+      },
+      {
+        "level": 78,
+        "grade": 5,
+        "topic": "形容词最高级",
+        "difficulty": 3
+      },
+      {
+        "level": 79,
+        "grade": 5,
+        "topic": "副词比较级最高级",
+        "difficulty": 3
+      },
+      {
+        "level": 80,
+        "grade": 5,
+        "topic": "情态动词 may / must / should",
+        "difficulty": 3
+      }
+    ]
+  },
+  {
+    "subject": "english",
+    "start": 81,
+    "end": 90,
+    "levels": [
+      {
+        "level": 81,
+        "grade": 5,
+        "topic": "代词 some / any",
+        "difficulty": 3
+      },
+      {
+        "level": 82,
+        "grade": 5,
+        "topic": "代词 many / much",
+        "difficulty": 3
+      },
+      {
+        "level": 83,
+        "grade": 5,
+        "topic": "介词进阶",
+        "difficulty": 3
+      },
+      {
+        "level": 84,
+        "grade": 5,
+        "topic": "时间介词",
+        "difficulty": 3
+      },
+      {
+        "level": 85,
+        "grade": 5,
+        "topic": "定冠词 the 进阶",
+        "difficulty": 3
+      },
+      {
+        "level": 86,
+        "grade": 5,
+        "topic": "感叹句",
+        "difficulty": 3
+      },
+      {
+        "level": 87,
+        "grade": 5,
+        "topic": "反意疑问句",
+        "difficulty": 3
+      },
+      {
+        "level": 88,
+        "grade": 5,
+        "topic": "宾语从句",
+        "difficulty": 3
+      },
+      {
+        "level": 89,
+        "grade": 5,
+        "topic": "状语从句",
+        "difficulty": 3
+      },
+      {
+        "level": 90,
+        "grade": 5,
+        "topic": "被动语态初识",
+        "difficulty": 3
+      }
+    ]
+  },
+  {
+    "subject": "english",
+    "start": 91,
+    "end": 100,
+    "levels": [
+      {
+        "level": 91,
+        "grade": 5,
+        "topic": "阅读理解 细节",
+        "difficulty": 3
+      },
+      {
+        "level": 92,
+        "grade": 5,
+        "topic": "阅读理解 词义",
+        "difficulty": 3
+      },
+      {
+        "level": 93,
+        "grade": 5,
+        "topic": "阅读理解 主旨",
+        "difficulty": 3
+      },
+      {
+        "level": 94,
+        "grade": 5,
+        "topic": "阅读理解 推理",
+        "difficulty": 3
+      },
+      {
+        "level": 95,
+        "grade": 5,
+        "topic": "完形填空",
+        "difficulty": 3
+      },
+      {
+        "level": 96,
+        "grade": 5,
+        "topic": "情景交际",
+        "difficulty": 3
+      },
+      {
+        "level": 97,
+        "grade": 5,
+        "topic": "书面表达句型",
+        "difficulty": 3
+      },
+      {
+        "level": 98,
+        "grade": 5,
+        "topic": "文化常识",
+        "difficulty": 3
+      },
+      {
+        "level": 99,
+        "grade": 5,
+        "topic": "综合复习",
+        "difficulty": 3
+      },
+      {
+        "level": 100,
+        "grade": 5,
+        "topic": "毕业挑战",
+        "difficulty": 3
+      }
+    ]
+  }
+]

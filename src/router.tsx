@@ -2,7 +2,6 @@ import { createHashRouter, Navigate } from 'react-router-dom';
 import { PlayLayout } from './components/layout/PlayLayout';
 import { ParentLayout } from './components/layout/ParentLayout';
 import { PlayHome } from './pages/PlayHome';
-import { WorldMap } from './pages/WorldMap';
 import { Battle } from './pages/Battle';
 import { BattleResult } from './pages/BattleResult';
 import { RewardShop } from './pages/RewardShop';
@@ -37,8 +36,7 @@ export const router = createHashRouter([
     element: <PlayLayout />,
     children: [
       { index: true, element: <PlayHome /> },
-      { path: 'map', element: <WorldMap /> },
-      { path: 'battle/:subject/:stageId', element: <Battle /> },
+      { path: 'battle/:subject/:levelNumber', element: <Battle /> },
       { path: 'battle-result', element: <BattleResult /> },
       { path: 'rewards', element: <RewardShop /> },
       { path: 'wrong', element: <WrongQuestions /> },

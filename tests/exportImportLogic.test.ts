@@ -46,6 +46,18 @@ async function seedDatabase(): Promise<void> {
     stars: 50,
     equippedItems: {},
     activePet: 'pet-1',
+    minigameStats: {
+      gomokuWins: 0,
+      triviaCorrect: 0,
+      memorySRankCount: 0,
+      speedMathSRankCount: 0,
+      wordChainCount: 0
+    },
+    stamina: 10,
+    staminaUpdatedAt: 1_700_000_000_000,
+    dailyPassCount: 0,
+    dailyPassDate: '2024-01-01',
+    currentLevelNumber: 1,
     createdAt: 1_700_000_000_000
   };
   await saveProfile(profile);
@@ -65,12 +77,11 @@ async function seedDatabase(): Promise<void> {
   await saveQuestions([question]);
 
   const progress: Progress = {
-    id: 'progress-1',
+    id: 'math-001',
     subject: 'math',
-    stageId: 'm1-1',
+    levelNumber: 1,
     status: 'passed',
-    stars: 3,
-    bestScore: 100
+    passedAt: 1_700_000_000_000
   };
   await saveProgress(progress);
 
@@ -128,7 +139,7 @@ async function seedDatabase(): Promise<void> {
   const battleRecord: BattleRecord = {
     id: 'battle-1',
     subject: 'math',
-    stageId: 'm1-1',
+    levelNumber: 1,
     result: 'win',
     durationMs: 60_000,
     starsEarned: 10,

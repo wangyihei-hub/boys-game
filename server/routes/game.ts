@@ -51,9 +51,9 @@ gameRouter.post('/battle', (req, res) => {
 
 gameRouter.get('/battle/records', (req, res) => {
   try {
-    const { subject, stageId } = req.query;
-    if (subject && stageId) {
-      res.json(dbGetBattleRecords(subject as string, stageId as string));
+    const { subject, levelNumber } = req.query;
+    if (subject && levelNumber) {
+      res.json(dbGetBattleRecords(subject as string, Number(levelNumber)));
     } else {
       res.json(dbGetAllBattleRecords());
     }

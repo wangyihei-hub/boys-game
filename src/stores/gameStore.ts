@@ -1,11 +1,9 @@
 import { create } from 'zustand';
 import type {
-  BattleAnswer,
   BattleRecord,
   BattleResult,
   Progress,
   Question,
-  Stage,
   Subject
 } from '../types';
 import {
@@ -22,76 +20,66 @@ import type { PetSkillEffect } from '../services/petLogic';
 import {
   getDailyTasks,
   getProgress,
-  getWrongQuestion,
   saveBattleRecord,
   saveDailyTasks,
-  saveProgressBatch,
-  saveWrongQuestion
+  saveProgressBatch
 } from '../db/dataAccess';
 import { generateDailyTasks, getTodayKey, updateTaskProgress } from '../services/dailyTaskLogic';
+import { recordWrongAnswer } from '../services/wrongLogic';
 import { useProfileStore } from './profileStore';
+import { assertV3Level, LEVEL_COUNT } from '../data/v3';
+import { advanceCurrentLevel, markDailyPass } from '../services/staminaLogic';
 
-export const STAGES: Stage[] = [
-  // 语文之森 — 9 stages
-  { id: 'c1', subject: 'chinese', regionName: '语文之森', stageNumber: 1, name: '字词小径', difficulty: 1, questionCount: 4, monsterHp: 30, isBoss: false },
-  { id: 'c2', subject: 'chinese', regionName: '语文之森', stageNumber: 2, name: '成语小溪', difficulty: 1, questionCount: 4, monsterHp: 40, isBoss: false },
-  { id: 'c3', subject: 'chinese', regionName: '语文之森', stageNumber: 3, name: '句子山谷', difficulty: 1, questionCount: 5, monsterHp: 50, isBoss: false },
-  { id: 'c4', subject: 'chinese', regionName: '语文之森', stageNumber: 4, name: '古诗山丘', difficulty: 2, questionCount: 5, monsterHp: 60, isBoss: false },
-  { id: 'c5', subject: 'chinese', regionName: '语文之森', stageNumber: 5, name: '阅读森林', difficulty: 2, questionCount: 6, monsterHp: 75, isBoss: false },
-  { id: 'c6', subject: 'chinese', regionName: '语文之森', stageNumber: 6, name: '写作营地', difficulty: 2, questionCount: 6, monsterHp: 90, isBoss: false },
-  { id: 'c7', subject: 'chinese', regionName: '语文之森', stageNumber: 7, name: '文言古道', difficulty: 3, questionCount: 7, monsterHp: 110, isBoss: false },
-  { id: 'c8', subject: 'chinese', regionName: '语文之森', stageNumber: 8, name: '综合高地', difficulty: 3, questionCount: 7, monsterHp: 130, isBoss: false },
-  { id: 'c9', subject: 'chinese', regionName: '语文之森', stageNumber: 9, name: '语文巨兽', difficulty: 3, questionCount: 7, monsterHp: 220, isBoss: true },
-
-  // 数学迷宫 — 9 stages
-  { id: 'm1', subject: 'math', regionName: '数学迷宫', stageNumber: 1, name: '加法入口', difficulty: 1, questionCount: 4, monsterHp: 30, isBoss: false },
-  { id: 'm2', subject: 'math', regionName: '数学迷宫', stageNumber: 2, name: '减法走廊', difficulty: 1, questionCount: 4, monsterHp: 40, isBoss: false },
-  { id: 'm3', subject: 'math', regionName: '数学迷宫', stageNumber: 3, name: '乘法房间', difficulty: 1, questionCount: 5, monsterHp: 50, isBoss: false },
-  { id: 'm4', subject: 'math', regionName: '数学迷宫', stageNumber: 4, name: '除法厅堂', difficulty: 2, questionCount: 5, monsterHp: 60, isBoss: false },
-  { id: 'm5', subject: 'math', regionName: '数学迷宫', stageNumber: 5, name: '方程回廊', difficulty: 2, questionCount: 6, monsterHp: 75, isBoss: false },
-  { id: 'm6', subject: 'math', regionName: '数学迷宫', stageNumber: 6, name: '图形密室', difficulty: 2, questionCount: 6, monsterHp: 90, isBoss: false },
-  { id: 'm7', subject: 'math', regionName: '数学迷宫', stageNumber: 7, name: '统计塔楼', difficulty: 3, questionCount: 7, monsterHp: 110, isBoss: false },
-  { id: 'm8', subject: 'math', regionName: '数学迷宫', stageNumber: 8, name: '综合广场', difficulty: 3, questionCount: 7, monsterHp: 130, isBoss: false },
-  { id: 'm9', subject: 'math', regionName: '数学迷宫', stageNumber: 9, name: '数学魔王', difficulty: 3, questionCount: 7, monsterHp: 220, isBoss: true },
-
-  // 英语海岸 — 9 stages
-  { id: 'e1', subject: 'english', regionName: '英语海岸', stageNumber: 1, name: '单词沙滩', difficulty: 1, questionCount: 4, monsterHp: 30, isBoss: false },
-  { id: 'e2', subject: 'english', regionName: '英语海岸', stageNumber: 2, name: '句型浅湾', difficulty: 1, questionCount: 4, monsterHp: 40, isBoss: false },
-  { id: 'e3', subject: 'english', regionName: '英语海岸', stageNumber: 3, name: '对话港口', difficulty: 1, questionCount: 5, monsterHp: 50, isBoss: false },
-  { id: 'e4', subject: 'english', regionName: '英语海岸', stageNumber: 4, name: '语法礁石', difficulty: 2, questionCount: 5, monsterHp: 60, isBoss: false },
-  { id: 'e5', subject: 'english', regionName: '英语海岸', stageNumber: 5, name: '阅读海域', difficulty: 2, questionCount: 6, monsterHp: 75, isBoss: false },
-  { id: 'e6', subject: 'english', regionName: '英语海岸', stageNumber: 6, name: '写作海湾', difficulty: 2, questionCount: 6, monsterHp: 90, isBoss: false },
-  { id: 'e7', subject: 'english', regionName: '英语海岸', stageNumber: 7, name: '完形暗礁', difficulty: 3, questionCount: 7, monsterHp: 110, isBoss: false },
-  { id: 'e8', subject: 'english', regionName: '英语海岸', stageNumber: 8, name: '综合灯塔', difficulty: 3, questionCount: 7, monsterHp: 130, isBoss: false },
-  { id: 'e9', subject: 'english', regionName: '英语海岸', stageNumber: 9, name: '英语海怪', difficulty: 3, questionCount: 7, monsterHp: 220, isBoss: true }
-];
-
-export function getStageById(stageId: string): Stage | undefined {
-  return STAGES.find(s => s.id === stageId);
-}
-
-export function getStagesBySubject(subject: Subject): Stage[] {
-  return STAGES.filter(s => s.subject === subject);
+export function getProgressId(subject: Subject, levelNumber: number): string {
+  return `${subject}-${String(levelNumber).padStart(3, '0')}`;
 }
 
 export function getDefaultProgress(): Progress[] {
-  return STAGES.map(stage => ({
-    id: `${stage.subject}-${stage.id}`,
-    subject: stage.subject,
-    stageId: stage.id,
-    status: stage.stageNumber === 1 ? 'unlocked' : 'locked',
-    stars: 0,
-    bestScore: 0
-  }));
+  const progress: Progress[] = [];
+  for (let levelNumber = 1; levelNumber <= LEVEL_COUNT; levelNumber++) {
+    for (const subject of (['chinese', 'math', 'english'] as Subject[])) {
+      progress.push({
+        id: getProgressId(subject, levelNumber),
+        subject,
+        levelNumber,
+        status: levelNumber === 1 ? 'unlocked' : 'locked'
+      });
+    }
+  }
+  return progress;
 }
 
-export function computeRegionProgress(progressList: Progress[], subject: Subject): {
+export function computeSubjectProgress(progressList: Progress[], subject: Subject): {
   passed: number;
   total: number;
 } {
   const subjectProgress = progressList.filter(p => p.subject === subject);
   const passed = subjectProgress.filter(p => p.status === 'passed').length;
   return { passed, total: subjectProgress.length };
+}
+
+export function computeCurrentLevel(progressList: Progress[]): number {
+  let level = 1;
+  while (level <= LEVEL_COUNT) {
+    const trio = (['chinese', 'math', 'english'] as Subject[]).map(s =>
+      progressList.find(p => p.subject === s && p.levelNumber === level)
+    );
+    if (trio.every(p => p?.status === 'passed')) {
+      level++;
+    } else {
+      break;
+    }
+  }
+  return level;
+}
+
+export function isLevelUnlocked(progressList: Progress[], levelNumber: number): boolean {
+  if (levelNumber === 1) return true;
+  const prev = levelNumber - 1;
+  return (['chinese', 'math', 'english'] as Subject[]).every(subject => {
+    const p = progressList.find(p => p.subject === subject && p.levelNumber === prev);
+    return p?.status === 'passed';
+  });
 }
 
 interface GameState {
@@ -101,7 +89,7 @@ interface GameState {
   currentBattle: BattleState | null;
   lastBattleRecord: BattleRecord | null;
   loadProgress: () => Promise<void>;
-  startBattle: (stage: Stage, questions: Question[], playerLevel: number, bonuses?: Partial<EquipmentBonuses>) => void;
+  startBattle: (subject: Subject, levelNumber: number, questions: Question[]) => void;
   submitAnswer: (selectedAnswer: string | number, playerLevel: number, bonuses?: Partial<EquipmentBonuses>, petEffect?: PetSkillEffect) => void;
   submitTimeout: (bonuses?: Partial<EquipmentBonuses>) => void;
   escapeBattle: () => void;
@@ -127,17 +115,21 @@ export const useGameStore = create<GameState>((set, get) => ({
 
   async loadProgress() {
     try {
-      const firstStage = STAGES[0];
-      const sample = await getProgress(`${firstStage.subject}-${firstStage.id}`);
+      const sample = await getProgress(getProgressId('chinese', 1));
       let progress: Progress[];
       if (!sample) {
         progress = getDefaultProgress();
         await saveProgressBatch(progress);
       } else {
         const stored = await Promise.all(
-          STAGES.map(stage => getProgress(`${stage.subject}-${stage.id}`))
+          Array.from({ length: LEVEL_COUNT }, (_, i) => i + 1).flatMap(levelNumber =>
+            (['chinese', 'math', 'english'] as Subject[]).map(subject =>
+              getProgress(getProgressId(subject, levelNumber))
+            )
+          )
         );
-        progress = stored.map((p, index) => p ?? getDefaultProgress()[index]);
+        const defaults = getDefaultProgress();
+        progress = stored.map((p, index) => p ?? defaults[index]);
       }
       set({ progress, loaded: true, error: null });
     } catch (err) {
@@ -145,8 +137,12 @@ export const useGameStore = create<GameState>((set, get) => ({
     }
   },
 
-  startBattle(stage, questions, playerLevel, bonuses = {}) {
-    set({ currentBattle: createBattleState(stage, questions, playerLevel, bonuses), lastBattleRecord: null });
+  startBattle(subject, levelNumber, questions) {
+    const level = assertV3Level(subject, levelNumber);
+    set({
+      currentBattle: createBattleState(subject, levelNumber, level.topic, level.difficulty, questions),
+      lastBattleRecord: null
+    });
   },
 
   submitAnswer(selectedAnswer, playerLevel, bonuses = {}, petEffect) {
@@ -186,9 +182,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     const correctAnswers = battle.answers.filter(a => a.correct).length;
 
     const record: BattleRecord = {
-      id: `${battle.stage.subject}-${battle.stage.id}-${Date.now()}`,
-      subject: battle.stage.subject,
-      stageId: battle.stage.id,
+      id: `${battle.subject}-L${String(battle.levelNumber).padStart(3, '0')}-${Date.now()}`,
+      subject: battle.subject,
+      levelNumber: battle.levelNumber,
       result: battle.result ?? 'escape',
       durationMs,
       starsEarned: stars,
@@ -202,14 +198,7 @@ export const useGameStore = create<GameState>((set, get) => ({
     // Persist wrong answers
     for (const answer of battle.answers) {
       if (answer.correct) continue;
-      const questionId = battle.questions[battle.answers.indexOf(answer)]?.id ?? '';
-      if (!questionId) continue;
-      const existing = await getWrongQuestion(questionId);
-      await saveWrongQuestion({
-        questionId,
-        wrongCount: (existing?.wrongCount ?? 0) + 1,
-        lastReviewAt: Date.now()
-      });
+      await recordWrongAnswer(answer.questionId);
     }
 
     // Update daily tasks
@@ -218,10 +207,9 @@ export const useGameStore = create<GameState>((set, get) => ({
     if (tasks.length === 0) {
       tasks = generateDailyTasks(today);
     }
-    const correctCount = battle.answers.filter((a: BattleAnswer) => a.correct).length;
     const taskUpdates: { type: 'win_battle' | 'correct_answers'; increment: number }[] = [
       { type: 'win_battle', increment: battle.result === 'win' ? 1 : 0 },
-      { type: 'correct_answers', increment: correctCount }
+      { type: 'correct_answers', increment: correctAnswers }
     ];
     let updatedTasks = tasks;
     for (const update of taskUpdates) {
@@ -232,45 +220,43 @@ export const useGameStore = create<GameState>((set, get) => ({
 
     const progressList = get().progress;
     const progressIndex = progressList.findIndex(
-      p => p.subject === battle.stage.subject && p.stageId === battle.stage.id
+      p => p.subject === battle.subject && p.levelNumber === battle.levelNumber
     );
 
-    if (progressIndex !== -1) {
-      const currentProgress = progressList[progressIndex];
-      const correctCount = battle.answers.filter((a: BattleAnswer) => a.correct).length;
-      const score = battle.result === 'win'
-        ? Math.round((correctCount / battle.questions.length) * 100)
-        : currentProgress.bestScore;
-
-      const nextProgress: Progress = {
-        ...currentProgress,
-        status: battle.result === 'win' ? 'passed' : currentProgress.status,
-        stars: battle.result === 'win' ? Math.max(currentProgress.stars, stars) : currentProgress.stars,
-        bestScore: Math.max(currentProgress.bestScore, score)
+    if (progressIndex !== -1 && battle.result === 'win') {
+      const nextList = [...progressList];
+      nextList[progressIndex] = {
+        ...nextList[progressIndex],
+        status: 'passed',
+        passedAt: Date.now()
       };
 
-      const nextList = [...progressList];
-      nextList[progressIndex] = nextProgress;
-
-      // 解锁下一关
-      if (battle.result === 'win') {
-        const subjectStages = getStagesBySubject(battle.stage.subject);
-        const currentStageIndex = subjectStages.findIndex(s => s.id === battle.stage.id);
-        const nextStage = subjectStages[currentStageIndex + 1];
-        if (nextStage) {
-          const nextProgressIndex = nextList.findIndex(
-            p => p.subject === nextStage.subject && p.stageId === nextStage.id
-          );
-          if (nextProgressIndex !== -1 && nextList[nextProgressIndex].status === 'locked') {
-            nextList[nextProgressIndex] = {
-              ...nextList[nextProgressIndex],
-              status: 'unlocked'
-            };
+      // Unlock next level for all subjects when current trio is fully passed
+      const nextLevelNumber = battle.levelNumber + 1;
+      if (nextLevelNumber <= LEVEL_COUNT) {
+        for (const subject of (['chinese', 'math', 'english'] as Subject[])) {
+          const idx = nextList.findIndex(p => p.subject === subject && p.levelNumber === nextLevelNumber);
+          if (idx !== -1 && nextList[idx].status === 'locked') {
+            nextList[idx] = { ...nextList[idx], status: 'unlocked' };
           }
         }
       }
 
       await saveProgressBatch(nextList);
+
+      // 三科同号全过则推进统一关号并累加今日通关数
+      const trio = (['chinese', 'math', 'english'] as Subject[]).map(s =>
+        nextList.find(p => p.subject === s && p.levelNumber === battle.levelNumber)
+      );
+      if (trio.every(p => p?.status === 'passed')) {
+        const profileStore = useProfileStore.getState();
+        const currentProfile = profileStore.profile;
+        if (currentProfile) {
+          const nextProfile = advanceCurrentLevel(markDailyPass(currentProfile));
+          await profileStore.updateProfile(nextProfile);
+        }
+      }
+
       set({ progress: nextList, lastBattleRecord: record });
     } else {
       set({ lastBattleRecord: record });
@@ -295,3 +281,5 @@ export const useGameStore = create<GameState>((set, get) => ({
     set({ error: null });
   }
 }));
+
+export { LEVEL_COUNT } from '../data/v3';

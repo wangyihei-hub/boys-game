@@ -8,7 +8,7 @@ describe('Game API', () => {
   const sampleProgress = {
     id: 'math-stage1',
     subject: 'math',
-    stage_id: 'stage1',
+    level_number: 1,
     status: 'unlocked',
     stars: 3,
     best_score: 85,
@@ -17,7 +17,7 @@ describe('Game API', () => {
   const sampleBattleRecord = {
     id: 'battle-1',
     subject: 'math',
-    stage_id: 'stage1',
+    level_number: 1,
     result: 'win',
     duration_ms: 60000,
     stars_earned: 3,
@@ -43,8 +43,8 @@ describe('Game API', () => {
 
   it('PUT /api/progress/:profileId saves batch progress', async () => {
     const batch = [
-      { id: 'math-stage1', subject: 'math', stage_id: 'stage1', status: 'completed', stars: 3, best_score: 100 },
-      { id: 'math-stage2', subject: 'math', stage_id: 'stage2', status: 'unlocked', stars: 0, best_score: 0 },
+      { id: 'math-stage1', subject: 'math', level_number: 1, status: 'completed', stars: 3, best_score: 100 },
+      { id: 'math-stage2', subject: 'math', level_number: 2, status: 'unlocked', stars: 0, best_score: 0 },
     ];
     const res = await request(app)
       .put('/api/progress/math')
@@ -68,14 +68,14 @@ describe('Game API', () => {
     expect(res.body).toHaveLength(1);
   });
 
-  it('GET /api/battle/records filters by subject and stageId', async () => {
+  it('GET /api/battle/records filters by subject and levelNumber', async () => {
     await request(app).post('/api/battle').send(sampleBattleRecord);
     await request(app).post('/api/battle').send({
-      ...sampleBattleRecord, id: 'battle-2', subject: 'chinese', stage_id: 'ch-stage1',
+      ...sampleBattleRecord, id: 'battle-2', subject: 'chinese', level_number: 1,
     });
 
     const res = await request(app)
-      .get('/api/battle/records?subject=math&stageId=stage1');
+      .get('/api/battle/records?subject=math&levelNumber=1');
     expect(res.body).toHaveLength(1);
     expect(res.body[0].id).toBe('battle-1');
   });

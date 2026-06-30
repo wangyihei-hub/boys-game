@@ -19,6 +19,12 @@ import {
 } from '../db/dataAccess';
 
 import { calculateLevelUp } from '../services/battleLogic';
+import {
+  canEnterLevel,
+  consumeStamina,
+  MAX_STAMINA,
+  refreshStamina
+} from '../services/staminaLogic';
 import { computeNextBalance, createTransaction } from '../services/economyLogic';
 import { checkAchievements, checkLevelAchievements, checkStarAchievement, createInitialAchievements } from '../services/achievementLogic';
 import {
@@ -46,7 +52,7 @@ interface ProfileState {
   applyTransaction: (type: TransactionType, amount: number, reason: string) => Promise<void>;
   addExp: (amount: number) => Promise<{ newLevel: number; newExp: number; levelUps: number }>;
   applyBattleRewards: (stars: number, exp: number) => Promise<{ newLevel: number; newExp: number; levelUps: number; newlyUnlocked: AchievementId[] }>;
-  checkBattleAchievements: (subject: string, stageId: string) => Promise<AchievementId[]>;
+  checkBattleAchievements: (subject: string, levelNumber: number) => Promise<AchievementId[]>;
   recordStarsEarned: (amount: number) => Promise<void>;
   recordMinutesPlayed: (minutes: number) => Promise<void>;
   loadDailyStats: (dateKey?: string) => Promise<void>;
@@ -56,6 +62,8 @@ interface ProfileState {
   incrementMinigameStat: (key: keyof MinigameStats, amount?: number) => Promise<{ newlyUnlocked: AchievementId[] }>;
   checkMinigameAchievements: () => Promise<AchievementId[]>;
   unlockEyeCareGuard: () => Promise<AchievementId[]>;
+  refreshStaminaNow: () => Promise<void>;
+  consumeStaminaForLevel: () => Promise<{ ok: boolean; reason?: 'stamina' | 'daily_limit'; stamina: number }>;
   clearError: () => void;
 }
 
@@ -74,6 +82,11 @@ function createDefaultProfile(): Profile {
       speedMathSRankCount: 0,
       wordChainCount: 0
     },
+    stamina: 10,
+    staminaUpdatedAt: Date.now(),
+    dailyPassCount: 0,
+    dailyPassDate: getTodayKey(),
+    currentLevelNumber: 1,
     createdAt: Date.now()
   };
 }
@@ -89,6 +102,20 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       let profile = await getProfile('default');
       if (!profile) {
         profile = createDefaultProfile();
+        await saveProfile(profile);
+      } else {
+        // 兼容旧 profile：补充 V3 新增字段
+        const today = getTodayKey();
+        const defaults = createDefaultProfile();
+        profile = {
+          ...defaults,
+          ...profile,
+          stamina: profile.stamina ?? MAX_STAMINA,
+          staminaUpdatedAt: profile.staminaUpdatedAt ?? Date.now(),
+          dailyPassCount: profile.dailyPassCount ?? 0,
+          dailyPassDate: profile.dailyPassDate ?? today,
+          currentLevelNumber: profile.currentLevelNumber ?? 1
+        };
         await saveProfile(profile);
       }
       let achievements = await getAchievementsFromDB();
@@ -197,14 +224,14 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       return { newLevel: get().profile?.level ?? 1, newExp: get().profile?.exp ?? 0, levelUps: 0, newlyUnlocked: [] };
     }
   },
-  async checkBattleAchievements(subject, stageId) {
+  async checkBattleAchievements(subject, levelNumber) {
     try {
       const current = get().achievements;
       const transactions = await getTransactions();
       const totalStarsEarned = transactions
         .filter(t => t.type === 'earn')
         .reduce((sum, t) => sum + t.amount, 0);
-      const records = await getBattleRecords(subject as import('../types').Subject, stageId);
+      const records = await getBattleRecords(subject as import('../types').Subject, levelNumber);
       const progress = await Promise.all(
         (['chinese', 'math', 'english'] as const).map(s => getProgressBySubject(s))
       ).then(groups => groups.flat());
@@ -409,6 +436,26 @@ export const useProfileStore = create<ProfileState>((set, get) => ({
       set({ error: err instanceof Error ? err.message : '解锁护眼成就失败' });
       return [];
     }
+  },
+  async refreshStaminaNow() {
+    const current = get().profile;
+    if (!current) return;
+    const next = refreshStamina(current, Date.now());
+    if (next !== current) {
+      await saveProfile(next);
+      set({ profile: next, error: null });
+    }
+  },
+  async consumeStaminaForLevel() {
+    const current = get().profile;
+    if (!current) return { ok: false, reason: 'stamina', stamina: 0 };
+    const now = Date.now();
+    const check = canEnterLevel(current, now);
+    if (!check.ok) return check;
+    const next = consumeStamina(current, now);
+    await saveProfile(next);
+    set({ profile: next, error: null });
+    return { ok: true, stamina: next.stamina };
   },
   clearError() {
     set({ error: null });

@@ -39,6 +39,12 @@ export interface Profile {
   };
   activePet?: string;
   minigameStats?: MinigameStats;
+  // V3 体力与关卡推进
+  stamina: number;
+  staminaUpdatedAt: number;
+  dailyPassCount: number;
+  dailyPassDate: string;
+  currentLevelNumber: number;
   createdAt: number;
 }
 
@@ -257,27 +263,14 @@ export interface InventoryItem {
   bond?: number;
 }
 
-export type StageStatus = 'locked' | 'unlocked' | 'passed';
-
-export interface Stage {
-  id: string;
-  subject: Subject;
-  regionName: string;
-  stageNumber: number;
-  name: string;
-  difficulty: Difficulty;
-  questionCount: number;
-  monsterHp: number;
-  isBoss: boolean;
-}
+export type LevelStatus = 'locked' | 'unlocked' | 'passed';
 
 export interface Progress {
   id: string;
   subject: Subject;
-  stageId: string;
-  status: StageStatus;
-  stars: number;
-  bestScore: number;
+  levelNumber: number;
+  status: LevelStatus;
+  passedAt?: number;
 }
 
 export type BattleResult = 'win' | 'lose' | 'escape';
@@ -291,7 +284,7 @@ export interface BattleAnswer {
 export interface BattleRecord {
   id: string;
   subject: Subject;
-  stageId: string;
+  levelNumber: number;
   result: BattleResult;
   durationMs: number;
   starsEarned: number;

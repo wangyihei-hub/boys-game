@@ -18,7 +18,7 @@ import type {
 } from '../types';
 
 const DB_NAME = 'boys-game-db';
-const DB_VERSION = 5;
+const DB_VERSION = 6;
 
 interface GameDB extends DBSchema {
   profiles: { key: string; value: Profile };
@@ -30,7 +30,7 @@ interface GameDB extends DBSchema {
   achievements: { key: string; value: Achievement };
   parentSettings: { key: string; value: ParentSettings & { id: string } };
   progress: { key: string; value: Progress; indexes: { 'by-subject': Subject } };
-  battleRecords: { key: string; value: BattleRecord; indexes: { 'by-subject-stage': [Subject, string] } };
+  battleRecords: { key: string; value: BattleRecord; indexes: { 'by-subject-level': [Subject, number] } };
   dailyTasks: { key: string; value: DailyTask };
   dailyStats: { key: string; value: DailyStats };
   lotteryPool: { key: string; value: LotteryPrize };
@@ -59,7 +59,7 @@ export function getDB() {
           const progressStore = db.createObjectStore('progress', { keyPath: 'id' });
           progressStore.createIndex('by-subject', 'subject');
           const battleRecordStore = db.createObjectStore('battleRecords', { keyPath: 'id' });
-          battleRecordStore.createIndex('by-subject-stage', ['subject', 'stageId']);
+          battleRecordStore.createIndex('by-subject-level', ['subject', 'levelNumber']);
         }
         if (oldVersion < 3) {
           db.createObjectStore('transactions', { keyPath: 'id' });
@@ -71,6 +71,15 @@ export function getDB() {
         }
         if (oldVersion < 5) {
           db.createObjectStore('dailyStats', { keyPath: 'id' });
+        }
+        if (oldVersion < 6) {
+          // V3 refactor: battle records are keyed by numeric levelNumber instead of stageId.
+          // Drop the old store and recreate it with the new index; old stage-based records are not compatible.
+          if (db.objectStoreNames.contains('battleRecords')) {
+            db.deleteObjectStore('battleRecords');
+          }
+          const battleRecordStore = db.createObjectStore('battleRecords', { keyPath: 'id' });
+          battleRecordStore.createIndex('by-subject-level', ['subject', 'levelNumber']);
         }
       }
     }).catch(err => {
@@ -208,9 +217,9 @@ export async function saveProgressBatch(progressList: Progress[]): Promise<void>
   await tx.done;
 }
 
-export async function getBattleRecords(subject: Subject, stageId: string): Promise<BattleRecord[]> {
+export async function getBattleRecords(subject: Subject, levelNumber: number): Promise<BattleRecord[]> {
   const db = await getDB();
-  return db.getAllFromIndex('battleRecords', 'by-subject-stage', [subject, stageId]);
+  return db.getAllFromIndex('battleRecords', 'by-subject-level', [subject, levelNumber]);
 }
 
 export async function getAllBattleRecords(): Promise<BattleRecord[]> {

@@ -16,7 +16,7 @@ import type {
   WrongQuestion
 } from '../types';
 
-export const EXPORT_VERSION = 5;
+export const EXPORT_VERSION = 6;
 
 export interface ExportBundle {
   version: number;

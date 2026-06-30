@@ -18,7 +18,7 @@ function makeRecord(overrides: Partial<BattleRecord> = {}): BattleRecord {
   return {
     id: 'r1',
     subject: 'math',
-    stageId: 'm1',
+    levelNumber: 1,
     result: 'win',
     durationMs: 1000,
     starsEarned: 5,
@@ -29,14 +29,12 @@ function makeRecord(overrides: Partial<BattleRecord> = {}): BattleRecord {
   };
 }
 
-function makeProgress(subject: Progress['subject'], status: Progress['status'] = 'passed'): Progress {
+function makeProgress(subject: Progress['subject'], levelNumber: number = 1, status: Progress['status'] = 'passed'): Progress {
   return {
-    id: `${subject}-s1`,
+    id: `${subject}-${String(levelNumber).padStart(3, '0')}`,
     subject,
-    stageId: `${subject.charAt(0)}1`,
-    status,
-    stars: 0,
-    bestScore: 0
+    levelNumber,
+    status
   };
 }
 
@@ -61,7 +59,7 @@ describe('achievementLogic', () => {
 
   it('unlocks first_boss only for boss wins', () => {
     const current = makeAchievements();
-    const records = [makeRecord({ result: 'win', stageId: 'm9', subject: 'math' })];
+    const records = [makeRecord({ result: 'win', levelNumber: 5, subject: 'math' })];
     const { newlyUnlocked } = checkAchievements(current, {
       level: 1,
       totalStarsEarned: 0,

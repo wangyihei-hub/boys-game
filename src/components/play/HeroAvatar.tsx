@@ -2,16 +2,12 @@ import type { Profile } from '../../types';
 
 interface HeroAvatarProps {
   profile: Profile;
-  hp: number;
-  maxHp: number;
   bounce?: boolean;
   attacking?: boolean;
   hurt?: boolean;
 }
 
-export function HeroAvatar({ profile, hp, maxHp, bounce, attacking, hurt }: HeroAvatarProps) {
-  const hpPercent = Math.max(0, Math.min(100, Math.round((hp / maxHp) * 100)));
-
+export function HeroAvatar({ profile, bounce, attacking, hurt }: HeroAvatarProps) {
   return (
     <div className="flex flex-col items-center gap-2 sm:gap-3">
       <div
@@ -23,17 +19,6 @@ export function HeroAvatar({ profile, hp, maxHp, bounce, attacking, hurt }: Hero
         ].join(' ')}
       >
         🧒
-      </div>
-      <div className="w-28 sm:w-40">
-        <div className="h-3 w-full overflow-hidden rounded-full bg-slate-900/10 shadow-inner sm:h-4">
-          <div
-            className="h-full rounded-full bg-green-500 transition-all duration-300"
-            style={{ width: `${hpPercent}%` }}
-          />
-        </div>
-        <p className="mt-1 text-center text-xs font-bold text-slate-700 sm:text-sm">
-          {hp}/{maxHp}
-        </p>
       </div>
       <div className="text-center">
         <p className="text-sm font-bold text-slate-800 sm:text-base">{profile.nickname}</p>

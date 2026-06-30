@@ -22,7 +22,7 @@ export function BattleResult() {
 
   useEffect(() => {
     if (!state) {
-      navigate('/play/map');
+      navigate('/play');
     }
     return () => {
       clearCurrentBattle();
@@ -75,10 +75,10 @@ export function BattleResult() {
       <div className="flex gap-3">
         <button
           type="button"
-          onClick={() => navigate('/play/map')}
+          onClick={() => navigate('/play')}
           className="btn-secondary flex-1"
         >
-          返回地图
+          返回营地
         </button>
         <button
           type="button"

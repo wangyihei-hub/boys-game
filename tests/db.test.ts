@@ -17,6 +17,11 @@ describe('IndexedDB layer', () => {
       exp: 0,
       stars: 0,
       equippedItems: {},
+      stamina: 10,
+      staminaUpdatedAt: Date.now(),
+      dailyPassCount: 0,
+      dailyPassDate: new Date().toISOString().slice(0, 10),
+      currentLevelNumber: 1,
       createdAt: Date.now()
     };
     await saveProfile(profile);

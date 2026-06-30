@@ -37,6 +37,11 @@ export function initDb(): void {
       equipped_staff TEXT,
       equipped_shoes TEXT,
       active_pet TEXT,
+      stamina INTEGER NOT NULL DEFAULT 10,
+      stamina_updated_at TEXT NOT NULL DEFAULT '',
+      daily_pass_count INTEGER NOT NULL DEFAULT 0,
+      daily_pass_date TEXT NOT NULL DEFAULT '',
+      current_level_number INTEGER NOT NULL DEFAULT 1,
       created_at TEXT NOT NULL DEFAULT ''
     );
 
@@ -107,17 +112,16 @@ export function initDb(): void {
     CREATE TABLE IF NOT EXISTS progress (
       id TEXT PRIMARY KEY,
       subject TEXT NOT NULL,
-      stage_id TEXT NOT NULL DEFAULT '',
+      level_number INTEGER NOT NULL DEFAULT 1,
       status TEXT NOT NULL DEFAULT 'locked',
-      stars INTEGER NOT NULL DEFAULT 0,
-      best_score INTEGER NOT NULL DEFAULT 0
+      passed_at TEXT
     );
     CREATE INDEX IF NOT EXISTS idx_progress_subject ON progress(subject);
 
     CREATE TABLE IF NOT EXISTS battle_records (
       id TEXT PRIMARY KEY,
       subject TEXT NOT NULL,
-      stage_id TEXT NOT NULL DEFAULT '',
+      level_number INTEGER NOT NULL DEFAULT 1,
       result TEXT NOT NULL DEFAULT '',
       duration_ms INTEGER NOT NULL DEFAULT 0,
       stars_earned INTEGER NOT NULL DEFAULT 0,
@@ -125,7 +129,7 @@ export function initDb(): void {
       correct_answers INTEGER NOT NULL DEFAULT 0,
       created_at TEXT NOT NULL DEFAULT ''
     );
-    CREATE INDEX IF NOT EXISTS idx_battle_records_subject_stage ON battle_records(subject, stage_id);
+    CREATE INDEX IF NOT EXISTS idx_battle_records_subject_level ON battle_records(subject, level_number);
 
     CREATE TABLE IF NOT EXISTS transactions (
       id TEXT PRIMARY KEY,
@@ -190,12 +194,23 @@ export function initDb(): void {
     );
   `);
 
-  // Migrate existing databases: add curriculum_data column if missing.
-  try {
-    db.exec(`ALTER TABLE parent_settings ADD COLUMN curriculum_data TEXT`);
-  } catch {
-    // Column already exists.
-  }
+  // Migrate existing databases: add columns that were introduced after initial creation.
+  const addColumn = (sql: string) => {
+    try {
+      db.exec(sql);
+    } catch {
+      // Column already exists.
+    }
+  };
+  addColumn(`ALTER TABLE parent_settings ADD COLUMN curriculum_data TEXT`);
+  addColumn(`ALTER TABLE profiles ADD COLUMN stamina INTEGER NOT NULL DEFAULT 10`);
+  addColumn(`ALTER TABLE profiles ADD COLUMN stamina_updated_at TEXT NOT NULL DEFAULT ''`);
+  addColumn(`ALTER TABLE profiles ADD COLUMN daily_pass_count INTEGER NOT NULL DEFAULT 0`);
+  addColumn(`ALTER TABLE profiles ADD COLUMN daily_pass_date TEXT NOT NULL DEFAULT ''`);
+  addColumn(`ALTER TABLE profiles ADD COLUMN current_level_number INTEGER NOT NULL DEFAULT 1`);
+  addColumn(`ALTER TABLE progress ADD COLUMN level_number INTEGER NOT NULL DEFAULT 1`);
+  addColumn(`ALTER TABLE progress ADD COLUMN passed_at TEXT`);
+  addColumn(`ALTER TABLE battle_records ADD COLUMN level_number INTEGER NOT NULL DEFAULT 1`);
 }
 
 // ========== Profile ==========
@@ -211,20 +226,34 @@ export function dbSaveProfile(profile: Record<string, unknown>) {
   if (existing) {
     db.prepare(`UPDATE profiles SET nickname=?, level=?, exp=?, stars=?,
       equipped_weapon=?, equipped_shield=?, equipped_staff=?, equipped_shoes=?,
-      active_pet=?, created_at=? WHERE id=?`).run(
+      active_pet=?, stamina=?, stamina_updated_at=?, daily_pass_count=?, daily_pass_date=?,
+      current_level_number=?, created_at=? WHERE id=?`).run(
       profile.nickname, profile.level, profile.exp, profile.stars,
       profile.equipped_weapon || null, profile.equipped_shield || null,
       profile.equipped_staff || null, profile.equipped_shoes || null,
-      profile.active_pet || null, profile.created_at, profile.id
+      profile.active_pet || null,
+      profile.stamina ?? 10,
+      profile.stamina_updated_at ?? profile.staminaUpdatedAt ?? '',
+      profile.daily_pass_count ?? profile.dailyPassCount ?? 0,
+      profile.daily_pass_date ?? profile.dailyPassDate ?? '',
+      profile.current_level_number ?? profile.currentLevelNumber ?? 1,
+      profile.created_at, profile.id
     );
   } else {
     db.prepare(`INSERT INTO profiles (id, nickname, level, exp, stars,
       equipped_weapon, equipped_shield, equipped_staff, equipped_shoes,
-      active_pet, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?)`).run(
+      active_pet, stamina, stamina_updated_at, daily_pass_count, daily_pass_date,
+      current_level_number, created_at) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,?)`).run(
       profile.id, profile.nickname, profile.level, profile.exp, profile.stars,
       profile.equipped_weapon || null, profile.equipped_shield || null,
       profile.equipped_staff || null, profile.equipped_shoes || null,
-      profile.active_pet || null, profile.created_at
+      profile.active_pet || null,
+      profile.stamina ?? 10,
+      profile.stamina_updated_at ?? profile.staminaUpdatedAt ?? '',
+      profile.daily_pass_count ?? profile.dailyPassCount ?? 0,
+      profile.daily_pass_date ?? profile.dailyPassDate ?? '',
+      profile.current_level_number ?? profile.currentLevelNumber ?? 1,
+      profile.created_at
     );
   }
 }
@@ -278,34 +307,43 @@ export function dbGetProgressBySubject(subject: string) {
 }
 export function dbSaveProgress(progress: Record<string, unknown>) {
   const db = getDb();
-  db.prepare(`INSERT OR REPLACE INTO progress (id, subject, stage_id, status, stars, best_score)
-    VALUES (?,?,?,?,?,?)`).run(progress.id, progress.subject, progress.stage_id || progress.stageId,
-    progress.status, progress.stars, progress.best_score || progress.bestScore);
+  db.prepare(`INSERT OR REPLACE INTO progress (id, subject, level_number, status, passed_at)
+    VALUES (?,?,?,?,?)`).run(
+    progress.id, progress.subject,
+    progress.level_number ?? progress.levelNumber ?? 1,
+    progress.status,
+    progress.passed_at ?? progress.passedAt ?? null
+  );
 }
 export function dbSaveProgressBatch(list: Record<string, unknown>[]) {
   const db = getDb();
-  const insert = db.prepare(`INSERT OR REPLACE INTO progress (id, subject, stage_id, status, stars, best_score)
-    VALUES (?,?,?,?,?,?)`);
+  const insert = db.prepare(`INSERT OR REPLACE INTO progress (id, subject, level_number, status, passed_at)
+    VALUES (?,?,?,?,?)`);
   const tx = db.transaction((items: Record<string, unknown>[]) => {
     for (const p of items) {
-      insert.run(p.id, p.subject, p.stage_id || p.stageId, p.status, p.stars, p.best_score || p.bestScore);
+      insert.run(
+        p.id, p.subject,
+        p.level_number ?? p.levelNumber ?? 1,
+        p.status,
+        p.passed_at ?? p.passedAt ?? null
+      );
     }
   });
   tx(list);
 }
 
 // ========== Battle Records ==========
-export function dbGetBattleRecords(subject: string, stageId: string) {
-  return getDb().prepare('SELECT * FROM battle_records WHERE subject = ? AND stage_id = ?').all(subject, stageId);
+export function dbGetBattleRecords(subject: string, levelNumber: number) {
+  return getDb().prepare('SELECT * FROM battle_records WHERE subject = ? AND level_number = ?').all(subject, levelNumber);
 }
 export function dbGetAllBattleRecords() {
   return getDb().prepare('SELECT * FROM battle_records').all();
 }
 export function dbSaveBattleRecord(record: Record<string, unknown>) {
   getDb().prepare(`INSERT OR REPLACE INTO battle_records
-    (id, subject, stage_id, result, duration_ms, stars_earned, exp_earned, correct_answers, created_at)
+    (id, subject, level_number, result, duration_ms, stars_earned, exp_earned, correct_answers, created_at)
     VALUES (?,?,?,?,?,?,?,?,?)`).run(
-    record.id, record.subject, record.stage_id || record.stageId, record.result,
+    record.id, record.subject, record.level_number ?? record.levelNumber ?? 1, record.result,
     record.duration_ms || record.durationMs, record.stars_earned || record.starsEarned,
     record.exp_earned || record.expEarned, record.correct_answers || record.correctAnswers,
     record.created_at || record.createdAt

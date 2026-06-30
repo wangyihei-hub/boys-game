@@ -19,6 +19,11 @@ function makeProfile(overrides: Partial<Profile> = {}): Profile {
     exp: 0,
     stars: 50,
     equippedItems: {},
+    stamina: 10,
+    staminaUpdatedAt: 0,
+    dailyPassCount: 0,
+    dailyPassDate: '2024-01-01',
+    currentLevelNumber: 1,
     createdAt: 0,
     ...overrides
   };
