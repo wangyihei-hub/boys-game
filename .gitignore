@@ -6,7 +6,7 @@ dist/
 dist-server/
 
 # Local data and logs
-data/
+/data/
 server-debug.log
 *.log
 
