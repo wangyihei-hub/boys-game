@@ -71,6 +71,7 @@ function createDefaultProfile(): Profile {
   return {
     id: 'default',
     nickname: '小勇士',
+    avatar: '🧒',
     level: 1,
     exp: 0,
     stars: 0,

@@ -28,6 +28,7 @@ export interface MinigameStats {
 export interface Profile {
   id: string;
   nickname: string;
+  avatar?: string;
   level: number;
   exp: number;
   stars: number;
