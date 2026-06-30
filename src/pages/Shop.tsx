@@ -1,8 +1,8 @@
 import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft, Star, Sparkles } from 'lucide-react';
+import { Sparkles } from 'lucide-react';
 import { useEconomyStore } from '../stores/economyStore';
 import { useProfileStore } from '../stores/profileStore';
+import { PageHeader } from '../components/play/PageHeader';
 import { ShopItem } from '../components/play/ShopItem';
 import { EQUIPMENT_CATALOG } from '../services/equipmentLogic';
 import { PET_CATALOG } from '../services/petLogic';
@@ -124,31 +124,14 @@ export function Shop() {
   if (!profile) return null;
 
   return (
-    <div className="scene-shop -mx-2 -mt-2 min-h-full rounded-t-3xl p-3 sm:-mx-4 sm:-mt-4 sm:p-4">
-      <div className="mx-auto max-w-3xl space-y-4">
-        <div className="glass-card flex items-center gap-3">
-          <Link
-            to="/play"
-            className="rounded-xl bg-slate-200 p-2 text-slate-700 hover:bg-slate-300"
-            aria-label="返回"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <div className="flex-1">
-            <h2 className="text-xl font-bold">虚拟商城</h2>
-            <p className="text-xs text-slate-500">欢迎来到小勇士补给站</p>
-          </div>
-          <div className="flex items-center gap-1 rounded-xl bg-white/80 px-3 py-1.5 text-yellow-600 shadow-sm">
-            <Star className="h-4 w-4 fill-current" />
-            <span className="font-bold">{profile.stars}</span>
-          </div>
-        </div>
-
+    <div className="pb-4">
+      <PageHeader title="虚拟商城" />
+      <div className="space-y-4 p-4">
         {!loaded ? (
-          <div className="glass-card py-12 text-center text-slate-500">加载商城中…</div>
+          <div className="card py-12 text-center text-slate-500">加载商城中…</div>
         ) : (
           <>
-            <div className="glass-card flex items-center justify-between bg-amber-50/80">
+            <div className="card flex items-center justify-between bg-amber-50">
               <div className="flex items-center gap-3">
                 <div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-white text-2xl shadow-sm">
                   🧩

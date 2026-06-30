@@ -1,6 +1,7 @@
 import { Link } from 'react-router-dom';
-import { ArrowLeft, CircleDot, Brain, Puzzle, Zap, Link2 } from 'lucide-react';
+import { CircleDot, Brain, Puzzle, Zap, Link2 } from 'lucide-react';
 import { useProfileStore } from '../stores/profileStore';
+import { PageHeader } from '../components/play/PageHeader';
 
 const GAMES = [
   {
@@ -44,37 +45,28 @@ export function Arcade() {
   const profile = useProfileStore(state => state.profile);
 
   return (
-    <div className="scene-camp -mx-2 -mt-2 min-h-full rounded-t-3xl p-3 sm:-mx-4 sm:-mt-4 sm:p-4">
-      <div className="mx-auto max-w-3xl space-y-4">
-        <div className="glass-card flex items-center gap-3">
-          <Link to="/play" className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-100 text-slate-600 transition active:scale-95">
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <div>
-            <h2 className="text-lg font-bold text-slate-800">副本乐园</h2>
-            <p className="text-xs text-slate-500">玩趣味小游戏，赢星星奖励</p>
-          </div>
-        </div>
-
+    <div className="pb-4">
+      <PageHeader title="副本乐园" />
+      <div className="space-y-4 p-4">
         {profile?.minigameStats && (
-          <div className="glass-card grid grid-cols-2 gap-3 text-center text-xs font-semibold text-slate-600 sm:grid-cols-5">
-            <div className="rounded-xl bg-white/50 p-2">
+          <div className="card grid grid-cols-2 gap-3 text-center text-xs font-semibold text-slate-600 sm:grid-cols-5">
+            <div className="rounded-xl bg-slate-50 p-2">
               <div className="text-lg font-bold text-slate-800">{profile.minigameStats.gomokuWins}</div>
               <div>五子棋胜</div>
             </div>
-            <div className="rounded-xl bg-white/50 p-2">
+            <div className="rounded-xl bg-slate-50 p-2">
               <div className="text-lg font-bold text-slate-800">{profile.minigameStats.triviaCorrect}</div>
               <div>答对题数</div>
             </div>
-            <div className="rounded-xl bg-white/50 p-2">
+            <div className="rounded-xl bg-slate-50 p-2">
               <div className="text-lg font-bold text-slate-800">{profile.minigameStats.memorySRankCount}</div>
               <div>S 评价</div>
             </div>
-            <div className="rounded-xl bg-white/50 p-2">
+            <div className="rounded-xl bg-slate-50 p-2">
               <div className="text-lg font-bold text-slate-800">{profile.minigameStats.speedMathSRankCount}</div>
               <div>速算 S</div>
             </div>
-            <div className="rounded-xl bg-white/50 p-2">
+            <div className="rounded-xl bg-slate-50 p-2">
               <div className="text-lg font-bold text-slate-800">{profile.minigameStats.wordChainCount}</div>
               <div>接龙次数</div>
             </div>
@@ -88,7 +80,7 @@ export function Arcade() {
               <Link
                 key={game.to}
                 to={game.to}
-                className="glass-card flex flex-col items-center gap-2 text-center transition hover:scale-[1.02] hover:bg-white/80 active:scale-95"
+                className="card flex flex-col items-center gap-2 text-center transition hover:scale-[1.02] active:scale-95"
               >
                 <div className={`flex h-14 w-14 items-center justify-center rounded-2xl ${game.color}`}>
                   <Icon className="h-7 w-7" />
