@@ -4,6 +4,9 @@ import { useProfileStore } from '../../stores/profileStore';
 import { useHealthGuard } from '../../hooks/useHealthGuard';
 import { RestModeOverlay } from '../play/RestModeOverlay';
 import { EyeCareModal } from '../play/EyeCareModal';
+import { BottomTabBar } from '../play/BottomTabBar';
+
+const TAB_ROUTES = ['/play', '/play/shop', '/play/arcade', '/play/wrong'];
 
 export function PlayLayout() {
   const loadProfile = useProfileStore(state => state.loadProfile);
@@ -38,20 +41,16 @@ export function PlayLayout() {
     );
   }
 
-  const isHome = location.pathname === '/play';
+  const showTab = TAB_ROUTES.includes(location.pathname);
 
   return (
-    <div className="flex min-h-screen flex-col bg-slate-900">
+    <div className="scene-camp-home relative flex min-h-screen flex-col">
       <RestModeOverlay isActive={isRestModeActive} />
       <EyeCareModal show={showEyeCare} onDismiss={dismissEyeCare} />
-      {!isHome && (
-        <header className="shrink-0 bg-slate-900 px-4 py-3 text-white sm:py-4">
-          <h1 className="text-lg font-bold sm:text-xl">学霸星球</h1>
-        </header>
-      )}
-      <main className={['flex-1', isHome ? '' : 'p-2 pb-[env(safe-area-inset-bottom)] sm:p-4'].join(' ')}>
+      <main className={['flex-1', showTab ? 'pb-24' : 'pb-[env(safe-area-inset-bottom)]'].join(' ')}>
         <Outlet />
       </main>
+      {showTab && <BottomTabBar />}
     </div>
   );
 }
