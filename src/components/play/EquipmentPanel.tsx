@@ -1,6 +1,4 @@
 import { useEffect } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowLeft } from 'lucide-react';
 import type { EquipmentSlot } from '../../types';
 import { useProfileStore } from '../../stores/profileStore';
 import { useEconomyStore } from '../../stores/economyStore';
@@ -11,6 +9,7 @@ import {
   unequipItem
 } from '../../services/equipmentLogic';
 import { EquipmentCard } from './EquipmentCard';
+import { PageHeader } from './PageHeader';
 
 const SLOTS: { key: EquipmentSlot; label: string; icon: string }[] = [
   { key: 'weapon', label: '武器', icon: '⚔️' },
@@ -59,19 +58,10 @@ export function EquipmentPanel() {
   }
 
   return (
-    <div className="scene-equipment -mx-2 -mt-2 min-h-full rounded-t-3xl p-3 sm:-mx-4 sm:-mt-4 sm:p-4">
-      <div className="mx-auto max-w-3xl space-y-4">
-        <div className="glass-card flex items-center gap-3">
-          <Link
-            to="/play"
-            className="flex h-10 w-10 items-center justify-center rounded-xl bg-slate-200 text-slate-700 hover:bg-slate-300"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </Link>
-          <h1 className="text-xl font-bold text-slate-800">我的装备</h1>
-        </div>
-
-        <div className="glass-card flex flex-wrap gap-2 text-sm">
+    <div className="pb-4">
+      <PageHeader title="我的装备" />
+      <div className="space-y-4 p-4">
+        <div className="card flex flex-wrap gap-2 text-sm">
           <span className="font-bold text-slate-700">总加成：</span>
           {bonuses.attackBonus > 0 && (
             <span className="rounded-lg bg-red-50 px-2 py-0.5 font-semibold text-red-700">
@@ -102,9 +92,9 @@ export function EquipmentPanel() {
         </div>
 
         <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-          <div className="glass-card space-y-3">
+          <div className="card space-y-3">
             <h2 className="font-bold text-slate-700">装备槽</h2>
-            <div className="relative mx-auto h-48 w-48 rounded-full border-4 border-dashed border-indigo-200 bg-white/50">
+            <div className="relative mx-auto h-48 w-48 rounded-full border-4 border-dashed border-indigo-200 bg-slate-50">
               <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 text-5xl">🧒</div>
               {SLOTS.map(({ key, label, icon }, idx) => {
                 const equippedId = currentProfile.equippedItems[key];
@@ -133,7 +123,7 @@ export function EquipmentPanel() {
             </div>
           </div>
 
-          <div className="glass-card space-y-3">
+          <div className="card space-y-3">
             <h2 className="font-bold text-slate-700">背包</h2>
             {equipmentItems.length === 0 ? (
               <p className="text-center text-sm text-slate-500">背包里没有装备</p>
